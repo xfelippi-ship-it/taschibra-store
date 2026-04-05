@@ -18,7 +18,7 @@ export default function CheckoutPage() {
   const { items, total, count, clearCart } = useCart()
   const [step, setStep] = useState<Step>('endereco')
   const [cep, setCep] = useState('')
-  const [endereco, setEndereco] = useState<any>(null)
+  const [endereco, setEndereco] = useState<Record<string, string> | null>(null)
   const [loadingCep, setLoadingCep] = useState(false)
   const [numero, setNumero] = useState('')
   const [complemento, setComplemento] = useState('')

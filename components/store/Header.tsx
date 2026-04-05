@@ -2,6 +2,7 @@
 import { ShoppingCart, User, Search, Phone } from 'lucide-react'
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useCart } from '@/contexts/CartContext'
 
 export default function Header() {
@@ -20,11 +21,14 @@ export default function Header() {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center gap-6">
           <Link href="/" className="flex-shrink-0">
-  <img
-    src="/images/logo.png"
-    alt="Taschibra Store"
-    className="h-12 w-auto"
-  />
+  <Image
+  src="/images/logo.png"
+  alt="Taschibra Store"
+  width={200}
+  height={48}
+  className="h-12 w-auto"
+  priority
+/>
 </Link>
           <div className="flex-1 max-w-xl relative">
             <input type="text" placeholder="O que você está procurando?"
