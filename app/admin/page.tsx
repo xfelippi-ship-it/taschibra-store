@@ -27,6 +27,14 @@ type Produto = {
   weight_kg?: number
   unit?: string
   warranty?: string
+  images?: string[]
+  weight_kg_packed?: number
+  height_cm?: number
+  width_cm?: number
+  depth_cm?: number
+  height_cm_packed?: number
+  width_cm_packed?: number
+  depth_cm_packed?: number
   tags?: string[]
 }
 
@@ -657,10 +665,58 @@ export default function AdminPage() {
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 resize-none" />
               </div>
               <div>
-                <label className="text-sm font-bold text-gray-700 mb-1 block">URL da imagem principal</label>
-                <input value={produtoEdit.main_image || ""} onChange={e => setProdutoEdit({...produtoEdit, main_image: e.target.value})}
-                  placeholder="https://..."
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                <p className="text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Imagens do produto (max. 6)</p>
+                <div className="grid grid-cols-6 gap-2 mb-2">
+                  {[0,1,2,3,4,5].map(idx => {
+                    const imgs = produtoEdit.images || []
+                    const url = imgs[idx] || ""
+                    const isPrincipal = produtoEdit.main_image === url && url !== ""
+                    return (
+                      <div key={idx} className="relative group">
+                        <div className={"aspect-square rounded-lg border-2 overflow-hidden flex items-center justify-center cursor-pointer " + (isPrincipal ? "border-green-500" : "border-gray-200 bg-gray-50")}>
+                          {url ? (
+                            <img src={url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-gray-300 text-xl">+</span>
+                          )}
+                        </div>
+                        {url && (
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-lg transition-all flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
+                            {isPrincipal ? (
+                              <span className="text-white text-xs font-black bg-green-600 px-2 py-0.5 rounded">Principal</span>
+                            ) : (
+                              <button type="button" onClick={() => setProdutoEdit({...produtoEdit, main_image: url})}
+                                className="text-white text-xs bg-green-600 px-2 py-0.5 rounded font-bold">Definir principal</button>
+                            )}
+                            <button type="button" onClick={() => {
+                              const newImgs = [...(produtoEdit.images || [])]
+                              newImgs.splice(idx, 1)
+                              const newMain = isPrincipal ? (newImgs[0] || "") : produtoEdit.main_image
+                              setProdutoEdit({...produtoEdit, images: newImgs, main_image: newMain})
+                            }} className="text-white text-xs bg-red-500 px-2 py-0.5 rounded font-bold">Remover</button>
+                          </div>
+                        )}
+                        {isPrincipal && <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-black">P</span>}
+                      </div>
+                    )
+                  })}
+                </div>
+                {(produtoEdit.images || []).length < 6 && (
+                  <input placeholder="Cole a URL e pressione Enter para adicionar"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault()
+                        const val = (e.target as HTMLInputElement).value.trim()
+                        if (!val) return
+                        const imgs = [...(produtoEdit.images || [])]
+                        imgs.push(val)
+                        setProdutoEdit({...produtoEdit, images: imgs, main_image: produtoEdit.main_image || imgs[0]})
+                        ;(e.target as HTMLInputElement).value = ""
+                      }
+                    }} />
+                )}
+                <p className="text-xs text-gray-400 mt-1">Cole a URL e Enter. Mouse sobre imagem para definir principal (P) ou remover.</p>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
@@ -682,36 +738,39 @@ export default function AdminPage() {
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
               </div>
+              <p className="text-xs font-black text-gray-500 uppercase tracking-wide pt-2">Dimensoes do produto</p>
               <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Peso (kg)</label>
-                  <input type="number" step="0.001" value={produtoEdit.weight_kg || ""} onChange={e => setProdutoEdit({...produtoEdit, weight_kg: parseFloat(e.target.value)})}
-                    placeholder="0,000"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
-                </div>
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Unidade</label>
-                  <select value={produtoEdit.unit || "un"} onChange={e => setProdutoEdit({...produtoEdit, unit: e.target.value})}
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
-                    <option value="un">Unidade</option>
-                    <option value="cx">Caixa</option>
-                    <option value="kt">Kit</option>
-                    <option value="pc">Peca</option>
-                    <option value="bl">Blister</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Garantia</label>
-                  <input value={produtoEdit.warranty || ""} onChange={e => setProdutoEdit({...produtoEdit, warranty: e.target.value})}
-                    placeholder="Ex: 1 ano"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
-                </div>
+                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Altura (cm)</label>
+                  <input type="number" step="0.1" value={produtoEdit.height_cm || ""} onChange={e => setProdutoEdit({...produtoEdit, height_cm: parseFloat(e.target.value)})} placeholder="0,0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
+                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Largura (cm)</label>
+                  <input type="number" step="0.1" value={produtoEdit.width_cm || ""} onChange={e => setProdutoEdit({...produtoEdit, width_cm: parseFloat(e.target.value)})} placeholder="0,0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
+                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Profundidade (cm)</label>
+                  <input type="number" step="0.1" value={produtoEdit.depth_cm || ""} onChange={e => setProdutoEdit({...produtoEdit, depth_cm: parseFloat(e.target.value)})} placeholder="0,0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
               </div>
-              <div>
-                <label className="text-sm font-bold text-gray-700 mb-1 block">Tags (separadas por virgula)</label>
-                <input value={(produtoEdit.tags || []).join(", ")} onChange={e => setProdutoEdit({...produtoEdit, tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean)})}
-                  placeholder="Ex: led, externo, ip65, bivolt"
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+              <p className="text-xs font-black text-gray-500 uppercase tracking-wide pt-2">Dimensoes com embalagem</p>
+              <div className="grid grid-cols-3 gap-4">
+                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Altura (cm)</label>
+                  <input type="number" step="0.1" value={produtoEdit.height_cm_packed || ""} onChange={e => setProdutoEdit({...produtoEdit, height_cm_packed: parseFloat(e.target.value)})} placeholder="0,0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
+                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Largura (cm)</label>
+                  <input type="number" step="0.1" value={produtoEdit.width_cm_packed || ""} onChange={e => setProdutoEdit({...produtoEdit, width_cm_packed: parseFloat(e.target.value)})} placeholder="0,0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
+                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Profundidade (cm)</label>
+                  <input type="number" step="0.1" value={produtoEdit.depth_cm_packed || ""} onChange={e => setProdutoEdit({...produtoEdit, depth_cm_packed: parseFloat(e.target.value)})} placeholder="0,0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Peso do produto (kg)</label>
+                  <input type="number" step="0.001" value={produtoEdit.weight_kg || ""} onChange={e => setProdutoEdit({...produtoEdit, weight_kg: parseFloat(e.target.value)})} placeholder="0,000" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
+                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Peso com embalagem (kg)</label>
+                  <input type="number" step="0.001" value={produtoEdit.weight_kg_packed || ""} onChange={e => setProdutoEdit({...produtoEdit, weight_kg_packed: parseFloat(e.target.value)})} placeholder="0,000" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Unidade</label>
+                  <select value={produtoEdit.unit || "un"} onChange={e => setProdutoEdit({...produtoEdit, unit: e.target.value})} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
+                    <option value="un">Unidade</option><option value="cx">Caixa</option><option value="kt">Kit</option><option value="pc">Peca</option><option value="bl">Blister</option>
+                  </select></div>
+                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Garantia</label>
+                  <input value={produtoEdit.warranty || ""} onChange={e => setProdutoEdit({...produtoEdit, warranty: e.target.value})} placeholder="Ex: 1 ano" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
+                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Tags (por virgula)</label>
+                  <input value={(produtoEdit.tags || []).join(", ")} onChange={e => setProdutoEdit({...produtoEdit, tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean)})} placeholder="Ex: led, ip65, bivolt" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
               </div>
             </div>
             <div className="flex gap-3 mt-6">
