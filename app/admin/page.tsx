@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Image from 'next/image'
 'use client'
+import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Package, ShoppingBag, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X } from 'lucide-react'
@@ -24,27 +24,27 @@ type Produto = {
 export default function AdminPage() {
   const [autenticado, setAutenticado] = useState(false)
   const [email, setEmail] = useState('')
-const [senha, setSenha] = useState('')
-const [erroLogin, setErroLogin] = useState('')
-const [loadingLogin, setLoadingLogin] = useState(false)
+  const [senha, setSenha] = useState('')
+  const [erroLogin, setErroLogin] = useState('')
+  const [loadingLogin, setLoadingLogin] = useState(false)
 
-async function handleLogin() {
-  setLoadingLogin(true)
-  setErroLogin('')
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha })
-  if (error || !data.user) {
-    setErroLogin('E-mail ou senha incorretos.')
-  } else {
-    const { data: adminData } = await supabase.from('admin_users').select('id').eq('user_id', data.user.id).single()
-    if (!adminData) {
-      await supabase.auth.signOut()
-      setErroLogin('Você não tem permissão de acesso.')
+  async function handleLogin() {
+    setLoadingLogin(true)
+    setErroLogin('')
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha })
+    if (error || !data.user) {
+      setErroLogin('E-mail ou senha incorretos.')
     } else {
-      setAutenticado(true)
+      const { data: adminData } = await supabase.from('admin_users').select('id').eq('user_id', data.user.id).single()
+      if (!adminData) {
+        await supabase.auth.signOut()
+        setErroLogin('Voce nao tem permissao de acesso.')
+      } else {
+        setAutenticado(true)
+      }
     }
+    setLoadingLogin(false)
   }
-  setLoadingLogin(false)
-}
   const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
@@ -93,41 +93,37 @@ async function handleLogin() {
     carregarProdutos()
   }
 
-      if (pin === ADMIN_PIN) setAutenticado(true)
-    else { setErroPin(true); setPin('') }
-  }
-
   if (!autenticado) {
-  return (
-    <div className="min-h-screen bg-green-900 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center">
-        <Image src="/images/logo.png" alt="Taschibra Store" width={200} height={48} className="h-12 w-auto mx-auto mb-4" priority />
-        <h1 className="text-xl font-black text-gray-800 mb-1">Backoffice</h1>
-        <p className="text-sm text-gray-500 mb-6">Área Restrita</p>
-        <div className="space-y-3 text-left">
-          <div>
-            <label className="text-xs font-bold text-gray-600 mb-1 block">E-mail</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="seu@taschibra.com.br"
-              className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500" />
+    return (
+      <div className="min-h-screen bg-green-900 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center">
+          <Image src="/images/logo.png" alt="Taschibra Store" width={200} height={48} className="h-12 w-auto mx-auto mb-4" priority />
+          <h1 className="text-xl font-black text-gray-800 mb-1">Backoffice</h1>
+          <p className="text-sm text-gray-500 mb-6">Area Restrita</p>
+          <div className="space-y-3 text-left">
+            <div>
+              <label className="text-xs font-bold text-gray-600 mb-1 block">E-mail</label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                placeholder="seu@taschibra.com.br"
+                className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500" />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-600 mb-1 block">Senha</label>
+              <input type="password" value={senha} onChange={e => setSenha(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleLogin()}
+                placeholder="••••••••"
+                className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500" />
+            </div>
+            {erroLogin && <p className="text-red-500 text-xs">{erroLogin}</p>}
+            <button onClick={handleLogin} disabled={loadingLogin || !email || !senha}
+              className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-black py-3 rounded-xl transition-colors">
+              {loadingLogin ? "Entrando..." : "Entrar"}
+            </button>
           </div>
-          <div>
-            <label className="text-xs font-bold text-gray-600 mb-1 block">Senha</label>
-            <input type="password" value={senha} onChange={e => setSenha(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleLogin()}
-              placeholder="••••••••"
-              className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500" />
-          </div>
-          {erroLogin && <p className="text-red-500 text-xs">{erroLogin}</p>}
-          <button onClick={handleLogin} disabled={loadingLogin || !email || !senha}
-            className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-black py-3 rounded-xl transition-colors">
-            {loadingLogin ? 'Entrando...' : 'Entrar'}
-          </button>
         </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
 
   const stats = [
     { label: 'Produtos', value: produtos.length, icon: '📦', color: 'bg-blue-50 text-blue-600' },
