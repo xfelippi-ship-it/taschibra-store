@@ -19,6 +19,15 @@ type Produto = {
   stock_qty: number
   active: boolean
   badge: string
+  family?: string
+  category_slug?: string
+  short_description?: string
+  description?: string
+  main_image?: string
+  weight_kg?: number
+  unit?: string
+  warranty?: string
+  tags?: string[]
 }
 
 
@@ -586,23 +595,45 @@ export default function AdminPage() {
               <h2 className="text-lg font-black text-gray-800">{produtoEdit.id ? 'Editar Produto' : 'Novo Produto'}</h2>
               <button onClick={() => setModal(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[65vh] overflow-y-auto pr-1">
               <div>
-                <label className="text-sm font-bold text-gray-700 mb-1 block">Nome do produto</label>
-                <input value={produtoEdit.name || ''} onChange={e => setProdutoEdit({...produtoEdit, name: e.target.value})}
-                  placeholder="Ex: Refletor LED 50W Branco"
+                <label className="text-sm font-bold text-gray-700 mb-1 block">Nome do produto *</label>
+                <input value={produtoEdit.name || ""} onChange={e => setProdutoEdit({...produtoEdit, name: e.target.value})}
+                  placeholder="Ex: Refletor LED Inlumix BR 50W 6500K Branco"
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">SKU</label>
-                  <input value={produtoEdit.sku || ''} onChange={e => setProdutoEdit({...produtoEdit, sku: e.target.value})}
-                    placeholder="EX: REF-50W-BR"
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">SKU *</label>
+                  <input value={produtoEdit.sku || ""} onChange={e => setProdutoEdit({...produtoEdit, sku: e.target.value})}
+                    placeholder="Ex: REF-50W-BR"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 font-mono" />
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Familia/Linha</label>
+                  <input value={produtoEdit.family || ""} onChange={e => setProdutoEdit({...produtoEdit, family: e.target.value})}
+                    placeholder="Ex: Inlumix, Smart, Factory"
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Categoria</label>
+                  <select value={produtoEdit.category_slug || ""} onChange={e => setProdutoEdit({...produtoEdit, category_slug: e.target.value})}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
+                    <option value="">Selecionar</option>
+                    <option value="lampadas">Lampadas</option>
+                    <option value="refletores">Refletores</option>
+                    <option value="plafons">Plafons</option>
+                    <option value="pendentes">Pendentes</option>
+                    <option value="smart">Smart</option>
+                    <option value="material-eletrico">Material Eletrico</option>
+                    <option value="outlet">Outlet</option>
+                  </select>
                 </div>
                 <div>
                   <label className="text-sm font-bold text-gray-700 mb-1 block">Badge</label>
-                  <select value={produtoEdit.badge || ''} onChange={e => setProdutoEdit({...produtoEdit, badge: e.target.value})}
+                  <select value={produtoEdit.badge || ""} onChange={e => setProdutoEdit({...produtoEdit, badge: e.target.value})}
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
                     <option value="">Sem badge</option>
                     <option value="novo">Novo</option>
@@ -612,25 +643,75 @@ export default function AdminPage() {
                   </select>
                 </div>
               </div>
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-1 block">Descricao curta</label>
+                <input value={produtoEdit.short_description || ""} onChange={e => setProdutoEdit({...produtoEdit, short_description: e.target.value})}
+                  placeholder="Ex: Refletor LED de alta eficiencia para areas externas"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+              </div>
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-1 block">Descricao completa</label>
+                <textarea value={produtoEdit.description || ""} onChange={e => setProdutoEdit({...produtoEdit, description: e.target.value})}
+                  placeholder="Descricao detalhada, caracteristicas tecnicas..."
+                  rows={3}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 resize-none" />
+              </div>
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-1 block">URL da imagem principal</label>
+                <input value={produtoEdit.main_image || ""} onChange={e => setProdutoEdit({...produtoEdit, main_image: e.target.value})}
+                  placeholder="https://..."
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+              </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Preço</label>
-                  <input type="number" step="0.01" value={produtoEdit.price || ''} onChange={e => setProdutoEdit({...produtoEdit, price: parseFloat(e.target.value)})}
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Preco cartao *</label>
+                  <input type="number" step="0.01" value={produtoEdit.price || ""} onChange={e => setProdutoEdit({...produtoEdit, price: parseFloat(e.target.value)})}
                     placeholder="0,00"
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Preço PIX</label>
-                  <input type="number" step="0.01" value={produtoEdit.promo_price || ''} onChange={e => setProdutoEdit({...produtoEdit, promo_price: parseFloat(e.target.value)})}
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Preco PIX</label>
+                  <input type="number" step="0.01" value={produtoEdit.promo_price || ""} onChange={e => setProdutoEdit({...produtoEdit, promo_price: parseFloat(e.target.value)})}
                     placeholder="0,00"
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Estoque</label>
-                  <input type="number" value={produtoEdit.stock_qty || ''} onChange={e => setProdutoEdit({...produtoEdit, stock_qty: parseInt(e.target.value)})}
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Estoque *</label>
+                  <input type="number" value={produtoEdit.stock_qty || ""} onChange={e => setProdutoEdit({...produtoEdit, stock_qty: parseInt(e.target.value)})}
                     placeholder="0"
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Peso (kg)</label>
+                  <input type="number" step="0.001" value={produtoEdit.weight_kg || ""} onChange={e => setProdutoEdit({...produtoEdit, weight_kg: parseFloat(e.target.value)})}
+                    placeholder="0,000"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Unidade</label>
+                  <select value={produtoEdit.unit || "un"} onChange={e => setProdutoEdit({...produtoEdit, unit: e.target.value})}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
+                    <option value="un">Unidade</option>
+                    <option value="cx">Caixa</option>
+                    <option value="kt">Kit</option>
+                    <option value="pc">Peca</option>
+                    <option value="bl">Blister</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Garantia</label>
+                  <input value={produtoEdit.warranty || ""} onChange={e => setProdutoEdit({...produtoEdit, warranty: e.target.value})}
+                    placeholder="Ex: 1 ano"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-1 block">Tags (separadas por virgula)</label>
+                <input value={(produtoEdit.tags || []).join(", ")} onChange={e => setProdutoEdit({...produtoEdit, tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean)})}
+                  placeholder="Ex: led, externo, ip65, bivolt"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
               </div>
             </div>
             <div className="flex gap-3 mt-6">
