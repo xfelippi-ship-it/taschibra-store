@@ -10,8 +10,6 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-const ADMIN_PIN = '1234'
-
 type Produto = {
   id: string
   name: string
@@ -25,8 +23,28 @@ type Produto = {
 
 export default function AdminPage() {
   const [autenticado, setAutenticado] = useState(false)
-  const [pin, setPin] = useState('')
-  const [erroPin, setErroPin] = useState(false)
+  const [email, setEmail] = useState('')
+const [senha, setSenha] = useState('')
+const [erroLogin, setErroLogin] = useState('')
+const [loadingLogin, setLoadingLogin] = useState(false)
+
+async function handleLogin() {
+  setLoadingLogin(true)
+  setErroLogin('')
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha })
+  if (error || !data.user) {
+    setErroLogin('E-mail ou senha incorretos.')
+  } else {
+    const { data: adminData } = await supabase.from('admin_users').select('id').eq('user_id', data.user.id).single()
+    if (!adminData) {
+      await supabase.auth.signOut()
+      setErroLogin('Você não tem permissão de acesso.')
+    } else {
+      setAutenticado(true)
+    }
+  }
+  setLoadingLogin(false)
+}
   const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
@@ -75,31 +93,41 @@ export default function AdminPage() {
     carregarProdutos()
   }
 
-  function handlePin() {
-    if (pin === ADMIN_PIN) setAutenticado(true)
+      if (pin === ADMIN_PIN) setAutenticado(true)
     else { setErroPin(true); setPin('') }
   }
 
   if (!autenticado) {
-    return (
-      <div className="min-h-screen bg-green-900 flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center">
-<Image src="/images/logo.png" alt="Taschibra Store" width={200} height={48} className="h-12 w-auto mx-auto mb-4" priority />
-<h1 className="text-xl font-black text-gray-800 mb-1">Backoffice</h1>
-<p className="text-sm text-gray-500 mb-6">Área Restrita</p>
-          <input type="password" value={pin} onChange={e => { setPin(e.target.value); setErroPin(false) }}
-            onKeyDown={e => e.key === 'Enter' && handlePin()}
-            placeholder="PIN de acesso" maxLength={6}
-            className={`w-full border-2 ${erroPin ? 'border-red-400' : 'border-gray-200'} rounded-xl px-4 py-3 text-center text-2xl tracking-widest font-black outline-none focus:border-green-500 mb-4`} />
-          {erroPin && <p className="text-red-500 text-sm mb-3">PIN incorreto</p>}
-          <button onClick={handlePin}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-black py-3 rounded-xl transition-colors">
-            Entrar
+  return (
+    <div className="min-h-screen bg-green-900 flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center">
+        <Image src="/images/logo.png" alt="Taschibra Store" width={200} height={48} className="h-12 w-auto mx-auto mb-4" priority />
+        <h1 className="text-xl font-black text-gray-800 mb-1">Backoffice</h1>
+        <p className="text-sm text-gray-500 mb-6">Área Restrita</p>
+        <div className="space-y-3 text-left">
+          <div>
+            <label className="text-xs font-bold text-gray-600 mb-1 block">E-mail</label>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+              placeholder="seu@taschibra.com.br"
+              className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500" />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-gray-600 mb-1 block">Senha</label>
+            <input type="password" value={senha} onChange={e => setSenha(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleLogin()}
+              placeholder="••••••••"
+              className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500" />
+          </div>
+          {erroLogin && <p className="text-red-500 text-xs">{erroLogin}</p>}
+          <button onClick={handleLogin} disabled={loadingLogin || !email || !senha}
+            className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-black py-3 rounded-xl transition-colors">
+            {loadingLogin ? 'Entrando...' : 'Entrar'}
           </button>
         </div>
       </div>
-    )
-  }
+    </div>
+  )
+}
 
   const stats = [
     { label: 'Produtos', value: produtos.length, icon: '📦', color: 'bg-blue-50 text-blue-600' },
