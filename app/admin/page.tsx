@@ -49,6 +49,10 @@ function CuponsTab() {
       starts_at: editando.starts_at || null,
       ends_at: editando.ends_at || null,
       active: editando.active !== false,
+      scope: editando.scope || 'all',
+      scope_ids: editando.scope_ids || [],
+      free_shipping: editando.free_shipping || false,
+      first_order_only: editando.first_order_only || false,
       channel: 'b2c',
     }
     if (editando.id) {
@@ -88,7 +92,8 @@ function CuponsTab() {
             <tr>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Código</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Desconto</th>
-              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Mínimo</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Escopo</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Minimo</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Usos</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Validade</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
@@ -110,6 +115,12 @@ function CuponsTab() {
                   <span className={`text-sm font-black px-3 py-1 rounded-full ${c.discount_type === 'percent' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
                     {c.discount_type === 'percent' ? `${c.discount_value}%` : `R$ ${Number(c.discount_value).toFixed(2).replace('.', ',')}`}
                   </span>
+                </td>
+                <td className="px-5 py-4 text-sm text-gray-600">
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-semibold">
+                    {c.scope === 'category' ? 'Categoria' : c.scope === 'product' ? 'Produto' : c.scope === 'family' ? 'Familia' : 'Tudo'}
+                  </span>
+                  {c.scope_ids?.length > 0 && <p className="text-xs text-gray-400 mt-0.5">{c.scope_ids.join(', ')}</p>}
                 </td>
                 <td className="px-5 py-4 text-sm text-gray-600">
                   {c.min_order_value > 0 ? `R$ ${Number(c.min_order_value).toFixed(2).replace('.', ',')}` : '—'}
@@ -158,13 +169,46 @@ function CuponsTab() {
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 font-mono uppercase" />
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Tipo</label>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Tipo de desconto</label>
                   <select value={editando.discount_type || 'percent'} onChange={e => setEditando({...editando, discount_type: e.target.value})}
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
                     <option value="percent">Percentual (%)</option>
                     <option value="fixed">Valor fixo (R$)</option>
                   </select>
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Escopo de aplicacao</label>
+                  <select value={editando.scope || 'all'} onChange={e => setEditando({...editando, scope: e.target.value, scope_ids: []})}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
+                    <option value="all">Tudo (sem restricao)</option>
+                    <option value="category">Categoria especifica</option>
+                    <option value="family">Familia/Linha de produto</option>
+                    <option value="product">Produto especifico</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">
+                    {editando.scope === 'category' ? 'Slug da categoria' : editando.scope === 'product' ? 'SKU do produto' : editando.scope === 'family' ? 'Nome da familia' : 'N/A'}
+                  </label>
+                  <input
+                    disabled={!editando.scope || editando.scope === 'all'}
+                    value={(editando.scope_ids || []).join(', ')}
+                    onChange={e => setEditando({...editando, scope_ids: e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean)})}
+                    placeholder={editando.scope === 'category' ? 'ex: lampadas, refletores' : editando.scope === 'product' ? 'ex: REF-50W, PIL-AAA' : editando.scope === 'family' ? 'ex: Inlumix, Smart' : '—'}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 disabled:bg-gray-50 disabled:text-gray-400" />
+                </div>
+              </div>
+              <div className="flex gap-6">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={editando.free_shipping || false} onChange={e => setEditando({...editando, free_shipping: e.target.checked})} className="w-4 h-4 accent-green-600" />
+                  <span className="text-sm font-bold text-gray-700">Frete gratis</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={editando.first_order_only || false} onChange={e => setEditando({...editando, first_order_only: e.target.checked})} className="w-4 h-4 accent-green-600" />
+                  <span className="text-sm font-bold text-gray-700">Apenas 1o pedido</span>
+                </label>
               </div>
               <div>
                 <label className="text-sm font-bold text-gray-700 mb-1 block">Descrição</label>
