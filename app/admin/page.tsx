@@ -21,6 +21,213 @@ type Produto = {
   badge: string
 }
 
+
+function CuponsTab() {
+  const [cupons, setCupons] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [modal, setModal] = useState(false)
+  const [editando, setEditando] = useState<any>({})
+
+  useEffect(() => { carregarCupons() }, [])
+
+  async function carregarCupons() {
+    setLoading(true)
+    const { data } = await supabase.from('coupons').select('*').order('created_at', { ascending: false })
+    setCupons(data || [])
+    setLoading(false)
+  }
+
+  async function salvarCupom() {
+    const cupom = {
+      code: editando.code?.toUpperCase().trim(),
+      description: editando.description || '',
+      discount_type: editando.discount_type || 'percent',
+      discount_value: Number(editando.discount_value) || 0,
+      min_order_value: Number(editando.min_order_value) || 0,
+      max_discount_value: editando.max_discount_value ? Number(editando.max_discount_value) : null,
+      usage_limit: editando.usage_limit ? Number(editando.usage_limit) : null,
+      starts_at: editando.starts_at || null,
+      ends_at: editando.ends_at || null,
+      active: editando.active !== false,
+      channel: 'b2c',
+    }
+    if (editando.id) {
+      await supabase.from('coupons').update(cupom).eq('id', editando.id)
+    } else {
+      await supabase.from('coupons').insert(cupom)
+    }
+    setModal(false)
+    setEditando({})
+    carregarCupons()
+  }
+
+  async function toggleAtivo(id: string, ativo: boolean) {
+    await supabase.from('coupons').update({ active: !ativo }).eq('id', id)
+    carregarCupons()
+  }
+
+  async function excluirCupom(id: string) {
+    if (!confirm('Excluir este cupom?')) return
+    await supabase.from('coupons').delete().eq('id', id)
+    carregarCupons()
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-black text-gray-800">Cupons</h1>
+        <button onClick={() => { setEditando({ discount_type: 'percent', active: true }); setModal(true) }}
+          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">
+          <Plus size={16} /> Novo Cupom
+        </button>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Código</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Desconto</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Mínimo</th>
+              <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Usos</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Validade</th>
+              <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
+              <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan={7} className="text-center py-8 text-gray-400">Carregando...</td></tr>
+            ) : cupons.length === 0 ? (
+              <tr><td colSpan={7} className="text-center py-8 text-gray-400">Nenhum cupom cadastrado.</td></tr>
+            ) : cupons.map(c => (
+              <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <td className="px-5 py-4">
+                  <p className="font-black text-gray-800 font-mono tracking-wide">{c.code}</p>
+                  <p className="text-xs text-gray-400">{c.description}</p>
+                </td>
+                <td className="px-5 py-4">
+                  <span className={`text-sm font-black px-3 py-1 rounded-full ${c.discount_type === 'percent' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                    {c.discount_type === 'percent' ? `${c.discount_value}%` : `R$ ${Number(c.discount_value).toFixed(2).replace('.', ',')}`}
+                  </span>
+                </td>
+                <td className="px-5 py-4 text-sm text-gray-600">
+                  {c.min_order_value > 0 ? `R$ ${Number(c.min_order_value).toFixed(2).replace('.', ',')}` : '—'}
+                </td>
+                <td className="px-5 py-4 text-center text-sm text-gray-600">
+                  {c.used_count || 0}{c.usage_limit ? `/${c.usage_limit}` : ''}
+                </td>
+                <td className="px-5 py-4 text-xs text-gray-500">
+                  {c.ends_at ? new Date(c.ends_at).toLocaleDateString('pt-BR') : '—'}
+                </td>
+                <td className="px-5 py-4 text-center">
+                  <button onClick={() => toggleAtivo(c.id, c.active)}
+                    className={`text-xs font-bold px-3 py-1 rounded-full transition-colors ${c.active ? 'bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-700' : 'bg-gray-100 text-gray-500 hover:bg-green-100 hover:text-green-700'}`}>
+                    {c.active ? 'Ativo' : 'Inativo'}
+                  </button>
+                </td>
+                <td className="px-5 py-4 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <button onClick={() => { setEditando(c); setModal(true) }} className="text-blue-500 hover:text-blue-700">
+                      <Pencil size={15} />
+                    </button>
+                    <button onClick={() => excluirCupom(c.id)} className="text-red-400 hover:text-red-600">
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {modal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-black text-gray-800">{editando.id ? 'Editar Cupom' : 'Novo Cupom'}</h2>
+              <button onClick={() => setModal(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+            </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Código</label>
+                  <input value={editando.code || ''} onChange={e => setEditando({...editando, code: e.target.value.toUpperCase()})}
+                    placeholder="EX: DESCONTO10"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 font-mono uppercase" />
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Tipo</label>
+                  <select value={editando.discount_type || 'percent'} onChange={e => setEditando({...editando, discount_type: e.target.value})}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
+                    <option value="percent">Percentual (%)</option>
+                    <option value="fixed">Valor fixo (R$)</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-1 block">Descrição</label>
+                <input value={editando.description || ''} onChange={e => setEditando({...editando, description: e.target.value})}
+                  placeholder="Ex: 10% de desconto na Páscoa"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">
+                    {editando.discount_type === 'fixed' ? 'Valor (R$)' : 'Desconto (%)'}
+                  </label>
+                  <input type="number" value={editando.discount_value || ''} onChange={e => setEditando({...editando, discount_value: e.target.value})}
+                    placeholder="0"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Pedido mínimo</label>
+                  <input type="number" value={editando.min_order_value || ''} onChange={e => setEditando({...editando, min_order_value: e.target.value})}
+                    placeholder="0"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Limite de usos</label>
+                  <input type="number" value={editando.usage_limit || ''} onChange={e => setEditando({...editando, usage_limit: e.target.value})}
+                    placeholder="Ilimitado"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Início</label>
+                  <input type="date" value={editando.starts_at?.split('T')[0] || ''} onChange={e => setEditando({...editando, starts_at: e.target.value})}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Expiração</label>
+                  <input type="date" value={editando.ends_at?.split('T')[0] || ''} onChange={e => setEditando({...editando, ends_at: e.target.value})}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <input type="checkbox" id="ativo" checked={editando.active !== false} onChange={e => setEditando({...editando, active: e.target.checked})}
+                  className="w-4 h-4 accent-green-600" />
+                <label htmlFor="ativo" className="text-sm font-bold text-gray-700">Cupom ativo</label>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setModal(false)} className="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50 transition-colors">
+                Cancelar
+              </button>
+              <button onClick={salvarCupom} disabled={!editando.code || !editando.discount_value}
+                className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-black py-3 rounded-lg transition-colors">
+                {editando.id ? 'Salvar' : 'Criar cupom'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function AdminPage() {
   const [autenticado, setAutenticado] = useState(false)
   const [email, setEmail] = useState('')
@@ -323,14 +530,7 @@ export default function AdminPage() {
 
         {/* CUPONS */}
         {aba === 'cupons' && (
-          <div>
-            <h1 className="text-2xl font-black text-gray-800 mb-6">Cupons</h1>
-            <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-              <Tag size={40} className="text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 mb-2">Gestão de cupons em desenvolvimento.</p>
-              <p className="text-xs text-gray-400">Em breve você poderá criar cupons por produto, categoria e campanhas globais.</p>
-            </div>
-          </div>
+          <CuponsTab />
         )}
       </main>
 
