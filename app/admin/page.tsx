@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import Image from 'next/image'
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
@@ -83,9 +84,9 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-green-900 flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center">
-          <div className="text-4xl mb-4">🔐</div>
-          <h1 className="text-xl font-black text-gray-800 mb-1">Backoffice</h1>
-          <p className="text-sm text-gray-500 mb-6">Taschibra Store — Área Restrita</p>
+<Image src="/images/logo.png" alt="Taschibra Store" width={200} height={48} className="h-12 w-auto mx-auto mb-4" priority />
+<h1 className="text-xl font-black text-gray-800 mb-1">Backoffice</h1>
+<p className="text-sm text-gray-500 mb-6">Área Restrita</p>
           <input type="password" value={pin} onChange={e => { setPin(e.target.value); setErroPin(false) }}
             onKeyDown={e => e.key === 'Enter' && handlePin()}
             placeholder="PIN de acesso" maxLength={6}
