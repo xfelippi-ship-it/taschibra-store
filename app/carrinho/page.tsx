@@ -1,6 +1,5 @@
 'use client'
 import { useCart } from '@/contexts/CartContext'
-import type { Cupom } from '@/contexts/CartContext'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import Link from 'next/link'

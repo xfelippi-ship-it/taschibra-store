@@ -7,7 +7,7 @@ const supabase = createClient(
 )
 
 export async function POST(req: NextRequest) {
-  const { code, subtotal, items } = await req.json()
+  const { code, subtotal } = await req.json()
 
   if (!code) return NextResponse.json({ error: 'Código inválido' }, { status: 400 })
 
