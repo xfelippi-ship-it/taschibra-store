@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { Package, ShoppingBag, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X } from 'lucide-react'
+import { Package, ShoppingBag, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,6 +27,7 @@ export default function AdminPage() {
   const [senha, setSenha] = useState('')
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
+  const [showSenha, setShowSenha] = useState(false)
 
   async function handleLogin() {
     setLoadingLogin(true)
@@ -109,10 +110,16 @@ export default function AdminPage() {
             </div>
             <div>
               <label className="text-xs font-bold text-gray-600 mb-1 block">Senha</label>
-              <input type="password" value={senha} onChange={e => setSenha(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && handleLogin()}
-                placeholder="••••••••"
-                className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500" />
+              <div className="relative">
+                <input type={showSenha ? "text" : "password"} value={senha} onChange={e => setSenha(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleLogin()}
+                  placeholder="••••••••"
+                  className="w-full border border-gray-200 rounded-lg px-4 pr-10 py-3 text-sm outline-none focus:border-green-500" />
+                <button type="button" onClick={() => setShowSenha(!showSenha)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {showSenha ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
             {erroLogin && <p className="text-red-500 text-xs">{erroLogin}</p>}
             <button onClick={handleLogin} disabled={loadingLogin || !email || !senha}
@@ -136,9 +143,9 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gray-100 flex">
       {/* Sidebar */}
       <aside className="w-60 bg-green-900 text-white flex flex-col flex-shrink-0">
-        <div className="p-6 border-b border-green-800">
-          <div className="text-xs font-bold text-green-400 tracking-widest uppercase mb-1">TASCHIBRA</div>
-          <div className="text-lg font-black">Backoffice</div>
+        <div className="p-4 border-b border-green-800 flex flex-col items-center">
+          <Image src="/images/logo.png" alt="Taschibra Store" width={160} height={40} className="w-auto h-9 mb-2" priority />
+          <div className="text-xs font-bold text-green-400 tracking-widest uppercase">Backoffice</div>
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {[
