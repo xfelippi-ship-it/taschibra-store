@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useCart } from '@/contexts/CartContext'
+import type { Cupom } from '@/contexts/CartContext'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import Link from 'next/link'
@@ -15,7 +16,7 @@ const freteOpcoes = [
 ]
 
 export default function CheckoutPage() {
-  const { items, total, count, clearCart } = useCart()
+  const { items, total, count, clearCart, cupom } = useCart()
   const [step, setStep] = useState<Step>('endereco')
   const [cep, setCep] = useState('')
   const [endereco, setEndereco] = useState<Record<string, string> | null>(null)
@@ -26,7 +27,8 @@ export default function CheckoutPage() {
   const [pagamento, setPagamento] = useState<'pix' | 'cartao'>('pix')
   const [pixCopiado, setPixCopiado] = useState(false)
 
-  const totalComFrete = total + freteEscolhido.preco
+  const desconto = cupom?.discount_amount || 0
+  const totalComFrete = total - desconto + freteEscolhido.preco
   const pixCode = `00020126580014BR.GOV.BCB.PIX0136taschibra@loja.com.br5204000053039865802BR5913TASCHIBRA LTDA6008INDAIAL62070503***6304${Math.floor(Math.random()*9999).toString().padStart(4,'0')}`
 
   async function buscarCep() {
@@ -335,6 +337,12 @@ export default function CheckoutPage() {
                 <span>Subtotal</span>
                 <span>R$ {total.toFixed(2).replace('.', ',')}</span>
               </div>
+              {cupom && (
+                <div className="flex justify-between text-sm text-green-600 font-semibold">
+                  <span>Cupom ({cupom.code})</span>
+                  <span>- R$ {desconto.toFixed(2).replace('.', ',')}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm text-gray-600">
                 <span>Frete ({freteEscolhido.nome})</span>
                 <span>R$ {freteEscolhido.preco.toFixed(2).replace('.', ',')}</span>

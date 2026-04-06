@@ -1,12 +1,50 @@
 'use client'
 import { useCart } from '@/contexts/CartContext'
+import type { Cupom } from '@/contexts/CartContext'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import Link from 'next/link'
-import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react'
+import { useState } from 'react'
+import { Trash2, Plus, Minus, ShoppingBag, Tag, X } from 'lucide-react'
 
 export default function CarrinhoPage() {
-  const { items, removeItem, updateQty, total, count, clearCart } = useCart()
+  const { items, removeItem, updateQty, total, count, clearCart, cupom, setCupom } = useCart()
+  const [cupomInput, setCupomInput] = useState(cupom?.code || '')
+  const [cupomErro, setCupomErro] = useState('')
+  const [cupomLoading, setCupomLoading] = useState(false)
+
+  const desconto = cupom?.discount_amount || 0
+  const totalFinal = total - desconto
+
+  async function aplicarCupom() {
+    if (!cupomInput.trim()) return
+    setCupomLoading(true)
+    setCupomErro('')
+    try {
+      const res = await fetch('/api/cupom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: cupomInput, subtotal: total, items }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setCupomErro(data.error || 'Cupom inválido')
+        setCupom(null)
+      } else {
+        setCupom(data)
+        setCupomErro('')
+      }
+    } catch {
+      setCupomErro('Erro ao validar cupom')
+    }
+    setCupomLoading(false)
+  }
+
+  function removerCupom() {
+    setCupom(null)
+    setCupomInput('')
+    setCupomErro('')
+  }
 
   if (items.length === 0) {
     return (
@@ -85,26 +123,62 @@ export default function CarrinhoPage() {
         <div className="lg:col-span-1">
           <div className="bg-white border border-gray-200 rounded-xl p-6 sticky top-24">
             <h2 className="text-lg font-black text-gray-800 mb-5">Resumo do pedido</h2>
+
+            {/* Cupom */}
+            {cupom ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Tag size={14} className="text-green-600" />
+                  <div>
+                    <p className="text-xs font-black text-green-700">{cupom.code}</p>
+                    <p className="text-xs text-green-600">{cupom.description || `${cupom.discount_type === 'percent' ? cupom.discount_value + '%' : 'R$ ' + cupom.discount_value} de desconto`}</p>
+                  </div>
+                </div>
+                <button onClick={removerCupom} className="text-gray-400 hover:text-red-500 transition-colors">
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <div className="mb-4">
+                <div className="flex gap-2">
+                  <input
+                    value={cupomInput}
+                    onChange={e => setCupomInput(e.target.value.toUpperCase())}
+                    onKeyDown={e => e.key === 'Enter' && aplicarCupom()}
+                    placeholder="Cupom de desconto"
+                    className="flex-1 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-green-500 uppercase"
+                  />
+                  <button onClick={aplicarCupom} disabled={cupomLoading || !cupomInput.trim()}
+                    className="bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-700 font-bold text-sm px-4 rounded-lg transition-colors">
+                    {cupomLoading ? '...' : 'OK'}
+                  </button>
+                </div>
+                {cupomErro && <p className="text-red-500 text-xs mt-1.5">{cupomErro}</p>}
+              </div>
+            )}
+
+            {/* Valores */}
             <div className="space-y-3 mb-5">
               <div className="flex justify-between text-sm text-gray-600">
                 <span>Subtotal ({count} itens)</span>
                 <span className="font-semibold">R$ {total.toFixed(2).replace('.', ',')}</span>
               </div>
+              {cupom && (
+                <div className="flex justify-between text-sm text-green-600 font-semibold">
+                  <span className="flex items-center gap-1"><Tag size={12} /> Desconto ({cupom.code})</span>
+                  <span>- R$ {desconto.toFixed(2).replace('.', ',')}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm text-gray-600">
                 <span>Frete</span>
                 <span className="text-green-600 font-semibold">Calcular</span>
               </div>
               <div className="border-t border-gray-100 pt-3 flex justify-between font-black text-gray-800">
                 <span>Total</span>
-                <span className="text-xl text-green-700">R$ {total.toFixed(2).replace('.', ',')}</span>
+                <span className="text-xl text-green-700">R$ {totalFinal.toFixed(2).replace('.', ',')}</span>
               </div>
             </div>
-            <div className="mb-4">
-              <div className="flex gap-2">
-                <input className="flex-1 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-green-500" placeholder="Cupom de desconto" />
-                <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-sm px-4 rounded-lg transition-colors">OK</button>
-              </div>
-            </div>
+
             <Link href="/checkout" className="block w-full bg-green-600 hover:bg-green-700 text-white font-black text-sm py-4 rounded-lg text-center transition-colors">
               FINALIZAR COMPRA →
             </Link>

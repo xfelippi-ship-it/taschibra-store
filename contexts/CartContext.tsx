@@ -1,6 +1,14 @@
 'use client'
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
+export type Cupom = {
+  code: string
+  description: string
+  discount_type: string
+  discount_value: number
+  discount_amount: number
+}
+
 export type CartItem = {
   id: string
   slug: string
@@ -19,12 +27,15 @@ type CartContextType = {
   clearCart: () => void
   total: number
   count: number
+  cupom: Cupom | null
+  setCupom: (c: Cupom | null) => void
 }
 
 const CartContext = createContext<CartContextType>({} as CartContextType)
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
+  const [cupom, setCupom] = useState<Cupom | null>(null)
 
   useEffect(() => {
     const saved = localStorage.getItem('taschibra-cart')
@@ -54,13 +65,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems(prev => prev.map(i => i.id === id ? { ...i, quantity: qty } : i))
   }
 
-  function clearCart() { setItems([]) }
+  function clearCart() { setItems([]); setCupom(null) }
 
   const total = items.reduce((sum, i) => sum + (i.promo_price || i.price) * i.quantity, 0)
   const count = items.reduce((sum, i) => sum + i.quantity, 0)
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQty, clearCart, total, count }}>
+    <CartContext.Provider value={{ items, addItem, removeItem, updateQty, clearCart, total, count, cupom, setCupom }}>
       {children}
     </CartContext.Provider>
   )
