@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react'
+import Image from 'next/image'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -49,8 +50,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/">
-            <img src="/images/logo.png" alt="Taschibra Store" className="h-12 w-auto mx-auto mb-4" />
-          </Link>
+<Image src="/images/logo.png" alt="Taschibra Store" width={200} height={48} className="h-12 w-auto mx-auto mb-4" priority />          </Link>
           <h1 className="text-2xl font-black text-gray-800">
             {modo === 'login' ? 'Bem-vindo de volta!' : 'Criar conta'}
           </h1>
