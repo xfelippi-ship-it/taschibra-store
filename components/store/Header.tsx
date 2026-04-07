@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 import { ShoppingCart, User, Search, Phone } from 'lucide-react'
 import { useState } from 'react'
@@ -59,10 +60,22 @@ export default function Header() {
         </div>
         <nav className="border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-6 flex items-center overflow-x-auto">
-            {['Lançamentos','Exclusivos','SMART','Lâmpadas','Teto','Refletor','Mat. Elétrico','Decorativo','Parede','Perfil','Outlet'].map(item => (
-              <Link key={item} href={`/produtos`}
+            {[
+              {label:'Lancamentos', slug:'lancamentos'},
+              {label:'Exclusivos', slug:'exclusivos'},
+              {label:'SMART', slug:'smart'},
+              {label:'Lampadas', slug:'lampadas'},
+              {label:'Teto', slug:'teto'},
+              {label:'Refletor', slug:'refletor'},
+              {label:'Mat. Eletrico', slug:'material-eletrico'},
+              {label:'Decorativo', slug:'decorativo'},
+              {label:'Parede', slug:'parede'},
+              {label:'Perfil', slug:'perfil'},
+              {label:'Outlet', slug:'outlet'},
+            ].map(({label, slug}) => (
+              <Link key={slug} href={`/produtos?categoria=${encodeURIComponent(slug)}`}
                 className="px-4 py-3 text-sm font-bold text-gray-600 hover:text-green-600 border-b-2 border-transparent hover:border-green-500 transition-all whitespace-nowrap">
-                {item}
+                {label}
               </Link>
             ))}
           </div>
