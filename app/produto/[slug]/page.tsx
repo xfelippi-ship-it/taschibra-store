@@ -22,7 +22,7 @@ type Produto = {
   category_slug: string
   sku?: string
   description?: string
-  image_url?: string
+  main_image?: string
 }
 
 export default function ProdutoPage() {
@@ -87,8 +87,8 @@ export default function ProdutoPage() {
         {/* Imagem */}
         <div>
           <div className="bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-center h-96 mb-3 overflow-hidden">
-            {produto.image_url
-              ? <img src={produto.image_url} alt={produto.name} className="h-80 object-contain" />
+            {produto.main_image
+              ? <img src={produto.main_image} alt={produto.name} className="h-80 object-contain" />
               : <span className="text-9xl">💡</span>
             }
           </div>

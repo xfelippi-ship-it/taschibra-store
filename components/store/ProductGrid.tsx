@@ -16,7 +16,7 @@ type Produto = {
   price: number
   promo_price: number
   category_slug: string
-  image_url?: string
+  main_image?: string
 }
 
 const badgeMap: Record<string, string> = {
@@ -45,7 +45,7 @@ function ProdCard({ p }: { p: Produto }) {
         </span>
       )}
       <div className="bg-gray-50 flex items-center justify-center h-44 text-7xl group-hover:scale-105 transition-transform">
-        {p.image_url ? <img src={p.image_url} alt={p.name} className="h-40 object-contain" /> : '💡'}
+        {p.main_image ? <img src={p.main_image} alt={p.name} className="h-40 object-contain" /> : '💡'}
       </div>
       <div className="p-4 flex flex-col">
         <p className="text-sm font-bold text-gray-800 leading-snug mb-2 line-clamp-2 min-h-[2.5rem]">{p.name}</p>
@@ -75,7 +75,7 @@ export default function ProductGrid({ title }: { title: string }) {
       const cat = title.toLowerCase() === 'lançamentos' ? 'lancamentos' : 'mais-vendidos'
       const { data } = await supabase
         .from('products')
-        .select('id, name, slug, price, promo_price, category_slug, image_url')
+        .select('id, name, slug, price, promo_price, category_slug, main_image')
         .eq('category_slug', cat)
         .limit(8)
       if (data && data.length > 0) {
@@ -83,7 +83,7 @@ export default function ProductGrid({ title }: { title: string }) {
       } else {
         const { data: fallback } = await supabase
           .from('products')
-          .select('id, name, slug, price, promo_price, category_slug, image_url')
+          .select('id, name, slug, price, promo_price, category_slug, main_image')
           .limit(8)
         setProdutos(fallback || [])
       }

@@ -6,7 +6,14 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-10">
         <div>
           <div className="mb-4">
-            <Image src="/images/logo.png" alt="Taschibra Store" width={160} height={48} className="object-contain brightness-0 invert" />
+            <Image
+              src="/images/logo.png"
+              alt="Taschibra Store"
+              width={180}
+              height={54}
+              className="object-contain"
+              style={{ filter: 'brightness(0) invert(1)' }}
+            />
           </div>
           <p className="text-sm text-green-400 leading-relaxed">Uma das maiores indústrias de iluminação da América Latina. Sede em Indaial/SC. Mais de 30 anos iluminando o Brasil.</p>
         </div>
