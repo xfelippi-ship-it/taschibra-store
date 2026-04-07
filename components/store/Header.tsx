@@ -61,13 +61,13 @@ export default function Header() {
         <nav className="border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-6 flex items-center overflow-x-auto">
             {[
-              {label:'Lancamentos', slug:'lancamentos'},
+              {label:'Lançamentos', slug:'lancamentos'},
               {label:'Exclusivos', slug:'exclusivos'},
               {label:'SMART', slug:'smart'},
-              {label:'Lampadas', slug:'lampadas'},
+              {label:'Lâmpadas', slug:'lampadas'},
               {label:'Teto', slug:'teto'},
               {label:'Refletor', slug:'refletor'},
-              {label:'Mat. Eletrico', slug:'material-eletrico'},
+              {label:'Mat. Elétrico', slug:'material-eletrico'},
               {label:'Decorativo', slug:'decorativo'},
               {label:'Parede', slug:'parede'},
               {label:'Perfil', slug:'perfil'},
