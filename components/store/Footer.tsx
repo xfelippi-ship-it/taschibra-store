@@ -1,19 +1,12 @@
-import Image from 'next/image'
-
 export default function Footer() {
   return (
     <footer className="bg-green-950 text-green-300 mt-16 px-12 pt-14 pb-8">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-10">
         <div>
-          <div className="mb-4">
-            <Image
-              src="/images/logo.png"
-              alt="Taschibra Store"
-              width={180}
-              height={54}
-              className="object-contain"
-              style={{ filter: 'brightness(0) invert(1)' }}
-            />
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-white font-black text-lg tracking-tight">TASCHIBRA</span>
+            <span className="text-green-500 font-light text-lg">|</span>
+            <span className="text-green-400 font-bold text-lg tracking-widest">STORE</span>
           </div>
           <p className="text-sm text-green-400 leading-relaxed">Uma das maiores indústrias de iluminação da América Latina. Sede em Indaial/SC. Mais de 30 anos iluminando o Brasil.</p>
         </div>
