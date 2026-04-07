@@ -17,33 +17,49 @@ const badgeColors: Record<string, string> = {
   novo: "bg-green-600", smart: "bg-blue-500", oferta: "bg-red-500", exclusivo: "bg-purple-600",
 }
 
+const PAGE_SIZE = 48
+
 function ProdutosContent() {
   const params = useSearchParams()
   const categoria = params.get("categoria") || ""
   const [produtos, setProdutos] = useState<any[]>([])
+  const [total, setTotal] = useState(0)
+  const [pagina, setPagina] = useState(1)
   const [loading, setLoading] = useState(true)
   const [titulo, setTitulo] = useState("Todos os Produtos")
   const { addItem } = useCart()
 
+  useEffect(() => { setPagina(1) }, [categoria])
+
   useEffect(() => {
     async function carregar() {
       setLoading(true)
-      let query = supabase.from("products").select("*").eq("active", true).order("name")
+      const from = (pagina - 1) * PAGE_SIZE
+      const to = from + PAGE_SIZE - 1
 
+      let query = supabase.from("products").select("*", { count: "exact" }).eq("active", true).order("name").range(from, to)
       if (categoria) {
-        // normalizar categoria para comparar sem acento
         query = query.ilike("category_slug", categoria)
-        setTitulo(categoria.replace(/-/g, " ").replace(/\w/g, l => l.toUpperCase()))
+        const label: Record<string, string> = {
+          lancamentos: "Lançamentos", lampadas: "Lâmpadas", "material-eletrico": "Mat. Elétrico",
+          smart: "SMART", outlet: "Outlet", teto: "Teto", refletor: "Refletor",
+          decorativo: "Decorativo", parede: "Parede", perfil: "Perfil", exclusivos: "Exclusivos",
+        }
+        setTitulo(label[categoria] || categoria.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()))
       } else {
         setTitulo("Todos os Produtos")
       }
 
-      const { data } = await query.limit(100)
+      const { data, count } = await query
       setProdutos(data || [])
+      setTotal(count || 0)
       setLoading(false)
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
     carregar()
-  }, [categoria])
+  }, [categoria, pagina])
+
+  const totalPaginas = Math.ceil(total / PAGE_SIZE)
 
   return (
     <>
@@ -57,7 +73,7 @@ function ProdutosContent() {
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-black text-gray-800">{titulo}</h1>
-          <span className="text-sm text-gray-500">{produtos.length} produtos encontrados</span>
+          <span className="text-sm text-gray-500">{total} produtos encontrados</span>
         </div>
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -75,53 +91,87 @@ function ProdutosContent() {
             <Link href="/produtos" className="text-green-600 hover:underline mt-4 block">Ver todos os produtos</Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {produtos.map(p => {
-              const preco = p.promo_price || p.price || 0
-              const precoCartao = p.price || 0
-              const badge = (p.badge || "").toLowerCase()
-              return (
-                <div key={p.id} className="bg-white rounded-xl border border-gray-200 hover:shadow-md transition-shadow group">
-                  <Link href={"/produto/" + p.slug}>
-                    <div className="relative aspect-square overflow-hidden rounded-t-xl bg-gray-50">
-                      {badge && badgeColors[badge] && (
-                        <span className={"absolute top-2 left-2 z-10 text-white text-xs font-black px-2 py-0.5 rounded " + badgeColors[badge]}>
-                          {p.badge}
-                        </span>
-                      )}
-                      {p.main_image ? (
-                        <img src={p.main_image} alt={p.name}
-                          className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-300"
-                          onError={e => { (e.target as HTMLImageElement).style.display = "none" }} />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-5xl">💡</div>
-                      )}
-                    </div>
-                  </Link>
-                  <div className="p-4">
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {produtos.map(p => {
+                const preco = p.promo_price || p.price || 0
+                const precoCartao = p.price || 0
+                const badge = (p.badge || "").toLowerCase()
+                return (
+                  <div key={p.id} className="bg-white rounded-xl border border-gray-200 hover:shadow-md transition-shadow group">
                     <Link href={"/produto/" + p.slug}>
-                      <p className="text-sm font-semibold text-gray-800 leading-snug mb-2 line-clamp-2 hover:text-green-700">{p.name}</p>
-                    </Link>
-                    {preco > 0 && (
-                      <div className="mb-3">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="bg-teal-500 text-white text-xs font-black px-1.5 py-0.5 rounded">PIX</span>
-                          <span className="font-black text-green-700 text-lg">R$ {preco.toFixed(2).replace(".", ",")}</span>
-                        </div>
-                        {precoCartao > preco && (
-                          <p className="text-xs text-gray-400">ou R$ {precoCartao.toFixed(2).replace(".", ",")} no cartao</p>
+                      <div className="relative aspect-square overflow-hidden rounded-t-xl bg-gray-50">
+                        {badge && badgeColors[badge] && (
+                          <span className={"absolute top-2 left-2 z-10 text-white text-xs font-black px-2 py-0.5 rounded " + badgeColors[badge]}>
+                            {p.badge}
+                          </span>
+                        )}
+                        {p.main_image ? (
+                          <img src={p.main_image} alt={p.name}
+                            className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-300"
+                            onError={e => { (e.target as HTMLImageElement).style.display = "none" }} />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-5xl">💡</div>
                         )}
                       </div>
-                    )}
-                    <button onClick={() => addItem({ id: p.id, name: p.name, slug: p.slug, price: precoCartao, promo_price: preco, emoji: "💡" })}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2.5 rounded-lg transition-colors">
-                      COMPRAR
-                    </button>
+                    </Link>
+                    <div className="p-4">
+                      <Link href={"/produto/" + p.slug}>
+                        <p className="text-sm font-semibold text-gray-800 leading-snug mb-2 line-clamp-2 min-h-[2.5rem] hover:text-green-700">{p.name}</p>
+                      </Link>
+                      {preco > 0 && (
+                        <div className="mb-3">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="bg-teal-500 text-white text-xs font-black px-1.5 py-0.5 rounded">PIX</span>
+                            <span className="font-black text-green-700 text-lg">R$ {preco.toFixed(2).replace(".", ",")}</span>
+                          </div>
+                          {precoCartao > preco && (
+                            <p className="text-xs text-gray-400">ou R$ {precoCartao.toFixed(2).replace(".", ",")} no cartão</p>
+                          )}
+                        </div>
+                      )}
+                      <button onClick={() => addItem({ id: p.id, name: p.name, slug: p.slug, price: precoCartao, promo_price: preco, emoji: "💡" })}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2.5 rounded-lg transition-colors">
+                        COMPRAR
+                      </button>
+                    </div>
                   </div>
+                )
+              })}
+            </div>
+
+            {totalPaginas > 1 && (
+              <div className="flex items-center justify-center gap-3 mt-12">
+                <button
+                  onClick={() => setPagina(p => Math.max(1, p - 1))}
+                  disabled={pagina === 1}
+                  className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-bold text-gray-600 hover:border-green-500 hover:text-green-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                  ← Anterior
+                </button>
+                <div className="flex gap-1">
+                  {[...Array(totalPaginas)].map((_, i) => {
+                    const n = i + 1
+                    if (totalPaginas <= 7 || n === 1 || n === totalPaginas || Math.abs(n - pagina) <= 1) {
+                      return (
+                        <button key={n} onClick={() => setPagina(n)}
+                          className={`w-9 h-9 rounded-lg text-sm font-bold transition-colors ${n === pagina ? "bg-green-600 text-white" : "border border-gray-200 text-gray-600 hover:border-green-500 hover:text-green-600"}`}>
+                          {n}
+                        </button>
+                      )
+                    }
+                    if (Math.abs(n - pagina) === 2) return <span key={n} className="w-9 h-9 flex items-center justify-center text-gray-400">…</span>
+                    return null
+                  })}
                 </div>
-              )
-            })}
-          </div>
+                <button
+                  onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}
+                  disabled={pagina === totalPaginas}
+                  className="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-bold text-gray-600 hover:border-green-500 hover:text-green-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                  Próxima →
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>
