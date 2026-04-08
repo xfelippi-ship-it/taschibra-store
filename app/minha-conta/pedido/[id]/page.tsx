@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import { createClient } from '@supabase/supabase-js'
