@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { Package, ShoppingBag, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff } from 'lucide-react'
+import { Package, ShoppingBag, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,33 +11,132 @@ const supabase = createClient(
 )
 
 type Produto = {
-  id: string
-  name: string
-  sku: string
-  price: number
-  promo_price: number
-  stock_qty: number
-  active: boolean
-  badge: string
-  family?: string
-  category_slug?: string
-  short_description?: string
-  description?: string
-  main_image?: string
-  weight_kg?: number
-  unit?: string
-  warranty?: string
-  images?: string[]
-  weight_kg_packed?: number
-  height_cm?: number
-  width_cm?: number
-  depth_cm?: number
-  height_cm_packed?: number
-  width_cm_packed?: number
-  depth_cm_packed?: number
-  tags?: string[]
+  id: string; name: string; sku: string; price: number; promo_price: number
+  stock_qty: number; active: boolean; badge: string; family?: string
+  category_slug?: string; short_description?: string; description?: string
+  main_image?: string; weight_kg?: number; unit?: string; warranty?: string
+  images?: string[]; weight_kg_packed?: number; height_cm?: number
+  width_cm?: number; depth_cm?: number; height_cm_packed?: number
+  width_cm_packed?: number; depth_cm_packed?: number; tags?: string[]
 }
 
+function UsuariosTab() {
+  const [usuarios, setUsuarios] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [email, setEmail] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const [msg, setMsg] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null)
+
+  useEffect(() => { carregarUsuarios() }, [])
+
+  async function carregarUsuarios() {
+    setLoading(true)
+    const { data } = await supabase.from('admin_users').select('*').order('created_at', { ascending: false })
+    setUsuarios(data || [])
+    setLoading(false)
+  }
+
+  async function convidar() {
+    if (!email.trim()) return
+    setEnviando(true)
+    setMsg(null)
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: { shouldCreateUser: true }
+    })
+    if (error) {
+      setMsg({ tipo: 'erro', texto: 'Erro ao enviar convite: ' + error.message })
+    } else {
+      const { data: existing } = await supabase.from('admin_users').select('id').eq('email', email.trim()).single()
+      if (!existing) {
+        await supabase.from('admin_users').insert({ email: email.trim(), role: 'admin' })
+      }
+      setMsg({ tipo: 'ok', texto: `Convite enviado para ${email.trim()}!` })
+      setEmail('')
+      carregarUsuarios()
+    }
+    setEnviando(false)
+  }
+
+  async function removerUsuario(id: string, emailUsuario: string) {
+    if (!confirm(`Remover acesso de ${emailUsuario}?`)) return
+    await supabase.from('admin_users').delete().eq('id', id)
+    carregarUsuarios()
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-black text-gray-800">Usuários do Backoffice</h1>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <h2 className="font-black text-gray-800 mb-1">Convidar novo usuário</h2>
+        <p className="text-sm text-gray-500 mb-4">O usuário receberá um link de acesso por e-mail. Use apenas e-mails @taschibra.com.br.</p>
+        <div className="flex gap-3">
+          <input
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && convidar()}
+            placeholder="nome@taschibra.com.br"
+            className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
+          />
+          <button
+            onClick={convidar}
+            disabled={enviando || !email.trim()}
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold text-sm px-6 py-2.5 rounded-lg transition-colors">
+            <Plus size={16} /> {enviando ? 'Enviando...' : 'Convidar'}
+          </button>
+        </div>
+        {msg && (
+          <p className={`mt-3 text-sm font-bold px-4 py-2 rounded-lg ${msg.tipo === 'ok' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+            {msg.tipo === 'ok' ? '✅' : '❌'} {msg.texto}
+          </p>
+        )}
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">E-mail</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Perfil</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Adicionado em</th>
+              <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan={4} className="text-center py-8 text-gray-400">Carregando...</td></tr>
+            ) : usuarios.length === 0 ? (
+              <tr><td colSpan={4} className="text-center py-8 text-gray-400">Nenhum usuário cadastrado.</td></tr>
+            ) : usuarios.map(u => (
+              <tr key={u.id} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="px-5 py-4">
+                  <p className="font-bold text-sm text-gray-800">{u.email}</p>
+                </td>
+                <td className="px-5 py-4">
+                  <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold capitalize">
+                    {u.role || 'admin'}
+                  </span>
+                </td>
+                <td className="px-5 py-4 text-sm text-gray-500">
+                  {u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '—'}
+                </td>
+                <td className="px-5 py-4 text-center">
+                  <button onClick={() => removerUsuario(u.id, u.email)} className="text-red-400 hover:text-red-600 transition-colors">
+                    <Trash2 size={15} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
 
 function CuponsTab() {
   const [cupons, setCupons] = useState<any[]>([])
@@ -102,7 +201,6 @@ function CuponsTab() {
           <Plus size={16} /> Novo Cupom
         </button>
       </div>
-
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
@@ -110,7 +208,7 @@ function CuponsTab() {
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Código</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Desconto</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Escopo</th>
-              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Minimo</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Mínimo</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Usos</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Validade</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
@@ -119,9 +217,9 @@ function CuponsTab() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="text-center py-8 text-gray-400">Carregando...</td></tr>
+              <tr><td colSpan={8} className="text-center py-8 text-gray-400">Carregando...</td></tr>
             ) : cupons.length === 0 ? (
-              <tr><td colSpan={7} className="text-center py-8 text-gray-400">Nenhum cupom cadastrado.</td></tr>
+              <tr><td colSpan={8} className="text-center py-8 text-gray-400">Nenhum cupom cadastrado.</td></tr>
             ) : cupons.map(c => (
               <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                 <td className="px-5 py-4">
@@ -133,11 +231,10 @@ function CuponsTab() {
                     {c.discount_type === 'percent' ? `${c.discount_value}%` : `R$ ${Number(c.discount_value).toFixed(2).replace('.', ',')}`}
                   </span>
                 </td>
-                <td className="px-5 py-4 text-sm text-gray-600">
+                <td className="px-5 py-4">
                   <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-semibold">
-                    {c.scope === 'category' ? 'Categoria' : c.scope === 'product' ? 'Produto' : c.scope === 'family' ? 'Familia' : 'Tudo'}
+                    {c.scope === 'category' ? 'Categoria' : c.scope === 'product' ? 'Produto' : c.scope === 'family' ? 'Família' : 'Tudo'}
                   </span>
-                  {c.scope_ids?.length > 0 && <p className="text-xs text-gray-400 mt-0.5">{c.scope_ids.join(', ')}</p>}
                 </td>
                 <td className="px-5 py-4 text-sm text-gray-600">
                   {c.min_order_value > 0 ? `R$ ${Number(c.min_order_value).toFixed(2).replace('.', ',')}` : '—'}
@@ -156,12 +253,8 @@ function CuponsTab() {
                 </td>
                 <td className="px-5 py-4 text-center">
                   <div className="flex items-center justify-center gap-2">
-                    <button onClick={() => { setEditando(c); setModal(true) }} className="text-blue-500 hover:text-blue-700">
-                      <Pencil size={15} />
-                    </button>
-                    <button onClick={() => excluirCupom(c.id)} className="text-red-400 hover:text-red-600">
-                      <Trash2 size={15} />
-                    </button>
+                    <button onClick={() => { setEditando(c); setModal(true) }} className="text-blue-500 hover:text-blue-700"><Pencil size={15} /></button>
+                    <button onClick={() => excluirCupom(c.id)} className="text-red-400 hover:text-red-600"><Trash2 size={15} /></button>
                   </div>
                 </td>
               </tr>
@@ -169,7 +262,6 @@ function CuponsTab() {
           </tbody>
         </table>
       </div>
-
       {modal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl">
@@ -194,66 +286,28 @@ function CuponsTab() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Escopo de aplicacao</label>
-                  <select value={editando.scope || 'all'} onChange={e => setEditando({...editando, scope: e.target.value, scope_ids: []})}
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
-                    <option value="all">Tudo (sem restricao)</option>
-                    <option value="category">Categoria especifica</option>
-                    <option value="family">Familia/Linha de produto</option>
-                    <option value="product">Produto especifico</option>
-                  </select>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">{editando.discount_type === 'fixed' ? 'Valor (R$)' : 'Desconto (%)'}</label>
+                  <input type="number" value={editando.discount_value || ''} onChange={e => setEditando({...editando, discount_value: e.target.value})}
+                    placeholder="0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">
-                    {editando.scope === 'category' ? 'Slug da categoria' : editando.scope === 'product' ? 'SKU do produto' : editando.scope === 'family' ? 'Nome da familia' : 'N/A'}
-                  </label>
-                  <input
-                    disabled={!editando.scope || editando.scope === 'all'}
-                    value={(editando.scope_ids || []).join(', ')}
-                    onChange={e => setEditando({...editando, scope_ids: e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean)})}
-                    placeholder={editando.scope === 'category' ? 'ex: lampadas, refletores' : editando.scope === 'product' ? 'ex: REF-50W, PIL-AAA' : editando.scope === 'family' ? 'ex: Inlumix, Smart' : '—'}
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 disabled:bg-gray-50 disabled:text-gray-400" />
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Pedido mínimo</label>
+                  <input type="number" value={editando.min_order_value || ''} onChange={e => setEditando({...editando, min_order_value: e.target.value})}
+                    placeholder="0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
-              </div>
-              <div className="flex gap-6">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={editando.free_shipping || false} onChange={e => setEditando({...editando, free_shipping: e.target.checked})} className="w-4 h-4 accent-green-600" />
-                  <span className="text-sm font-bold text-gray-700">Frete gratis</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={editando.first_order_only || false} onChange={e => setEditando({...editando, first_order_only: e.target.checked})} className="w-4 h-4 accent-green-600" />
-                  <span className="text-sm font-bold text-gray-700">Apenas 1o pedido</span>
-                </label>
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Limite de usos</label>
+                  <input type="number" value={editando.usage_limit || ''} onChange={e => setEditando({...editando, usage_limit: e.target.value})}
+                    placeholder="Ilimitado" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                </div>
               </div>
               <div>
                 <label className="text-sm font-bold text-gray-700 mb-1 block">Descrição</label>
                 <input value={editando.description || ''} onChange={e => setEditando({...editando, description: e.target.value})}
                   placeholder="Ex: 10% de desconto na Páscoa"
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">
-                    {editando.discount_type === 'fixed' ? 'Valor (R$)' : 'Desconto (%)'}
-                  </label>
-                  <input type="number" value={editando.discount_value || ''} onChange={e => setEditando({...editando, discount_value: e.target.value})}
-                    placeholder="0"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
-                </div>
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Pedido mínimo</label>
-                  <input type="number" value={editando.min_order_value || ''} onChange={e => setEditando({...editando, min_order_value: e.target.value})}
-                    placeholder="0"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
-                </div>
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Limite de usos</label>
-                  <input type="number" value={editando.usage_limit || ''} onChange={e => setEditando({...editando, usage_limit: e.target.value})}
-                    placeholder="Ilimitado"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
-                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -268,15 +322,12 @@ function CuponsTab() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <input type="checkbox" id="ativo" checked={editando.active !== false} onChange={e => setEditando({...editando, active: e.target.checked})}
-                  className="w-4 h-4 accent-green-600" />
+                <input type="checkbox" id="ativo" checked={editando.active !== false} onChange={e => setEditando({...editando, active: e.target.checked})} className="w-4 h-4 accent-green-600" />
                 <label htmlFor="ativo" className="text-sm font-bold text-gray-700">Cupom ativo</label>
               </div>
             </div>
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setModal(false)} className="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50 transition-colors">
-                Cancelar
-              </button>
+              <button onClick={() => setModal(false)} className="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50 transition-colors">Cancelar</button>
               <button onClick={salvarCupom} disabled={!editando.code || !editando.discount_value}
                 className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-black py-3 rounded-lg transition-colors">
                 {editando.id ? 'Salvar' : 'Criar cupom'}
@@ -296,6 +347,12 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios'>('dashboard')
+  const [produtos, setProdutos] = useState<Produto[]>([])
+  const [pedidos, setPedidos] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [modal, setModal] = useState(false)
+  const [produtoEdit, setProdutoEdit] = useState<Partial<Produto>>({})
 
   async function handleLogin() {
     setLoadingLogin(true)
@@ -307,25 +364,16 @@ export default function AdminPage() {
       const { data: adminData } = await supabase.from('admin_users').select('id').eq('user_id', data.user.id).single()
       if (!adminData) {
         await supabase.auth.signOut()
-        setErroLogin('Voce nao tem permissao de acesso.')
+        setErroLogin('Você não tem permissão de acesso.')
       } else {
         setAutenticado(true)
       }
     }
     setLoadingLogin(false)
   }
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons'>('dashboard')
-  const [produtos, setProdutos] = useState<Produto[]>([])
-  const [pedidos, setPedidos] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  const [modal, setModal] = useState(false)
-  const [produtoEdit, setProdutoEdit] = useState<Partial<Produto>>({})
 
   useEffect(() => {
-    if (autenticado) {
-      carregarProdutos()
-      carregarPedidos()
-    }
+    if (autenticado) { carregarProdutos(); carregarPedidos() }
   }, [autenticado])
 
   async function carregarProdutos() {
@@ -368,7 +416,7 @@ export default function AdminPage() {
         <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center">
           <Image src="/images/logo.png" alt="Taschibra Store" width={200} height={48} className="h-12 w-auto mx-auto mb-4" priority />
           <h1 className="text-xl font-black text-gray-800 mb-1">Backoffice</h1>
-          <p className="text-sm text-gray-500 mb-6">Area Restrita</p>
+          <p className="text-sm text-gray-500 mb-6">Área Restrita</p>
           <div className="space-y-3 text-left">
             <div>
               <label className="text-xs font-bold text-gray-600 mb-1 block">E-mail</label>
@@ -379,8 +427,8 @@ export default function AdminPage() {
             <div>
               <label className="text-xs font-bold text-gray-600 mb-1 block">Senha</label>
               <div className="relative">
-                <input type={showSenha ? "text" : "password"} value={senha} onChange={e => setSenha(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleLogin()}
+                <input type={showSenha ? 'text' : 'password'} value={senha} onChange={e => setSenha(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleLogin()}
                   placeholder="••••••••"
                   className="w-full border border-gray-200 rounded-lg px-4 pr-10 py-3 text-sm outline-none focus:border-green-500" />
                 <button type="button" onClick={() => setShowSenha(!showSenha)}
@@ -392,7 +440,7 @@ export default function AdminPage() {
             {erroLogin && <p className="text-red-500 text-xs">{erroLogin}</p>}
             <button onClick={handleLogin} disabled={loadingLogin || !email || !senha}
               className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-black py-3 rounded-xl transition-colors">
-              {loadingLogin ? "Entrando..." : "Entrar"}
+              {loadingLogin ? 'Entrando...' : 'Entrar'}
             </button>
           </div>
         </div>
@@ -409,7 +457,6 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar */}
       <aside className="w-60 bg-green-900 text-white flex flex-col flex-shrink-0">
         <div className="p-4 border-b border-green-800 flex flex-col items-center">
           <Image src="/images/logo.png" alt="Taschibra Store" width={160} height={40} className="w-auto h-9 mb-2" priority />
@@ -421,6 +468,7 @@ export default function AdminPage() {
             { id: 'produtos', label: 'Produtos', icon: <Package size={16} /> },
             { id: 'pedidos', label: 'Pedidos', icon: <ShoppingBag size={16} /> },
             { id: 'cupons', label: 'Cupons', icon: <Tag size={16} /> },
+            { id: 'usuarios', label: 'Usuários', icon: <Users size={16} /> },
           ].map(item => (
             <button key={item.id} onClick={() => setAba(item.id as any)}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
@@ -431,28 +479,21 @@ export default function AdminPage() {
           ))}
         </nav>
         <div className="p-4 border-t border-green-800">
-          <a href="/" className="flex items-center gap-2 text-xs text-green-400 hover:text-white transition-colors">
-            ← Ver loja
-          </a>
+          <a href="/" className="flex items-center gap-2 text-xs text-green-400 hover:text-white transition-colors">← Ver loja</a>
           <button onClick={() => setAutenticado(false)} className="flex items-center gap-2 text-xs text-green-400 hover:text-red-400 transition-colors mt-2">
             <LogOut size={12} /> Sair
           </button>
         </div>
       </aside>
 
-      {/* Conteúdo */}
       <main className="flex-1 p-8 overflow-auto">
-
-        {/* DASHBOARD */}
         {aba === 'dashboard' && (
           <div>
             <h1 className="text-2xl font-black text-gray-800 mb-6">Dashboard</h1>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               {stats.map((s, i) => (
                 <div key={i} className="bg-white rounded-xl p-5 border border-gray-200">
-                  <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl text-xl mb-3 ${s.color}`}>
-                    {s.icon}
-                  </div>
+                  <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl text-xl mb-3 ${s.color}`}>{s.icon}</div>
                   <div className="text-3xl font-black text-gray-800">{s.value}</div>
                   <div className="text-sm text-gray-500">{s.label}</div>
                 </div>
@@ -468,11 +509,7 @@ export default function AdminPage() {
                     <p className="font-bold text-sm text-gray-800">{p.order_number}</p>
                     <p className="text-xs text-gray-400">{new Date(p.created_at).toLocaleDateString('pt-BR')}</p>
                   </div>
-                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                    p.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                    p.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-gray-100 text-gray-600'
-                  }`}>{p.status}</span>
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${p.status === 'confirmed' ? 'bg-green-100 text-green-700' : p.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>{p.status}</span>
                   <span className="font-black text-green-700">R$ {Number(p.total).toFixed(2).replace('.', ',')}</span>
                 </div>
               ))}
@@ -480,7 +517,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* PRODUTOS */}
         {aba === 'produtos' && (
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -494,12 +530,12 @@ export default function AdminPage() {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase tracking-wide">Produto</th>
-                    <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase tracking-wide">SKU</th>
-                    <th className="text-right px-5 py-3 text-xs font-black text-gray-500 uppercase tracking-wide">Preço</th>
-                    <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase tracking-wide">Estoque</th>
-                    <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase tracking-wide">Status</th>
-                    <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase tracking-wide">Ações</th>
+                    <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Produto</th>
+                    <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">SKU</th>
+                    <th className="text-right px-5 py-3 text-xs font-black text-gray-500 uppercase">Preço</th>
+                    <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Estoque</th>
+                    <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
+                    <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -521,22 +557,14 @@ export default function AdminPage() {
                       </td>
                       <td className="px-5 py-4 text-center">
                         <button onClick={() => toggleAtivo(p.id, p.active)}
-                          className={`text-xs font-bold px-3 py-1 rounded-full transition-colors ${
-                            p.active ? 'bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-700' : 'bg-gray-100 text-gray-500 hover:bg-green-100 hover:text-green-700'
-                          }`}>
+                          className={`text-xs font-bold px-3 py-1 rounded-full transition-colors ${p.active ? 'bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-700' : 'bg-gray-100 text-gray-500 hover:bg-green-100 hover:text-green-700'}`}>
                           {p.active ? 'Ativo' : 'Inativo'}
                         </button>
                       </td>
                       <td className="px-5 py-4 text-center">
                         <div className="flex items-center justify-center gap-2">
-                          <button onClick={() => { setProdutoEdit(p); setModal(true) }}
-                            className="text-blue-500 hover:text-blue-700 transition-colors">
-                            <Pencil size={15} />
-                          </button>
-                          <button onClick={() => excluirProduto(p.id)}
-                            className="text-red-400 hover:text-red-600 transition-colors">
-                            <Trash2 size={15} />
-                          </button>
+                          <button onClick={() => { setProdutoEdit(p); setModal(true) }} className="text-blue-500 hover:text-blue-700"><Pencil size={15} /></button>
+                          <button onClick={() => excluirProduto(p.id)} className="text-red-400 hover:text-red-600"><Trash2 size={15} /></button>
                         </div>
                       </td>
                     </tr>
@@ -547,7 +575,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* PEDIDOS */}
         {aba === 'pedidos' && (
           <div>
             <h1 className="text-2xl font-black text-gray-800 mb-6">Pedidos</h1>
@@ -573,11 +600,7 @@ export default function AdminPage() {
                         <td className="px-5 py-4 font-bold text-sm text-gray-800">{p.order_number}</td>
                         <td className="px-5 py-4 text-sm text-gray-500">{new Date(p.created_at).toLocaleDateString('pt-BR')}</td>
                         <td className="px-5 py-4 text-center">
-                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                            p.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                            p.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>{p.status}</span>
+                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${p.status === 'confirmed' ? 'bg-green-100 text-green-700' : p.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>{p.status}</span>
                         </td>
                         <td className="px-5 py-4 text-right font-black text-green-700">R$ {Number(p.total).toFixed(2).replace('.', ',')}</td>
                       </tr>
@@ -589,13 +612,10 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* CUPONS */}
-        {aba === 'cupons' && (
-          <CuponsTab />
-        )}
+        {aba === 'cupons' && <CuponsTab />}
+        {aba === 'usuarios' && <UsuariosTab />}
       </main>
 
-      {/* Modal produto */}
       {modal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl">
@@ -606,177 +626,44 @@ export default function AdminPage() {
             <div className="space-y-4 max-h-[65vh] overflow-y-auto pr-1">
               <div>
                 <label className="text-sm font-bold text-gray-700 mb-1 block">Nome do produto *</label>
-                <input value={produtoEdit.name || ""} onChange={e => setProdutoEdit({...produtoEdit, name: e.target.value})}
+                <input value={produtoEdit.name || ''} onChange={e => setProdutoEdit({...produtoEdit, name: e.target.value})}
                   placeholder="Ex: Refletor LED Inlumix BR 50W 6500K Branco"
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-bold text-gray-700 mb-1 block">SKU *</label>
-                  <input value={produtoEdit.sku || ""} onChange={e => setProdutoEdit({...produtoEdit, sku: e.target.value})}
+                  <input value={produtoEdit.sku || ''} onChange={e => setProdutoEdit({...produtoEdit, sku: e.target.value})}
                     placeholder="Ex: REF-50W-BR"
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 font-mono" />
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Familia/Linha</label>
-                  <input value={produtoEdit.family || ""} onChange={e => setProdutoEdit({...produtoEdit, family: e.target.value})}
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Família/Linha</label>
+                  <input value={produtoEdit.family || ''} onChange={e => setProdutoEdit({...produtoEdit, family: e.target.value})}
                     placeholder="Ex: Inlumix, Smart, Factory"
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Categoria</label>
-                  <select value={produtoEdit.category_slug || ""} onChange={e => setProdutoEdit({...produtoEdit, category_slug: e.target.value})}
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
-                    <option value="">Selecionar</option>
-                    <option value="lampadas">Lampadas</option>
-                    <option value="refletores">Refletores</option>
-                    <option value="plafons">Plafons</option>
-                    <option value="pendentes">Pendentes</option>
-                    <option value="smart">Smart</option>
-                    <option value="material-eletrico">Material Eletrico</option>
-                    <option value="outlet">Outlet</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Badge</label>
-                  <select value={produtoEdit.badge || ""} onChange={e => setProdutoEdit({...produtoEdit, badge: e.target.value})}
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
-                    <option value="">Sem badge</option>
-                    <option value="novo">Novo</option>
-                    <option value="oferta">Oferta</option>
-                    <option value="smart">Smart</option>
-                    <option value="exclusivo">Exclusivo</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-bold text-gray-700 mb-1 block">Descricao curta</label>
-                <input value={produtoEdit.short_description || ""} onChange={e => setProdutoEdit({...produtoEdit, short_description: e.target.value})}
-                  placeholder="Ex: Refletor LED de alta eficiencia para areas externas"
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
-              </div>
-              <div>
-                <label className="text-sm font-bold text-gray-700 mb-1 block">Descricao completa</label>
-                <textarea value={produtoEdit.description || ""} onChange={e => setProdutoEdit({...produtoEdit, description: e.target.value})}
-                  placeholder="Descricao detalhada, caracteristicas tecnicas..."
-                  rows={3}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 resize-none" />
-              </div>
-              <div>
-                <p className="text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Imagens do produto (max. 6)</p>
-                <div className="grid grid-cols-6 gap-2 mb-2">
-                  {[0,1,2,3,4,5].map(idx => {
-                    const imgs = produtoEdit.images || []
-                    const url = imgs[idx] || ""
-                    const isPrincipal = produtoEdit.main_image === url && url !== ""
-                    return (
-                      <div key={idx} className="relative group">
-                        <div className={"aspect-square rounded-lg border-2 overflow-hidden flex items-center justify-center cursor-pointer " + (isPrincipal ? "border-green-500" : "border-gray-200 bg-gray-50")}>
-                          {url ? (
-                            <img src={url} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-gray-300 text-xl">+</span>
-                          )}
-                        </div>
-                        {url && (
-                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-lg transition-all flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
-                            {isPrincipal ? (
-                              <span className="text-white text-xs font-black bg-green-600 px-2 py-0.5 rounded">Principal</span>
-                            ) : (
-                              <button type="button" onClick={() => setProdutoEdit({...produtoEdit, main_image: url})}
-                                className="text-white text-xs bg-green-600 px-2 py-0.5 rounded font-bold">Definir principal</button>
-                            )}
-                            <button type="button" onClick={() => {
-                              const newImgs = [...(produtoEdit.images || [])]
-                              newImgs.splice(idx, 1)
-                              const newMain = isPrincipal ? (newImgs[0] || "") : produtoEdit.main_image
-                              setProdutoEdit({...produtoEdit, images: newImgs, main_image: newMain})
-                            }} className="text-white text-xs bg-red-500 px-2 py-0.5 rounded font-bold">Remover</button>
-                          </div>
-                        )}
-                        {isPrincipal && <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-black">P</span>}
-                      </div>
-                    )
-                  })}
-                </div>
-                {(produtoEdit.images || []).length < 6 && (
-                  <input placeholder="Cole a URL e pressione Enter para adicionar"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
-                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault()
-                        const val = (e.target as HTMLInputElement).value.trim()
-                        if (!val) return
-                        const imgs = [...(produtoEdit.images || [])]
-                        imgs.push(val)
-                        setProdutoEdit({...produtoEdit, images: imgs, main_image: produtoEdit.main_image || imgs[0]})
-                        ;(e.target as HTMLInputElement).value = ""
-                      }
-                    }} />
-                )}
-                <p className="text-xs text-gray-400 mt-1">Cole a URL e Enter. Mouse sobre imagem para definir principal (P) ou remover.</p>
-              </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Preco cartao *</label>
-                  <input type="number" step="0.01" value={produtoEdit.price || ""} onChange={e => setProdutoEdit({...produtoEdit, price: parseFloat(e.target.value)})}
-                    placeholder="0,00"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Preço cartão *</label>
+                  <input type="number" step="0.01" value={produtoEdit.price || ''} onChange={e => setProdutoEdit({...produtoEdit, price: parseFloat(e.target.value)})}
+                    placeholder="0,00" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Preco PIX</label>
-                  <input type="number" step="0.01" value={produtoEdit.promo_price || ""} onChange={e => setProdutoEdit({...produtoEdit, promo_price: parseFloat(e.target.value)})}
-                    placeholder="0,00"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Preço PIX</label>
+                  <input type="number" step="0.01" value={produtoEdit.promo_price || ''} onChange={e => setProdutoEdit({...produtoEdit, promo_price: parseFloat(e.target.value)})}
+                    placeholder="0,00" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
                 <div>
                   <label className="text-sm font-bold text-gray-700 mb-1 block">Estoque *</label>
-                  <input type="number" value={produtoEdit.stock_qty || ""} onChange={e => setProdutoEdit({...produtoEdit, stock_qty: parseInt(e.target.value)})}
-                    placeholder="0"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                  <input type="number" value={produtoEdit.stock_qty || ''} onChange={e => setProdutoEdit({...produtoEdit, stock_qty: parseInt(e.target.value)})}
+                    placeholder="0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
-              </div>
-              <p className="text-xs font-black text-gray-500 uppercase tracking-wide pt-2">Dimensoes do produto</p>
-              <div className="grid grid-cols-3 gap-4">
-                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Altura (cm)</label>
-                  <input type="number" step="0.1" value={produtoEdit.height_cm || ""} onChange={e => setProdutoEdit({...produtoEdit, height_cm: parseFloat(e.target.value)})} placeholder="0,0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
-                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Largura (cm)</label>
-                  <input type="number" step="0.1" value={produtoEdit.width_cm || ""} onChange={e => setProdutoEdit({...produtoEdit, width_cm: parseFloat(e.target.value)})} placeholder="0,0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
-                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Profundidade (cm)</label>
-                  <input type="number" step="0.1" value={produtoEdit.depth_cm || ""} onChange={e => setProdutoEdit({...produtoEdit, depth_cm: parseFloat(e.target.value)})} placeholder="0,0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
-              </div>
-              <p className="text-xs font-black text-gray-500 uppercase tracking-wide pt-2">Dimensoes com embalagem</p>
-              <div className="grid grid-cols-3 gap-4">
-                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Altura (cm)</label>
-                  <input type="number" step="0.1" value={produtoEdit.height_cm_packed || ""} onChange={e => setProdutoEdit({...produtoEdit, height_cm_packed: parseFloat(e.target.value)})} placeholder="0,0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
-                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Largura (cm)</label>
-                  <input type="number" step="0.1" value={produtoEdit.width_cm_packed || ""} onChange={e => setProdutoEdit({...produtoEdit, width_cm_packed: parseFloat(e.target.value)})} placeholder="0,0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
-                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Profundidade (cm)</label>
-                  <input type="number" step="0.1" value={produtoEdit.depth_cm_packed || ""} onChange={e => setProdutoEdit({...produtoEdit, depth_cm_packed: parseFloat(e.target.value)})} placeholder="0,0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Peso do produto (kg)</label>
-                  <input type="number" step="0.001" value={produtoEdit.weight_kg || ""} onChange={e => setProdutoEdit({...produtoEdit, weight_kg: parseFloat(e.target.value)})} placeholder="0,000" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
-                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Peso com embalagem (kg)</label>
-                  <input type="number" step="0.001" value={produtoEdit.weight_kg_packed || ""} onChange={e => setProdutoEdit({...produtoEdit, weight_kg_packed: parseFloat(e.target.value)})} placeholder="0,000" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Unidade</label>
-                  <select value={produtoEdit.unit || "un"} onChange={e => setProdutoEdit({...produtoEdit, unit: e.target.value})} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
-                    <option value="un">Unidade</option><option value="cx">Caixa</option><option value="kt">Kit</option><option value="pc">Peca</option><option value="bl">Blister</option>
-                  </select></div>
-                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Garantia</label>
-                  <input value={produtoEdit.warranty || ""} onChange={e => setProdutoEdit({...produtoEdit, warranty: e.target.value})} placeholder="Ex: 1 ano" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
-                <div><label className="text-sm font-bold text-gray-700 mb-1 block">Tags (por virgula)</label>
-                  <input value={(produtoEdit.tags || []).join(", ")} onChange={e => setProdutoEdit({...produtoEdit, tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean)})} placeholder="Ex: led, ip65, bivolt" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" /></div>
               </div>
             </div>
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setModal(false)} className="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50 transition-colors">
-                Cancelar
-              </button>
+              <button onClick={() => setModal(false)} className="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50 transition-colors">Cancelar</button>
               <button onClick={salvarProduto} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black py-3 rounded-lg transition-colors">
                 {produtoEdit.id ? 'Salvar alterações' : 'Criar produto'}
               </button>
