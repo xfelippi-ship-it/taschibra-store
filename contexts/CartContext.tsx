@@ -36,15 +36,18 @@ const CartContext = createContext<CartContextType>({} as CartContextType)
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [cupom, setCupom] = useState<Cupom | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem('taschibra-cart')
     if (saved) setItems(JSON.parse(saved))
+    setMounted(true)
   }, [])
 
   useEffect(() => {
+    if (!mounted) return
     localStorage.setItem('taschibra-cart', JSON.stringify(items))
-  }, [items])
+  }, [items, mounted])
 
   function addItem(item: Omit<CartItem, 'quantity'>) {
     setItems(prev => {
