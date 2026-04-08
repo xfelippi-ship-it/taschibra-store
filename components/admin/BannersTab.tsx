@@ -127,7 +127,7 @@ export default function BannersTab() {
               <tr><td colSpan={5} className="text-center py-8 text-gray-400">Carregando...</td></tr>
             ) : banners.length === 0 ? (
               <tr><td colSpan={5} className="text-center py-8 text-gray-400">Nenhum banner cadastrado.</td></tr>
-            ) : banners.map((b: any) => {
+            ) : banners.map((b) => {
               const st = status(b)
               return (
                 <tr key={b.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
