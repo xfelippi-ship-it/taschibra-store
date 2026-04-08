@@ -11,7 +11,8 @@ const CLEARSALE_URL = 'https://api.clearsale.com.br/v1'
 
 type ItemPedido = {
   product_id: string
-  name: string
+  name?: string
+  name_snapshot?: string
   unit_price: number
   quantity: number
 }
@@ -145,7 +146,7 @@ export async function POST(req: NextRequest) {
       .single()
 
     const endereco = pedido.shipping_address as EnderecoEntrega
-    const itens = (pedido.order_items as ItemPedido[]) || []
+    const itens = (pedido.order_items as unknown as ItemPedido[]) || []
 
     // Chama ClearSale
     const resultado = await analisarClearSale({
