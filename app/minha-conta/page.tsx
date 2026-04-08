@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import { createClient } from '@supabase/supabase-js'
@@ -13,14 +12,12 @@ const supabase = createClient(
 )
 
 export default function MinhaContaPage() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
-  const [senha, setSenha] = useState('')
   const [nome, setNome] = useState('')
   const [modo, setModo] = useState<'login' | 'cadastro'>('login')
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
-  const [usuario, setUsuario] = useState<{email: string, nome?: string} | null>(null)
+  const [usuario, setUsuario] = useState<{email: string, nome?: string, id?: string} | null>(null)
   const [verificando, setVerificando] = useState(true)
 
   useEffect(() => {

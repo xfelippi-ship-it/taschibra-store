@@ -33,9 +33,8 @@ const statusColor: Record<string, string> = {
 }
 
 export default function PedidoDetalhePage() {
-  const router = useRouter()
   const params = useParams()
-  const [pedido, setPedido] = useState<any>(null)
+  const [pedido, setPedido] = useState<Record<string, unknown> | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -107,7 +106,7 @@ export default function PedidoDetalhePage() {
           <Package size={16} className="text-green-600" /> Itens do pedido
         </h2>
         <div className="space-y-3">
-          {pedido.order_items?.map((item: any) => (
+          {(pedido.order_items as Record<string, unknown>[])?.map((item: Record<string, unknown>) => (
             <div key={item.id} className="flex justify-between items-center">
               <div>
                 <p className="text-sm font-semibold text-gray-800">{item.name_snapshot}</p>

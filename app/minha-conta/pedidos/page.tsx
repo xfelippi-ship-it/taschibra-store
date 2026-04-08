@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import { createClient } from '@supabase/supabase-js'
@@ -33,17 +32,14 @@ const statusColor: Record<string, string> = {
 }
 
 export default function PedidosPage() {
-  const router = useRouter()
-  const [pedidos, setPedidos] = useState<any[]>([])
+  const [pedidos, setPedidos] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
-  const [cliente, setCliente] = useState<any>(null)
 
   useEffect(() => {
     const salvo = localStorage.getItem('cliente_logado')
     if (!salvo) { router.push('/minha-conta'); return }
     const c = JSON.parse(salvo)
-    setCliente(c)
-    carregarPedidos(c.id)
+    carregarPedidos(c.id as string)
   }, [])
 
   async function carregarPedidos(clienteId: string) {
@@ -80,7 +76,7 @@ export default function PedidosPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {pedidos.map(p => (
+          {pedidos.map((p: Record<string, unknown>) => (
             <Link key={p.id} href={`/minha-conta/pedido/${p.id}`}
               className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-colors">
               <div className="flex items-center gap-4">
