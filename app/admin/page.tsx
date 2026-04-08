@@ -2,6 +2,7 @@
 'use client'
 import Image from 'next/image'
 import BannersTab from '@/components/admin/BannersTab'
+import DashboardTab from '@/components/admin/DashboardTab'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Package, ShoppingBag, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon } from 'lucide-react'
@@ -491,35 +492,7 @@ export default function AdminPage() {
       </aside>
 
       <main className="flex-1 p-8 overflow-auto">
-        {aba === 'dashboard' && (
-          <div>
-            <h1 className="text-2xl font-black text-gray-800 mb-6">Dashboard</h1>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              {stats.map((s, i) => (
-                <div key={i} className="bg-white rounded-xl p-5 border border-gray-200">
-                  <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl text-xl mb-3 ${s.color}`}>{s.icon}</div>
-                  <div className="text-3xl font-black text-gray-800">{s.value}</div>
-                  <div className="text-sm text-gray-500">{s.label}</div>
-                </div>
-              ))}
-            </div>
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="font-black text-gray-800 mb-4">Últimos Pedidos</h2>
-              {pedidos.length === 0 ? (
-                <p className="text-gray-400 text-sm">Nenhum pedido ainda.</p>
-              ) : pedidos.slice(0, 5).map((p: any) => (
-                <div key={p.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                  <div>
-                    <p className="font-bold text-sm text-gray-800">{p.order_number}</p>
-                    <p className="text-xs text-gray-400">{new Date(p.created_at).toLocaleDateString('pt-BR')}</p>
-                  </div>
-                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${p.status === 'confirmed' ? 'bg-green-100 text-green-700' : p.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>{p.status}</span>
-                  <span className="font-black text-green-700">R$ {Number(p.total).toFixed(2).replace('.', ',')}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {aba === 'dashboard' && <DashboardTab />}
 
         {aba === 'produtos' && (
           <div>
