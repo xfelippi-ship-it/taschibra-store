@@ -52,7 +52,7 @@ export default function HeroBanner() {
   }, [current, next])
 
   return (
-    <div className="relative overflow-hidden" style={{ height: 'clamp(320px, 50vw, 480px)' }}>
+    <div className="relative overflow-hidden" style={{ height: 'clamp(220px, 35vw, 380px)' }}>
       <div
         className="flex h-full transition-transform duration-500 ease-in-out"
         style={{ transform: `translateX(-${current * 100}%)` }}
