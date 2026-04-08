@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import Image from 'next/image'
+import BannersTab from '@/components/admin/BannersTab'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Package, ShoppingBag, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon } from 'lucide-react'
