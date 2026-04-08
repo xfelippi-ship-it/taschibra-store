@@ -352,6 +352,8 @@ export default function AdminPage() {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+  const [busca, setBusca] = useState("")
+  const [ordem, setOrdem] = useState<"asc"|"desc">("asc")
   const [modal, setModal] = useState(false)
   const [produtoEdit, setProdutoEdit] = useState<Partial<Produto>>({})
 
@@ -528,6 +530,10 @@ export default function AdminPage() {
                 <Plus size={16} /> Novo Produto
               </button>
             </div>
+            <div className="flex gap-3 mb-4">
+              <input type="text" placeholder="Buscar por nome ou SKU..." value={busca} onChange={e => setBusca(e.target.value)} className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+              <select value={ordem} onChange={e => setOrdem(e.target.value as "asc"|"desc")} className="border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white font-semibold text-gray-700"><option value="asc">A → Z</option><option value="desc">Z → A</option></select>
+            </div>
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
@@ -543,7 +549,7 @@ export default function AdminPage() {
                 <tbody>
                   {loading ? (
                     <tr><td colSpan={6} className="text-center py-8 text-gray-400">Carregando...</td></tr>
-                  ) : produtos.map(p => (
+                  ) : produtos.filter(p => busca === "" || p.name.toLowerCase().includes(busca.toLowerCase()) || (p.sku||"").toLowerCase().includes(busca.toLowerCase())).sort((a,b) => ordem === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)).map(p => (
                     <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                       <td className="px-5 py-4">
                         <p className="font-bold text-sm text-gray-800 max-w-xs truncate">{p.name}</p>
