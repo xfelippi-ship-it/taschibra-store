@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import { createClient } from '@supabase/supabase-js'
@@ -13,7 +12,6 @@ const supabase = createClient(
 )
 
 export default function DadosPage() {
-  const router = useRouter()
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [telefone, setTelefone] = useState('')
