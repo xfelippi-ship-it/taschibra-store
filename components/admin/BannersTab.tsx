@@ -26,11 +26,18 @@ type Banner = {
 }
 
 const bgOpcoes = [
-  { label: 'Verde (padrão)', value: 'from-green-900 via-green-700 to-green-800' },
-  { label: 'Azul', value: 'from-blue-950 via-blue-800 to-blue-900' },
+  { label: 'Verde Taschibra', value: 'from-green-900 via-green-700 to-green-800' },
+  { label: 'Verde escuro', value: 'from-green-950 via-green-900 to-green-800' },
+  { label: 'Azul profundo', value: 'from-blue-950 via-blue-800 to-blue-900' },
+  { label: 'Azul petróleo', value: 'from-cyan-950 via-cyan-800 to-blue-900' },
   { label: 'Roxo', value: 'from-purple-950 via-purple-800 to-purple-900' },
+  { label: 'Roxo escuro', value: 'from-violet-950 via-violet-800 to-purple-900' },
+  { label: 'Laranja queimado', value: 'from-orange-950 via-orange-800 to-amber-900' },
   { label: 'Vermelho', value: 'from-red-950 via-red-800 to-red-900' },
-  { label: 'Cinza escuro', value: 'from-gray-900 via-gray-700 to-gray-800' },
+  { label: 'Grafite', value: 'from-gray-900 via-gray-700 to-gray-800' },
+  { label: 'Preto', value: 'from-zinc-950 via-zinc-900 to-zinc-800' },
+  { label: 'Marrom', value: 'from-stone-900 via-stone-700 to-stone-800' },
+  { label: 'Verde militar', value: 'from-lime-950 via-lime-900 to-green-900' },
 ]
 
 const bannerVazio: Banner = {
@@ -226,7 +233,7 @@ export default function BannersTab() {
               <div>
                 <label className="text-sm font-bold text-gray-700 mb-1 block">URL da imagem de fundo (opcional)</label>
                 <input value={editando.image_url} onChange={e => setEditando({...editando, image_url: e.target.value})}
-                  placeholder="JPG ou WebP, 1440x480px, máx 500KB — deixe vazio para usar cor de fundo"
+                  placeholder="JPEG 1440x480px — deixe vazio para usar cor"
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
               </div>
               <div>
