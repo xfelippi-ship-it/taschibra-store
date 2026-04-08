@@ -3,14 +3,33 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { TrendingUp, ShoppingBag, Package, AlertTriangle, ArrowUp, ArrowDown } from 'lucide-react'
 
+type Pedido = {
+  id: string
+  created_at: string
+  total: number
+  status: string
+  order_number?: string
+}
+
+type Produto = {
+  id: string
+  name: string
+  sku: string
+  stock_qty: number
+  price: number
+  promo_price: number
+  active: boolean
+  category_slug: string
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
 export default function DashboardTab() {
-  const [pedidos, setPedidos] = useState<Record<string,unknown>[]>([])
-  const [produtos, setProdutos] = useState<Record<string,unknown>[]>([])
+  const [pedidos, setPedidos] = useState<Pedido[]>([])
+  const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -189,7 +208,7 @@ export default function DashboardTab() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {Object.entries(
-              pedidosMes.reduce((acc: Record<string,number>, p: Record<string,unknown>) => {
+              pedidosMes.reduce((acc: Record<string,number>, p: Pedido) => {
                 acc[p.status] = (acc[p.status] || 0) + 1
                 return acc
               }, {})
