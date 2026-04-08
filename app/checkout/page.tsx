@@ -90,6 +90,33 @@ export default function CheckoutPage() {
       setPedidoId(data.pedido_id)
       if (data.pix_code) setPixCode(data.pix_code)
       if (data.pix_url) setPixUrl(data.pix_url)
+      // Envia e-mail de confirmacao
+      if (email) {
+        fetch('/api/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tipo: 'confirmacao_pedido',
+            destinatario: email,
+            dados: {
+              nome,
+              pedido_id: data.pedido_id,
+              itens: items.map(i => ({
+                name: i.name,
+                quantity: i.quantity,
+                unit_price: i.promo_price || i.price,
+                total_price: (i.promo_price || i.price) * i.quantity,
+              })),
+              subtotal: total - desconto,
+              frete: freteEscolhido.preco,
+              desconto,
+              total: totalComFrete,
+              metodo_pagamento: pagamento,
+              pix_code: data.pix_code || null,
+            }
+          })
+        }).catch(err => console.error('Email erro:', err))
+      }
       clearCart()
       setStep('confirmado')
     } catch { setErro('Erro de conexão. Tente novamente.') }
