@@ -4,7 +4,8 @@ import { useParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
-import { ShoppingCart, Heart, Truck, Shield } from 'lucide-react'
+import { ShoppingCart, Heart, Shield } from 'lucide-react'
+import CalculaFrete from '@/components/store/CalculaFrete'
 import { useCart } from '@/contexts/CartContext'
 import Link from 'next/link'
 
@@ -124,16 +125,7 @@ export default function ProdutoPage() {
               <Heart size={15} /> Favoritar
             </button>
           </div>
-          {/* Frete */}
-          <div className="border border-gray-200 rounded-xl p-4 mb-4">
-            <p className="text-sm font-black text-gray-800 flex items-center gap-2 mb-3">
-              <Truck size={16} className="text-green-600" /> Calcule o frete
-            </p>
-            <div className="flex gap-2">
-              <input className="flex-1 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-green-500" placeholder="00000-000" />
-              <button className="bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-5 rounded-lg transition-colors">OK</button>
-            </div>
-          </div>
+          <CalculaFrete produtoId={produto.id} />
           {/* Descrição */}
           {produto.description && (
             <div className="border border-gray-200 rounded-xl p-4 mb-4">
