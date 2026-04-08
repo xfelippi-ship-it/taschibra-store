@@ -452,12 +452,6 @@ export default function AdminPage() {
     )
   }
 
-  const stats = [
-    { label: 'Produtos', value: produtos.length, icon: '📦', color: 'bg-blue-50 text-blue-600' },
-    { label: 'Pedidos', value: pedidos.length, icon: '🛒', color: 'bg-green-50 text-green-600' },
-    { label: 'Ativos', value: produtos.filter(p => p.active).length, icon: '✅', color: 'bg-emerald-50 text-emerald-600' },
-    { label: 'Inativos', value: produtos.filter(p => !p.active).length, icon: '⏸️', color: 'bg-gray-50 text-gray-600' },
-  ]
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
