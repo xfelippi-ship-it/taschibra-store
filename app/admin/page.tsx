@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { Package, ShoppingBag, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users } from 'lucide-react'
+import { Package, ShoppingBag, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, Image } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -347,7 +347,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -469,6 +469,7 @@ export default function AdminPage() {
             { id: 'pedidos', label: 'Pedidos', icon: <ShoppingBag size={16} /> },
             { id: 'cupons', label: 'Cupons', icon: <Tag size={16} /> },
             { id: 'usuarios', label: 'Usuários', icon: <Users size={16} /> },
+            { id: 'banners', label: 'Banners', icon: <Image size={16} /> },
           ].map(item => (
             <button key={item.id} onClick={() => setAba(item.id as any)}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
@@ -614,6 +615,7 @@ export default function AdminPage() {
 
         {aba === 'cupons' && <CuponsTab />}
         {aba === 'usuarios' && <UsuariosTab />}
+        {aba === 'banners' && <BannersTab />}
       </main>
 
       {modal && (
