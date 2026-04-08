@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { TrendingUp, ShoppingBag, Package, Users, AlertTriangle, ArrowUp, ArrowDown } from 'lucide-react'
+import { TrendingUp, ShoppingBag, Package, AlertTriangle, ArrowUp, ArrowDown } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,21 +9,18 @@ const supabase = createClient(
 )
 
 export default function DashboardTab() {
-  const [pedidos, setPedidos] = useState<any[]>([])
-  const [produtos, setProdutos] = useState<any[]>([])
-  const [clientes, setClientes] = useState(0)
+  const [pedidos, setPedidos] = useState<Record<string,unknown>[]>([])
+  const [produtos, setProdutos] = useState<Record<string,unknown>[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
-      const [{ data: ped }, { data: prod }, { count }] = await Promise.all([
+      const [{ data: ped }, { data: prod }] = await Promise.all([
         supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(50),
         supabase.from('products').select('id, name, sku, stock_qty, price, promo_price, active, category_slug').eq('active', true),
-        supabase.from('orders').select('*', { count: 'exact', head: true }),
       ])
       setPedidos(ped || [])
       setProdutos(prod || [])
-      setClientes(count || 0)
       setLoading(false)
     }
     load()
@@ -139,7 +136,7 @@ export default function DashboardTab() {
             </div>
           ) : (
             <div className="space-y-1">
-              {pedidos.slice(0, 8).map((p: any) => (
+              {pedidos.slice(0, 8).map((p) => (
                 <div key={p.id} className="flex items-center justify-between py-2.5 border-b border-gray-50 last:border-0">
                   <div>
                     <p className="font-bold text-sm text-gray-800">{p.order_number || p.id.slice(0, 8)}</p>
@@ -192,11 +189,11 @@ export default function DashboardTab() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {Object.entries(
-              pedidosMes.reduce((acc: any, p) => {
+              pedidosMes.reduce((acc: Record<string,number>, p: Record<string,unknown>) => {
                 acc[p.status] = (acc[p.status] || 0) + 1
                 return acc
               }, {})
-            ).map(([status, count]: any) => (
+            ).map(([status, count]) => (
               <div key={status} className={`rounded-xl p-4 text-center ${statusCores[status] || 'bg-gray-100 text-gray-600'}`}>
                 <div className="text-2xl font-black">{count}</div>
                 <div className="text-xs font-bold mt-0.5">{statusLabel[status] || status}</div>
