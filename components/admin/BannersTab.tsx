@@ -82,14 +82,14 @@ export default function BannersTab() {
     carregar()
   }
 
-  async function toggleAtivo(id: string, ativo: boolean) {
-    await supabase.from('banners').update({ active: !ativo }).eq('id', id)
+  async function toggleAtivo(id: string | undefined, ativo: boolean) {
+    if (!id) return; await supabase.from('banners').update({ active: !ativo }).eq('id', id)
     carregar()
   }
 
-  async function excluir(id: string) {
+  async function excluir(id: string | undefined) {
     if (!confirm('Excluir este banner?')) return
-    await supabase.from('banners').delete().eq('id', id)
+    if (!id) return; await supabase.from('banners').delete().eq('id', id)
     carregar()
   }
 
