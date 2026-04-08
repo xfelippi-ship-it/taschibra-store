@@ -226,7 +226,7 @@ export default function BannersTab() {
               <div>
                 <label className="text-sm font-bold text-gray-700 mb-1 block">URL da imagem de fundo (opcional)</label>
                 <input value={editando.image_url} onChange={e => setEditando({...editando, image_url: e.target.value})}
-                  placeholder="https://... (deixe vazio para usar cor de fundo)"
+                  placeholder="JPG ou WebP, 1440x480px, máx 500KB — deixe vazio para usar cor de fundo"
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
               </div>
               <div>
