@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { X } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,8 +21,6 @@ type TopBarData = {
 
 export default function TopBar() {
   const [data, setData] = useState<TopBarData | null>(null)
-  const [fechada, setFechada] = useState(false)
-
   useEffect(() => {
     async function load() {
       const { data: row } = await supabase
@@ -38,7 +35,7 @@ export default function TopBar() {
     load()
   }, [])
 
-  if (!data || fechada) return null
+  if (!data) return null
 
   const style = data.tipo === 'imagem' && data.imagem_url
     ? { backgroundImage: `url(${data.imagem_url})`, backgroundSize: 'cover', backgroundPosition: 'center', color: data.cor_texto }
@@ -54,9 +51,7 @@ export default function TopBar() {
           {data.subtexto}
         </span>
       )}
-      <button onClick={() => setFechada(true)} className="absolute right-3 opacity-70 hover:opacity-100 transition-opacity">
-        <X size={14} />
-      </button>
+
     </div>
   )
 
