@@ -7,6 +7,11 @@ import Footer from '@/components/store/Footer'
 import Link from 'next/link'
 import { Trash2, Plus, Minus, ShoppingBag, Tag, X } from 'lucide-react'
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
 export default function CarrinhoPage() {
   const { items, removeItem, updateQty, total, count, clearCart, cupom, setCupom } = useCart()
   const [cupomInput, setCupomInput] = useState(cupom?.code || '')
