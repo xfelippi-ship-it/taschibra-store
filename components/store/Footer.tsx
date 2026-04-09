@@ -26,7 +26,11 @@ export default function Footer() {
         ))}
       </div>
       <div className="max-w-7xl mx-auto border-t border-green-900 pt-6 flex flex-wrap items-center justify-between gap-4 text-xs text-green-600">
-        <span>Taschibra © 2025 — Indaial/SC</span>
+        <div>
+          <p>Blumenox Iluminação LTDA — CNPJ: 02.477.605/0001-01</p>
+          <p className="mt-0.5">Rodovia BR 470 KM 65,931, nº 2135 — Encano do Norte, Indaial/SC — CEP 89085-144</p>
+          <p className="mt-0.5">Taschibra Store © 2025 — Todos os direitos reservados</p>
+        </div>
         <div className="flex gap-2">
           {['PIX','VISA','MASTER','ELO','BOLETO'].map(p => (
             <span key={p} className="bg-green-900 px-2 py-1 rounded text-green-400 font-bold">{p}</span>
