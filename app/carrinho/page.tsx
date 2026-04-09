@@ -1,5 +1,13 @@
 'use client'
 import { useCart } from '@/contexts/CartContext'
+import { useEffect, useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
+import { Tag } from 'lucide-react'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import Link from 'next/link'
@@ -9,6 +17,20 @@ import { Trash2, Plus, Minus, ShoppingBag, Tag, X } from 'lucide-react'
 export default function CarrinhoPage() {
   const { items, removeItem, updateQty, total, count, clearCart, cupom, setCupom } = useCart()
   const [cupomInput, setCupomInput] = useState(cupom?.code || '')
+  const [cuponsDisponiveis, setCuponsDisponiveis] = useState<{code: string, description: string, discount_type: string, discount_value: number}[]>([])
+
+  useEffect(() => {
+    async function loadCupons() {
+      const { data } = await supabase
+        .from('coupons')
+        .select('code, description, discount_type, discount_value')
+        .eq('active', true)
+        .is('ends_at', null)
+        .limit(4)
+      setCuponsDisponiveis(data || [])
+    }
+    loadCupons()
+  }, [])
   const [cupomErro, setCupomErro] = useState('')
   const [cupomLoading, setCupomLoading] = useState(false)
 
@@ -153,6 +175,27 @@ export default function CarrinhoPage() {
                   </button>
                 </div>
                 {cupomErro && <p className="text-red-500 text-xs mt-1.5">{cupomErro}</p>}
+                {cuponsDisponiveis.length > 0 && !cupom && (
+                  <div className="mt-3">
+                    <p className="text-xs font-bold text-gray-500 mb-2 flex items-center gap-1">
+                      <Tag size={11} /> Cupons disponíveis
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {cuponsDisponiveis.map(cp => (
+                        <button
+                          key={cp.code}
+                          onClick={() => setCupomInput(cp.code)}
+                          className="flex items-center gap-1.5 bg-green-50 hover:bg-green-100 border border-green-200 hover:border-green-400 text-green-700 text-xs font-black px-3 py-1.5 rounded-full transition-colors"
+                        >
+                          <Tag size={10} /> {cp.code}
+                          <span className="font-normal text-green-600 ml-1">
+                            {cp.discount_type === 'percentage' ? `${cp.discount_value}% off` : `R$ ${Number(cp.discount_value).toFixed(2).replace('.', ',')} off`}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
