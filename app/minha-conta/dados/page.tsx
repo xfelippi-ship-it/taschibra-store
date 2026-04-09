@@ -33,11 +33,11 @@ export default function DadosPage() {
     setLoading(true)
     const { data } = await supabase
       .from('customers')
-      .select('name, email, phone')
+      .select('first_name, last_name, email, phone')
       .eq('id', id)
       .single()
     if (data) {
-      setNome(data.name || '')
+      setNome(`${data.first_name || ''} ${data.last_name || ''}`.trim())
       setEmail(data.email || '')
       setTelefone(data.phone || '')
     }
@@ -49,9 +49,10 @@ export default function DadosPage() {
     setErro('')
     setSucesso(false)
     try {
+      const parts = nome.trim().split(' ')
       const { error } = await supabase
         .from('customers')
-        .update({ name: nome, phone: telefone, updated_at: new Date().toISOString() })
+        .update({ first_name: parts[0], last_name: parts.slice(1).join(' '), phone: telefone, updated_at: new Date().toISOString() })
         .eq('id', clienteId)
 
       if (error) { setErro('Erro ao salvar. Tente novamente.'); return }

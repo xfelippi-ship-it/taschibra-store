@@ -32,7 +32,7 @@ export default function MinhaContaPage() {
     try {
       const { data, error } = await supabase
         .from('customers')
-        .select('id, name, email')
+        .select('id, first_name, last_name, email')
         .eq('email', email.toLowerCase().trim())
         .single()
 
@@ -41,7 +41,7 @@ export default function MinhaContaPage() {
         return
       }
 
-      const u = { email: data.email, nome: data.name, id: data.id }
+      const u = { email: data.email, nome: `${data.first_name || ''} ${data.last_name || ''}`.trim(), id: data.id }
       localStorage.setItem('cliente_logado', JSON.stringify(u))
       setUsuario(u)
     } catch {
@@ -68,9 +68,12 @@ export default function MinhaContaPage() {
         return
       }
 
+      const nomeParts = nome.trim().split(' ')
+      const firstName = nomeParts[0]
+      const lastName = nomeParts.slice(1).join(' ') || ''
       const { data, error } = await supabase
         .from('customers')
-        .insert({ name: nome, email: email.toLowerCase().trim() })
+        .insert({ first_name: firstName, last_name: lastName, email: email.toLowerCase().trim() })
         .select()
         .single()
 
@@ -79,7 +82,7 @@ export default function MinhaContaPage() {
         return
       }
 
-      const u = { email: data.email, nome: data.name, id: data.id }
+      const u = { email: data.email, nome: `${data.first_name || ''} ${data.last_name || ''}`.trim(), id: data.id }
       localStorage.setItem('cliente_logado', JSON.stringify(u))
       setUsuario(u)
     } catch {
