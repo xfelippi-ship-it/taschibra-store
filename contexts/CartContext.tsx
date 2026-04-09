@@ -7,6 +7,8 @@ export type Cupom = {
   discount_type: string
   discount_value: number
   discount_amount: number
+  free_shipping?: boolean
+  scope?: string
 }
 
 export type CartItem = {
@@ -29,18 +31,25 @@ type CartContextType = {
   count: number
   cupom: Cupom | null
   setCupom: (c: Cupom | null) => void
+  cupons: Cupom[]
+  addCupom: (c: Cupom) => void
+  removeCupom: (code: string) => void
+  totalDesconto: number
+  freeShipping: boolean
 }
 
 const CartContext = createContext<CartContextType>({} as CartContextType)
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
-  const [cupom, setCupom] = useState<Cupom | null>(null)
+  const [cupons, setCupons] = useState<Cupom[]>([])
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem('taschibra-cart')
     if (saved) setItems(JSON.parse(saved))
+    const savedCupons = localStorage.getItem('taschibra-cupons')
+    if (savedCupons) setCupons(JSON.parse(savedCupons))
     setMounted(true)
   }, [])
 
@@ -49,35 +58,70 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('taschibra-cart', JSON.stringify(items))
   }, [items, mounted])
 
+  useEffect(() => {
+    if (!mounted) return
+    localStorage.setItem('taschibra-cupons', JSON.stringify(cupons))
+  }, [cupons, mounted])
+
   function addItem(item: Omit<CartItem, 'quantity'>) {
     setItems(prev => {
       const existing = prev.find(i => i.id === item.id)
-      if (existing) {
-        return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i)
-      }
+      if (existing) return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i)
       return [...prev, { ...item, quantity: 1 }]
     })
   }
 
-  function removeItem(id: string) {
-    setItems(prev => prev.filter(i => i.id !== id))
-  }
+  function removeItem(id: string) { setItems(prev => prev.filter(i => i.id !== id)) }
 
   function updateQty(id: string, qty: number) {
     if (qty <= 0) return removeItem(id)
     setItems(prev => prev.map(i => i.id === id ? { ...i, quantity: qty } : i))
   }
 
-  function clearCart() { setItems([]); setCupom(null) }
+  function clearCart() { setItems([]); setCupons([]) }
+
+  function addCupom(c: Cupom) {
+    setCupons(prev => {
+      // Remove se ja existe o mesmo codigo
+      const sem = prev.filter(x => x.code !== c.code)
+      // Regra cumulativa: especifico (product/category/family) + generico (all)
+      // Nao permite dois cupons do mesmo tipo scope
+      const temEspecifico = sem.some(x => x.scope && x.scope !== 'all')
+      const temGenerico = sem.some(x => !x.scope || x.scope === 'all')
+      if (c.scope && c.scope !== 'all' && temEspecifico) {
+        // Substitui o especifico existente
+        return [...sem.filter(x => !x.scope || x.scope === 'all'), c]
+      }
+      if ((!c.scope || c.scope === 'all') && temGenerico) {
+        // Substitui o generico existente
+        return [...sem.filter(x => x.scope && x.scope !== 'all'), c]
+      }
+      return [...sem, c]
+    })
+  }
+
+  function removeCupom(code: string) { setCupons(prev => prev.filter(x => x.code !== code)) }
 
   const total = items.reduce((sum, i) => sum + (i.promo_price || i.price) * i.quantity, 0)
   const count = items.reduce((sum, i) => sum + i.quantity, 0)
+  const totalDesconto = cupons.reduce((sum, c) => sum + c.discount_amount, 0)
+  const freeShipping = cupons.some(c => c.free_shipping)
+
+  // Compatibilidade com codigo legado que usa cupom singular
+  const cupom = cupons.length > 0 ? cupons[0] : null
+  const setCupom = (c: Cupom | null) => { if (c) addCupom(c); else setCupons([]) }
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQty, clearCart, total, count, cupom, setCupom }}>
+    <CartContext.Provider value={{
+      items, addItem, removeItem, updateQty, clearCart,
+      total, count,
+      cupom, setCupom,
+      cupons, addCupom, removeCupom,
+      totalDesconto, freeShipping
+    }}>
       {children}
     </CartContext.Provider>
   )
 }
 
-export const useCart = () => useContext(CartContext)
+export function useCart() { return useContext(CartContext) }
