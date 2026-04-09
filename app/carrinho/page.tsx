@@ -155,9 +155,9 @@ export default function CarrinhoPage() {
                       <div>
                         <p className="text-xs font-black text-green-800">{cp.code}</p>
                         <p className="text-xs text-green-600 font-medium">
-                          {cp.discount_type === 'percent' || cp.discount_type === 'percentage'
-                            ? `${cp.discount_value}% · - R$ ${cp.discount_amount.toFixed(2).replace('.', ',')}`
-                            : `- R$ ${cp.discount_amount.toFixed(2).replace('.', ',')}`}
+                          {(cp.discount_type === 'percent' || cp.discount_type === 'percentage')
+                            ? `${Number(cp.discount_value).toFixed(0)}% off · - R$ ${cp.discount_amount.toFixed(2).replace('.', ',')}`
+                            : `R$ ${Number(cp.discount_value).toFixed(0)} off · - R$ ${cp.discount_amount.toFixed(2).replace('.', ',')}`}
                           {cp.free_shipping ? ' · Frete grátis' : ''}
                         </p>
                       </div>
@@ -215,7 +215,7 @@ export default function CarrinhoPage() {
                         {aplicado ? <Check size={9} /> : <Tag size={9} />}
                         {cp.code}
                         <span className={`font-normal ${aplicado ? 'text-green-700' : 'text-green-500'}`}>
-                          {cp.discount_type === 'percentage' ? ` ${cp.discount_value}%` : ` R$ ${Number(cp.discount_value).toFixed(0)}`} off
+                          {(cp.discount_type === 'percent' || cp.discount_type === 'percentage') ? ` ${Number(cp.discount_value).toFixed(0)}% off` : `R$ ${Number(cp.discount_value).toFixed(0)} off`}
                         </span>
                       </button>
                     )
@@ -245,7 +245,7 @@ export default function CarrinhoPage() {
               {cupons.map(cp => (
                 <div key={cp.code} className="flex justify-between text-sm">
                   <span className="flex items-center gap-1.5 text-green-700 font-bold">
-                    <Tag size={11} /> Desconto ({cp.code})
+                    <Tag size={11} /> {cp.code} {(cp.discount_type === 'percent' || cp.discount_type === 'percentage') ? `(${Number(cp.discount_value).toFixed(0)}%)` : ''}
                   </span>
                   <span className="text-green-700 font-bold">- R$ {cp.discount_amount.toFixed(2).replace('.', ',')}</span>
                 </div>
