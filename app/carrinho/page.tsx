@@ -18,7 +18,6 @@ export default function CarrinhoPage() {
         .from('coupons')
         .select('code, description, discount_type, discount_value')
         .eq('active', true)
-        .is('ends_at', null)
         .limit(4)
       setCuponsDisponiveis(data || [])
     }
