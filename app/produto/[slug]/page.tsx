@@ -6,6 +6,7 @@ import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import { ShoppingCart, Heart, Shield, ChevronRight, Star } from 'lucide-react'
 import CalculaFrete from '@/components/store/CalculaFrete'
+import VariacoesProduto from '@/components/store/VariacoesProduto'
 import { useCart } from '@/contexts/CartContext'
 import Link from 'next/link'
 
@@ -13,6 +14,18 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
+
+type Variacao = {
+  id: string
+  name: string
+  type: string
+  value: string
+  sku?: string
+  price?: number
+  promo_price?: number
+  stock_qty: number
+  active: boolean
+}
 
 type Produto = {
   id: string
@@ -36,6 +49,7 @@ export default function ProdutoPage() {
   const [qty, setQty] = useState(1)
   const [imgAtiva, setImgAtiva] = useState(0)
   const [adicionado, setAdicionado] = useState(false)
+  const [variacaoSelecionada, setVariacaoSelecionada] = useState<Variacao | null>(null)
   const { addItem } = useCart()
 
   useEffect(() => {
@@ -70,8 +84,10 @@ export default function ProdutoPage() {
     </>
   )
 
-  const desconto = Math.round((1 - produto.promo_price / produto.price) * 100)
-  const parcela = (produto.price / 10).toFixed(2).replace('.', ',')
+  const precoAtivo = variacaoSelecionada?.promo_price || produto.promo_price
+  const precoOriginal = variacaoSelecionada?.price || produto.price
+  const desconto = Math.round((1 - precoAtivo / precoOriginal) * 100)
+  const parcela = (precoOriginal / 10).toFixed(2).replace('.', ',')
   const imagens = produto.images?.length ? produto.images : produto.main_image ? [produto.main_image] : []
 
   function handleAdd() {
@@ -135,10 +151,10 @@ export default function ProdutoPage() {
             <p className="text-xs text-gray-600 mb-1">No cartão em até <strong className="text-gray-800">10x de R$ {parcela}</strong> sem juros</p>
             <div className="flex items-center gap-2 pt-2 border-t border-green-100 mt-2">
               <span className="bg-teal-500 text-white text-xs font-black px-1.5 py-0.5 rounded">PIX</span>
-              <span className="text-2xl md:text-3xl font-black text-green-700">R$ {produto.promo_price.toFixed(2).replace('.', ',')}</span>
+              <span className="text-2xl md:text-3xl font-black text-green-700">R$ {precoAtivo.toFixed(2).replace('.', ',')}</span>
               {desconto > 0 && <span className="bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">-{desconto}%</span>}
             </div>
-            <p className="text-xs text-gray-500 mt-1">ou R$ {produto.price.toFixed(2).replace('.', ',')} no cartão</p>
+            <p className="text-xs text-gray-500 mt-1">ou R$ {precoOriginal.toFixed(2).replace('.', ',')} no cartão</p>
           </div>
 
           {/* Qty + Comprar — visível só em desktop */}
@@ -160,6 +176,7 @@ export default function ProdutoPage() {
             </button>
           </div>
 
+          <VariacoesProduto produtoId={produto.id} onSelect={setVariacaoSelecionada} />
           <CalculaFrete produtoId={produto.id} />
 
           {produto.description && (
