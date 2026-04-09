@@ -1,45 +1,18 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 
-type TopBarData = {
-  id: string
-  active: boolean
-  texto: string
-  subtexto?: string
-  link?: string
-  tipo: 'cor' | 'imagem'
-  cor_fundo: string
-  cor_texto: string
-  imagem_url?: string
-}
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export default function TopBar() {
-  const [data, setData] = useState<TopBarData | null>(null)
-
-  async function load() {
-    const { data: rows } = await supabase
-      .from('top_bar')
-      .select('*')
-      .eq('active', true)
-      .order('created_at', { ascending: false })
-      .limit(1)
-    if (rows && rows.length > 0) setData(rows[0])
-    else setData(null)
-  }
+  const [data, setData] = useState<any>(null)
 
   useEffect(() => {
-    load()
-
-    // Realtime — atualiza instantaneamente quando o backoffice salva
-    const channel = supabase
-      .channel('top_bar_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'top_bar' }, () => {
-        load()
-      })
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
+    supabase.from('top_bar').select('*').eq('active', true).order('created_at', { ascending: false }).limit(1)
+      .then(({ data: rows }) => { if (rows && rows.length > 0) setData(rows[0]) })
   }, [])
 
   if (!data) return null
@@ -59,7 +32,5 @@ export default function TopBar() {
     </div>
   )
 
-  return data.link
-    ? <a href={data.link} className="block hover:opacity-95 transition-opacity">{content}</a>
-    : <div>{content}</div>
+  return data.link ? <a href={data.link} className="block">{content}</a> : <div>{content}</div>
 }
