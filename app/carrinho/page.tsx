@@ -235,23 +235,43 @@ export default function CarrinhoPage() {
             </div>
 
             {/* Valores */}
-            <div className="space-y-3 mb-5">
+            <div className="space-y-2 mb-5">
               <div className="flex justify-between text-sm text-gray-600">
-                <span>Subtotal ({count} itens)</span>
+                <span>Subtotal ({count} {count === 1 ? 'item' : 'itens'})</span>
                 <span className="font-semibold">R$ {total.toFixed(2).replace('.', ',')}</span>
               </div>
-              {cupons.map(c => (
-                <div key={c.code} className="flex justify-between text-sm text-green-600 font-semibold">
-                  <span className="flex items-center gap-1"><Tag size={12} /> {c.code}</span>
-                  <span>- R$ {c.discount_amount.toFixed(2).replace('.', ',')}</span>
-                </div>
-              ))}
-              {totalDesconto > 0 && cupons.length > 1 && (
-                <div className="flex justify-between text-sm text-green-700 font-black border-t border-green-100 pt-2">
-                  <span>Total de descontos</span>
-                  <span>- R$ {totalDesconto.toFixed(2).replace('.', ',')}</span>
+
+              {/* Cupons aplicados — destaque abaixo do subtotal */}
+              {cupons.length > 0 && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-3 space-y-2 my-1">
+                  <p className="text-xs font-black text-green-700 uppercase tracking-wide flex items-center gap-1">
+                    <Tag size={11} /> Cupons aplicados
+                  </p>
+                  {cupons.map(cp => (
+                    <div key={cp.code} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="bg-green-600 text-white text-xs font-black px-2 py-0.5 rounded-full">{cp.code}</span>
+                        {cp.scope && cp.scope !== 'all' && (
+                          <span className="text-xs text-green-600 font-bold">específico</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black text-green-700">- R$ {cp.discount_amount.toFixed(2).replace('.', ',')}</span>
+                        <button onClick={() => removeCupom(cp.code)} className="text-gray-300 hover:text-red-500 transition-colors">
+                          <X size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {totalDesconto > 0 && cupons.length > 1 && (
+                    <div className="border-t border-green-200 pt-2 flex justify-between">
+                      <span className="text-xs font-black text-green-800">Total de descontos</span>
+                      <span className="text-sm font-black text-green-800">- R$ {totalDesconto.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                  )}
                 </div>
               )}
+
               <div className="flex justify-between text-sm text-gray-600">
                 <span>Frete</span>
                 <span className={freeShipping ? 'text-green-600 font-black' : 'text-green-600 font-semibold'}>
