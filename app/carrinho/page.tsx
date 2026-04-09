@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import Link from 'next/link'
-import { Trash2, Plus, Minus, ShoppingBag, Tag, X } from 'lucide-react'
+import { Trash2, Plus, Minus, ShoppingBag, Tag, X, Check } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,9 +18,10 @@ export default function CarrinhoPage() {
   const [cupomErro, setCupomErro] = useState('')
   const [cupomLoading, setCupomLoading] = useState(false)
   const [cuponsDisponiveis, setCuponsDisponiveis] = useState<any[]>([])
+
+  // Calcula total final — fixo primeiro (ja ordenado no CartContext), depois percentual
   const totalFinal = Math.max(0, total - totalDesconto)
 
-  // Busca cupons relevantes — genericos + especificos dos SKUs no carrinho
   useEffect(() => {
     async function loadCupons() {
       const { data } = await supabase
@@ -28,36 +29,41 @@ export default function CarrinhoPage() {
         .select('code, description, discount_type, discount_value, scope, scope_ids')
         .eq('active', true)
       if (!data) return
-
       const skus = items.map(i => i.id)
-      const categorias = items.map(i => (i as any).category).filter(Boolean)
-
       const relevantes = data.filter(c => {
         if (!c.scope || c.scope === 'all') return true
         if (c.scope === 'product' && c.scope_ids?.some((id: string) => skus.includes(id))) return true
-        if (c.scope === 'category' && c.scope_ids?.some((id: string) => categorias.includes(id))) return true
         return false
       })
-
       setCuponsDisponiveis(relevantes.slice(0, 6))
     }
     if (items.length > 0) loadCupons()
   }, [items])
 
-  async function aplicarCupom() {
-    if (!cupomInput.trim()) return
-    const code = cupomInput.trim().toUpperCase()
-    if (cupons.find(c => c.code === code)) {
+  async function aplicarCupom(code?: string) {
+    const codigoFinal = (code || cupomInput).trim().toUpperCase()
+    if (!codigoFinal) return
+    if (cupons.find(c => c.code === codigoFinal)) {
       setCupomErro('Este cupom já foi aplicado')
+      return
+    }
+    if (cupons.length >= 2) {
+      setCupomErro('Máximo de 2 cupons por compra')
       return
     }
     setCupomLoading(true)
     setCupomErro('')
     try {
+      // Calcula saldo após cupons fixos já aplicados
+      const descontoFixo = cupons
+        .filter(c => c.discount_type !== 'percent' && c.discount_type !== 'percentage')
+        .reduce((s, c) => s + c.discount_amount, 0)
+      const saldoAposFixos = Math.max(0, total - descontoFixo)
+
       const res = await fetch('/api/cupom', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, subtotal: total, items }),
+        body: JSON.stringify({ code: codigoFinal, subtotal: total, subtotal_apos_fixos: saldoAposFixos, items }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -100,6 +106,7 @@ export default function CarrinhoPage() {
           <span className="text-gray-700 font-semibold">Carrinho</span>
         </div>
       </div>
+
       <div className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         {/* Itens */}
@@ -122,24 +129,12 @@ export default function CarrinhoPage() {
               </div>
               <div className="flex items-center gap-3 flex-shrink-0">
                 <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-                  <button onClick={() => updateQty(item.id, item.quantity - 1)}
-                    className="w-8 h-8 bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors">
-                    <Minus size={12} />
-                  </button>
-                  <span className="w-8 h-8 flex items-center justify-center text-sm font-black border-x border-gray-200">
-                    {item.quantity}
-                  </span>
-                  <button onClick={() => updateQty(item.id, item.quantity + 1)}
-                    className="w-8 h-8 bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors">
-                    <Plus size={12} />
-                  </button>
+                  <button onClick={() => updateQty(item.id, item.quantity - 1)} className="w-8 h-8 bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors"><Minus size={12} /></button>
+                  <span className="w-8 h-8 flex items-center justify-center text-sm font-black border-x border-gray-200">{item.quantity}</span>
+                  <button onClick={() => updateQty(item.id, item.quantity + 1)} className="w-8 h-8 bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors"><Plus size={12} /></button>
                 </div>
-                <span className="font-black text-gray-800 w-20 text-right text-sm">
-                  R$ {((item.promo_price || item.price) * item.quantity).toFixed(2).replace('.', ',')}
-                </span>
-                <button onClick={() => removeItem(item.id)} className="text-gray-300 hover:text-red-500 transition-colors">
-                  <Trash2 size={16} />
-                </button>
+                <span className="font-black text-gray-800 w-20 text-right text-sm">R$ {((item.promo_price || item.price) * item.quantity).toFixed(2).replace('.', ',')}</span>
+                <button onClick={() => removeItem(item.id)} className="text-gray-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
               </div>
             </div>
           ))}
@@ -147,29 +142,27 @@ export default function CarrinhoPage() {
 
         {/* Resumo */}
         <div className="lg:col-span-1">
-          <div className="bg-white border border-gray-200 rounded-xl p-6 sticky top-24">
-            <h2 className="text-lg font-black text-gray-800 mb-5">Resumo do pedido</h2>
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 sticky top-24 space-y-4">
+            <h2 className="text-base font-black text-gray-800">Resumo do pedido</h2>
 
-            {/* Cupons aplicados */}
+            {/* Cupons aplicados — destaque no topo */}
             {cupons.length > 0 && (
-              <div className="space-y-2 mb-4">
-                {cupons.map(c => (
-                  <div key={c.code} className="bg-green-50 border border-green-200 rounded-lg px-3 py-2.5 flex items-center justify-between">
+              <div className="space-y-2">
+                {cupons.map(cp => (
+                  <div key={cp.code} className="bg-green-50 border border-green-200 rounded-xl px-3 py-2.5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Tag size={13} className="text-green-600 flex-shrink-0" />
                       <div>
-                        <p className="text-xs font-black text-green-700">{c.code}
-                          {c.scope && c.scope !== 'all' && (
-                            <span className="ml-1.5 text-xs bg-green-200 text-green-800 px-1.5 py-0.5 rounded-full font-bold">específico</span>
-                          )}
-                        </p>
-                        <p className="text-xs text-green-600">
-                          - R$ {c.discount_amount.toFixed(2).replace('.', ',')}
-                          {c.free_shipping && ' + Frete grátis'}
+                        <p className="text-xs font-black text-green-800">{cp.code}</p>
+                        <p className="text-xs text-green-600 font-medium">
+                          {cp.discount_type === 'percent' || cp.discount_type === 'percentage'
+                            ? `${cp.discount_value}% · - R$ ${cp.discount_amount.toFixed(2).replace('.', ',')}`
+                            : `- R$ ${cp.discount_amount.toFixed(2).replace('.', ',')}`}
+                          {cp.free_shipping ? ' · Frete grátis' : ''}
                         </p>
                       </div>
                     </div>
-                    <button onClick={() => removeCupom(c.code)} className="text-gray-400 hover:text-red-500 transition-colors ml-2">
+                    <button onClick={() => removeCupom(cp.code)} className="text-gray-300 hover:text-red-500 transition-colors ml-2 flex-shrink-0">
                       <X size={13} />
                     </button>
                   </div>
@@ -178,116 +171,110 @@ export default function CarrinhoPage() {
             )}
 
             {/* Input cupom */}
-            <div className="mb-4">
-              <div className="flex gap-2">
-                <input
-                  value={cupomInput}
-                  onChange={e => setCupomInput(e.target.value.toUpperCase())}
-                  onKeyDown={e => e.key === 'Enter' && aplicarCupom()}
-                  placeholder="Cupom de desconto"
-                  className="flex-1 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-green-500 uppercase"
-                />
-                <button onClick={aplicarCupom} disabled={cupomLoading || !cupomInput.trim()}
-                  className="bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-700 font-bold text-sm px-4 rounded-lg transition-colors">
-                  {cupomLoading ? '...' : 'OK'}
-                </button>
-              </div>
-              {cupomErro && <p className="text-red-500 text-xs mt-1.5">{cupomErro}</p>}
-
-              {/* Cupons sugeridos */}
-              {cuponsDisponiveis.length > 0 && (
-                <div className="mt-3">
-                  <p className="text-xs font-bold text-gray-500 mb-2 flex items-center gap-1">
-                    <Tag size={11} /> Cupons disponíveis
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {cuponsDisponiveis.map(cp => {
-                      const jaAplicado = cupons.find(c => c.code === cp.code)
-                      return (
-                        <button
-                          key={cp.code}
-                          onClick={() => { if (!jaAplicado) { setCupomInput(cp.code) } }}
-                          disabled={!!jaAplicado}
-                          className={`flex items-center gap-1 text-xs font-black px-2.5 py-1.5 rounded-full border transition-colors ${
-                            jaAplicado
-                              ? 'bg-green-100 border-green-300 text-green-700 cursor-default'
-                              : 'bg-green-50 hover:bg-green-100 border-green-200 hover:border-green-400 text-green-700'
-                          }`}
-                        >
-                          <Tag size={9} />
-                          {cp.code}
-                          {cp.scope && cp.scope !== 'all' && <span className="text-green-500 font-normal">•específico</span>}
-                          <span className="font-normal text-green-600">
-                            {cp.discount_type === 'percentage' ? ` ${cp.discount_value}% off` : ` R$ ${Number(cp.discount_value).toFixed(0)} off`}
-                          </span>
-                          {jaAplicado && <span className="text-green-500">✓</span>}
-                        </button>
-                      )
-                    })}
-                  </div>
-                  {cupons.some(c => c.scope && c.scope !== 'all') && cupons.some(c => !c.scope || c.scope === 'all') && (
-                    <p className="text-xs text-green-600 font-bold mt-2 flex items-center gap-1">
-                      ✅ Cupons cumulativos aplicados!
-                    </p>
-                  )}
+            {cupons.length < 2 && (
+              <div>
+                <div className="flex gap-2">
+                  <input
+                    value={cupomInput}
+                    onChange={e => { setCupomInput(e.target.value.toUpperCase()); setCupomErro('') }}
+                    onKeyDown={e => e.key === 'Enter' && aplicarCupom()}
+                    placeholder="CUPOM DE DESCONTO"
+                    className="flex-1 border border-gray-200 rounded-lg px-3 py-2.5 text-xs outline-none focus:border-green-500 uppercase placeholder:text-gray-400 tracking-wide"
+                  />
+                  <button onClick={() => aplicarCupom()} disabled={cupomLoading || !cupomInput.trim()}
+                    className="bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-700 font-bold text-sm px-4 rounded-lg transition-colors">
+                    {cupomLoading ? '...' : 'OK'}
+                  </button>
                 </div>
-              )}
-            </div>
+                {cupomErro && <p className="text-red-500 text-xs mt-1.5 font-medium">{cupomErro}</p>}
+              </div>
+            )}
+
+            {/* Cupons disponíveis */}
+            {cuponsDisponiveis.length > 0 && (
+              <div>
+                <p className="text-xs font-bold text-gray-500 mb-2 flex items-center gap-1.5">
+                  <Tag size={11} /> Cupons disponíveis
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {cuponsDisponiveis.map(cp => {
+                    const aplicado = cupons.find(c => c.code === cp.code)
+                    return (
+                      <button
+                        key={cp.code}
+                        onClick={() => { if (!aplicado && cupons.length < 2) aplicarCupom(cp.code) }}
+                        disabled={!!aplicado || cupons.length >= 2}
+                        className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full border transition-all ${
+                          aplicado
+                            ? 'bg-green-100 border-green-400 text-green-800 font-black cursor-default'
+                            : cupons.length >= 2
+                            ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
+                            : 'bg-white border-green-200 text-green-700 font-bold hover:bg-green-50 hover:border-green-400'
+                        }`}
+                      >
+                        {aplicado ? <Check size={9} /> : <Tag size={9} />}
+                        {cp.code}
+                        <span className={`font-normal ${aplicado ? 'text-green-700' : 'text-green-500'}`}>
+                          {cp.discount_type === 'percentage' ? ` ${cp.discount_value}%` : ` R$ ${Number(cp.discount_value).toFixed(0)}`} off
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+                {cupons.length === 2 && (
+                  <p className="text-xs text-amber-600 font-bold mt-2">Máximo de 2 cupons atingido</p>
+                )}
+                {cupons.length === 2 && (
+                  <p className="text-xs text-green-600 font-bold mt-1 flex items-center gap-1">
+                    <Check size={11} /> Cupons cumulativos aplicados!
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Linha divisória */}
+            <div className="border-t border-gray-100" />
 
             {/* Valores */}
-            <div className="space-y-2 mb-5">
+            <div className="space-y-2">
               <div className="flex justify-between text-sm text-gray-600">
                 <span>Subtotal ({count} {count === 1 ? 'item' : 'itens'})</span>
                 <span className="font-semibold">R$ {total.toFixed(2).replace('.', ',')}</span>
               </div>
 
-              {/* Cupons aplicados — destaque abaixo do subtotal */}
-              {cupons.length > 0 && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-3 space-y-2 my-1">
-                  <p className="text-xs font-black text-green-700 uppercase tracking-wide flex items-center gap-1">
-                    <Tag size={11} /> Cupons aplicados
-                  </p>
-                  {cupons.map(cp => (
-                    <div key={cp.code} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="bg-green-600 text-white text-xs font-black px-2 py-0.5 rounded-full">{cp.code}</span>
-                        {cp.scope && cp.scope !== 'all' && (
-                          <span className="text-xs text-green-600 font-bold">específico</span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-black text-green-700">- R$ {cp.discount_amount.toFixed(2).replace('.', ',')}</span>
-                        <button onClick={() => removeCupom(cp.code)} className="text-gray-300 hover:text-red-500 transition-colors">
-                          <X size={12} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                  {totalDesconto > 0 && cupons.length > 1 && (
-                    <div className="border-t border-green-200 pt-2 flex justify-between">
-                      <span className="text-xs font-black text-green-800">Total de descontos</span>
-                      <span className="text-sm font-black text-green-800">- R$ {totalDesconto.toFixed(2).replace('.', ',')}</span>
-                    </div>
-                  )}
+              {cupons.map(cp => (
+                <div key={cp.code} className="flex justify-between text-sm">
+                  <span className="flex items-center gap-1.5 text-green-700 font-bold">
+                    <Tag size={11} /> Desconto ({cp.code})
+                  </span>
+                  <span className="text-green-700 font-bold">- R$ {cp.discount_amount.toFixed(2).replace('.', ',')}</span>
+                </div>
+              ))}
+
+              {totalDesconto > 0 && cupons.length > 1 && (
+                <div className="flex justify-between text-xs text-green-600 font-bold bg-green-50 rounded-lg px-3 py-2">
+                  <span>Total de descontos</span>
+                  <span>- R$ {totalDesconto.toFixed(2).replace('.', ',')}</span>
                 </div>
               )}
 
               <div className="flex justify-between text-sm text-gray-600">
                 <span>Frete</span>
                 <span className={freeShipping ? 'text-green-600 font-black' : 'text-green-600 font-semibold'}>
-                  {freeShipping ? 'GRÁTIS 🎉' : 'Calcular'}
+                  {freeShipping ? 'GRÁTIS' : 'Calcular'}
                 </span>
               </div>
-              <div className="border-t border-gray-100 pt-3 flex justify-between font-black text-gray-800">
-                <span>Total</span>
-                <span className="text-xl text-green-700">R$ {totalFinal.toFixed(2).replace('.', ',')}</span>
+
+              <div className="border-t border-gray-100 pt-3 flex justify-between items-center font-black text-gray-800">
+                <span className="text-base">Total</span>
+                <span className="text-2xl text-green-700">R$ {totalFinal.toFixed(2).replace('.', ',')}</span>
               </div>
             </div>
 
-            <Link href="/checkout" className="block w-full bg-green-600 hover:bg-green-700 text-white font-black text-sm py-4 rounded-lg text-center transition-colors">
+            <Link href="/checkout" className="block w-full bg-green-800 hover:bg-green-900 text-white font-black text-sm py-4 rounded-xl text-center transition-colors tracking-wide">
               FINALIZAR COMPRA →
             </Link>
-            <Link href="/produtos" className="block w-full text-center text-sm text-green-600 font-semibold mt-3 hover:underline">
+            <Link href="/produtos" className="block w-full text-center text-sm text-green-600 font-semibold hover:underline">
               Continuar comprando
             </Link>
           </div>

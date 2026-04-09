@@ -84,19 +84,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCupons(prev => {
       // Remove se ja existe o mesmo codigo
       const sem = prev.filter(x => x.code !== c.code)
-      // Regra cumulativa: especifico (product/category/family) + generico (all)
-      // Nao permite dois cupons do mesmo tipo scope
-      const temEspecifico = sem.some(x => x.scope && x.scope !== 'all')
-      const temGenerico = sem.some(x => !x.scope || x.scope === 'all')
-      if (c.scope && c.scope !== 'all' && temEspecifico) {
-        // Substitui o especifico existente
-        return [...sem.filter(x => !x.scope || x.scope === 'all'), c]
-      }
-      if ((!c.scope || c.scope === 'all') && temGenerico) {
-        // Substitui o generico existente
-        return [...sem.filter(x => x.scope && x.scope !== 'all'), c]
-      }
-      return [...sem, c]
+      // Maximo 2 cupons
+      if (sem.length >= 2) return prev
+      const novo = [...sem, c]
+      // Ordena: fixo (percentage=false) primeiro, percentual depois
+      // Assim o calculo aplica fixo primeiro, depois % sobre o saldo
+      return novo.sort((a, b) => {
+        const aPerc = a.discount_type === 'percent' || a.discount_type === 'percentage' ? 1 : 0
+        const bPerc = b.discount_type === 'percent' || b.discount_type === 'percentage' ? 1 : 0
+        return aPerc - bPerc
+      })
     })
   }
 

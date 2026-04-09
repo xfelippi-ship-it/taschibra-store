@@ -7,7 +7,9 @@ const supabase = createClient(
 )
 
 export async function POST(req: NextRequest) {
-  const { code, subtotal, items: subtotalItems = [] } = await req.json()
+  const { code, subtotal, subtotal_apos_fixos, items: subtotalItems = [] } = await req.json()
+  // Se ja houve desconto fixo, aplica percentual sobre o saldo
+  const baseCalculo = subtotal_apos_fixos ?? subtotal
 
   if (!code) return NextResponse.json({ error: 'Código inválido' }, { status: 400 })
 
@@ -49,8 +51,8 @@ export async function POST(req: NextRequest) {
   }
 
   let discount = 0
-  if (cupom.discount_type === 'percent') {
-    discount = subtotal * (cupom.discount_value / 100)
+  if (cupom.discount_type === 'percent' || cupom.discount_type === 'percentage') {
+    discount = baseCalculo * (cupom.discount_value / 100)
   } else {
     discount = cupom.discount_value
   }
