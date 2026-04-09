@@ -441,7 +441,7 @@ export default function DadosPage() {
             </div>
           </label>
           <div className="border-t border-gray-100 pt-5">
-            <p className="text-sm font-black text-red-600 mb-2">Zona de perigo</p>
+            <p className="text-sm font-black text-red-600 mb-2">Aviso</p>
             <p className="text-xs text-gray-500 mb-3">A exclusão da conta remove permanentemente todos os seus dados, pedidos e informações pessoais.</p>
             <button className="text-sm text-red-500 hover:text-red-700 font-bold border border-red-200 hover:border-red-400 px-4 py-2 rounded-lg transition-colors">
               Solicitar exclusão de conta
