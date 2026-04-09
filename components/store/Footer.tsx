@@ -31,23 +31,25 @@ export default function Footer() {
         <p className="text-xs text-green-600 uppercase tracking-widest font-bold mb-4 text-center">Compra 100% Segura</p>
         <div className="flex flex-wrap items-center justify-center gap-4">
           {/* SSL */}
-          <div className="bg-white rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm">
-            <svg viewBox="0 0 24 24" className="w-7 h-7 fill-current text-green-600"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+          <div className="bg-white rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm min-w-[160px]">
+            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current text-green-600"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+            </div>
             <div><p className="text-xs font-black text-gray-800">SSL Seguro</p><p className="text-xs text-gray-500">Dados criptografados</p></div>
           </div>
           {/* PagarMe */}
-          <div className="bg-white rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm">
-            <img src="https://logospng.org/download/pagar-me/logo-pagar-me-1024.png" alt="Pagar.me" className="h-7 w-auto object-contain" onError={(e) => { e.currentTarget.style.display="none" }} />
+          <div className="bg-white rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm min-w-[160px]">
+            <img src="/logos/logo-pagarme.png" alt="Pagar.me" className="h-8 w-auto object-contain" />
             <div><p className="text-xs font-black text-gray-800">Pagar.me</p><p className="text-xs text-gray-500">Pagamento seguro</p></div>
           </div>
           {/* ClearSale */}
-          <div className="bg-white rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm">
-            <img src="https://logospng.org/download/clearsale/logo-clearsale-1024.png" alt="ClearSale" className="h-7 w-auto object-contain" onError={(e) => { e.currentTarget.style.display="none" }} />
+          <div className="bg-white rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm min-w-[160px]">
+            <img src="/logos/ClearSale - Experian logo-orange.webp" alt="ClearSale" className="h-8 w-auto object-contain" />
             <div><p className="text-xs font-black text-gray-800">ClearSale</p><p className="text-xs text-gray-500">Antifraude certificado</p></div>
           </div>
           {/* Melhor Envio */}
-          <div className="bg-white rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm">
-            <img src="https://logospng.org/download/melhor-envio/logo-melhor-envio-1024.png" alt="Melhor Envio" className="h-7 w-auto object-contain" onError={(e) => { e.currentTarget.style.display="none" }} />
+          <div className="bg-white rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm min-w-[160px]">
+            <img src="/logos/me_3.webp" alt="Melhor Envio" className="h-8 w-auto object-contain" />
             <div><p className="text-xs font-black text-gray-800">Melhor Envio</p><p className="text-xs text-gray-500">Entrega garantida</p></div>
           </div>
         </div>
