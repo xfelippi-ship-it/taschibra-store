@@ -1,12 +1,10 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { useCart } from '@/contexts/CartContext'
 import { createClient } from '@supabase/supabase-js'
-import { Tag } from 'lucide-react'
-
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import Link from 'next/link'
-import { useState } from 'react'
 import { Trash2, Plus, Minus, ShoppingBag, Tag, X } from 'lucide-react'
 
 export default function CarrinhoPage() {
