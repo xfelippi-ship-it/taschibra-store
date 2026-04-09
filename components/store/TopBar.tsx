@@ -32,6 +32,8 @@ export default function TopBar() {
       if (rows && rows.length > 0) setData(rows[0])
     }
     load()
+    const interval = setInterval(load, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   if (!data) return null
