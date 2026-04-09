@@ -14,15 +14,12 @@ export const metadata: Metadata = {
   description: "Loja oficial Taschibra. Mais de 3.000 produtos de iluminação, automação e utilidades.",
 }
 
-import TopBar from '@/components/store/TopBar'
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
       <body className={`${nunito.variable} antialiased bg-white text-gray-900`}>
         <CartProvider>
-          <TopBar />
-        {children}
+{children}
         </CartProvider>
       </body>
     </html>

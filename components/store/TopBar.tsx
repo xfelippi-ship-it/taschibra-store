@@ -23,14 +23,13 @@ export default function TopBar() {
   const [data, setData] = useState<TopBarData | null>(null)
   useEffect(() => {
     async function load() {
-      const { data: row } = await supabase
+      const { data: rows } = await supabase
         .from('top_bar')
         .select('*')
         .eq('active', true)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single()
-      if (row) setData(row)
+      if (rows && rows.length > 0) setData(rows[0])
     }
     load()
   }, [])

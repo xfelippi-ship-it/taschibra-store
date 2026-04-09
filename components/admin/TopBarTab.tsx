@@ -26,22 +26,22 @@ export default function TopBarTab() {
   useEffect(() => { carregar() }, [])
 
   async function carregar() {
-    const { data } = await supabase
+    const { data: rows } = await supabase
       .from('top_bar')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(1)
-      .single()
-    if (data) {
-      setId(data.id)
-      setActive(data.active)
-      setTexto(data.texto || '')
-      setSubtexto(data.subtexto || '')
-      setLink(data.link || '')
-      setTipo(data.tipo || 'cor')
-      setCorFundo(data.cor_fundo || '#1a5c2a')
-      setCorTexto(data.cor_texto || '#ffffff')
-      setImagemUrl(data.imagem_url || '')
+    if (rows && rows.length > 0) {
+      const row = rows[0]
+      setId(row.id)
+      setActive(row.active)
+      setTexto(row.texto || '')
+      setSubtexto(row.subtexto || '')
+      setLink(row.link || '')
+      setTipo(row.tipo || 'cor')
+      setCorFundo(row.cor_fundo || '#1a5c2a')
+      setCorTexto(row.cor_texto || '#ffffff')
+      setImagemUrl(row.imagem_url || '')
     }
   }
 
