@@ -30,21 +30,25 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto border-t border-green-900 pt-8 pb-6">
         <p className="text-xs text-green-600 uppercase tracking-widest font-bold mb-4 text-center">Compra 100% Segura</p>
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <div className="flex items-center gap-2 bg-green-900/50 border border-green-800 rounded-lg px-4 py-2.5">
-            <svg viewBox="0 0 24 24" className="w-5 h-5 text-green-400 fill-current"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-            <div><p className="text-xs font-black text-green-300">SSL Seguro</p><p className="text-xs text-green-600">Dados criptografados</p></div>
+          {/* SSL */}
+          <div className="bg-white rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm">
+            <svg viewBox="0 0 24 24" className="w-7 h-7 fill-current text-green-600"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+            <div><p className="text-xs font-black text-gray-800">SSL Seguro</p><p className="text-xs text-gray-500">Dados criptografados</p></div>
           </div>
-          <div className="flex items-center gap-2 bg-green-900/50 border border-green-800 rounded-lg px-4 py-2.5">
-            <svg viewBox="0 0 24 24" className="w-5 h-5 text-green-400 fill-current"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-            <div><p className="text-xs font-black text-green-300">Pagar.me</p><p className="text-xs text-green-600">Pagamento seguro</p></div>
+          {/* PagarMe */}
+          <div className="bg-white rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm">
+            <img src="https://logospng.org/download/pagar-me/logo-pagar-me-1024.png" alt="Pagar.me" className="h-7 w-auto object-contain" onError={(e) => { e.currentTarget.style.display="none" }} />
+            <div><p className="text-xs font-black text-gray-800">Pagar.me</p><p className="text-xs text-gray-500">Pagamento seguro</p></div>
           </div>
-          <div className="flex items-center gap-2 bg-green-900/50 border border-green-800 rounded-lg px-4 py-2.5">
-            <svg viewBox="0 0 24 24" className="w-5 h-5 text-green-400 fill-current"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            <div><p className="text-xs font-black text-green-300">ClearSale</p><p className="text-xs text-green-600">Antifraude certificado</p></div>
+          {/* ClearSale */}
+          <div className="bg-white rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm">
+            <img src="https://logospng.org/download/clearsale/logo-clearsale-1024.png" alt="ClearSale" className="h-7 w-auto object-contain" onError={(e) => { e.currentTarget.style.display="none" }} />
+            <div><p className="text-xs font-black text-gray-800">ClearSale</p><p className="text-xs text-gray-500">Antifraude certificado</p></div>
           </div>
-          <div className="flex items-center gap-2 bg-green-900/50 border border-green-800 rounded-lg px-4 py-2.5">
-            <svg viewBox="0 0 24 24" className="w-5 h-5 text-green-400 fill-current"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-            <div><p className="text-xs font-black text-green-300">Melhor Envio</p><p className="text-xs text-green-600">Entrega garantida</p></div>
+          {/* Melhor Envio */}
+          <div className="bg-white rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm">
+            <img src="https://logospng.org/download/melhor-envio/logo-melhor-envio-1024.png" alt="Melhor Envio" className="h-7 w-auto object-contain" onError={(e) => { e.currentTarget.style.display="none" }} />
+            <div><p className="text-xs font-black text-gray-800">Melhor Envio</p><p className="text-xs text-gray-500">Entrega garantida</p></div>
           </div>
         </div>
       </div>
