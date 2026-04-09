@@ -2,7 +2,8 @@
 import { ShoppingCart, User, Search, Phone, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import Link from 'next/link'
-import TopBar from '@/components/store/TopBar'
+import dynamic from 'next/dynamic'
+const TopBar = dynamic(() => import('@/components/store/TopBar'), { ssr: false })
 import Image from 'next/image'
 import { useCart } from '@/contexts/CartContext'
 
