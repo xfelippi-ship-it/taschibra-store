@@ -172,6 +172,7 @@ function CuponsTab() {
       scope_ids: editando.scope_ids || [],
       free_shipping: editando.free_shipping || false,
       first_order_only: editando.first_order_only || false,
+      usage_limit_per_customer: editando.usage_limit_per_customer ? Number(editando.usage_limit_per_customer) : null,
       channel: 'b2c',
     }
     if (editando.id) {
@@ -267,17 +268,19 @@ function CuponsTab() {
       </div>
       {modal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl">
+          <div className="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-black text-gray-800">{editando.id ? 'Editar Cupom' : 'Novo Cupom'}</h2>
               <button onClick={() => setModal(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
             </div>
             <div className="space-y-4">
+
+              {/* Codigo + Tipo */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Código</label>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Código *</label>
                   <input value={editando.code || ''} onChange={e => setEditando({...editando, code: e.target.value.toUpperCase()})}
-                    placeholder="EX: DESCONTO10"
+                    placeholder="EX: PASCOA20"
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 font-mono uppercase" />
                 </div>
                 <div>
@@ -289,51 +292,136 @@ function CuponsTab() {
                   </select>
                 </div>
               </div>
+
+              {/* Valor + Maximo + Minimo */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">{editando.discount_type === 'fixed' ? 'Valor (R$)' : 'Desconto (%)'}</label>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">{editando.discount_type === 'fixed' ? 'Valor (R$) *' : 'Desconto (%) *'}</label>
                   <input type="number" value={editando.discount_value || ''} onChange={e => setEditando({...editando, discount_value: e.target.value})}
                     placeholder="0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
+                {editando.discount_type !== 'fixed' && (
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-1 block">Desconto máx. (R$)</label>
+                    <input type="number" value={editando.max_discount_value || ''} onChange={e => setEditando({...editando, max_discount_value: e.target.value})}
+                      placeholder="Sem teto" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                  </div>
+                )}
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Pedido mínimo</label>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Pedido mínimo (R$)</label>
                   <input type="number" value={editando.min_order_value || ''} onChange={e => setEditando({...editando, min_order_value: e.target.value})}
                     placeholder="0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Limite de usos</label>
-                  <input type="number" value={editando.usage_limit || ''} onChange={e => setEditando({...editando, usage_limit: e.target.value})}
-                    placeholder="Ilimitado" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
-                </div>
               </div>
+
+              {/* Descricao */}
               <div>
                 <label className="text-sm font-bold text-gray-700 mb-1 block">Descrição</label>
                 <input value={editando.description || ''} onChange={e => setEditando({...editando, description: e.target.value})}
-                  placeholder="Ex: 10% de desconto na Páscoa"
+                  placeholder="Ex: 20% de desconto na Páscoa acima de R$ 100"
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
               </div>
+
+              {/* Escopo */}
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-1 block">Escopo do cupom</label>
+                <select value={editando.scope || 'all'} onChange={e => setEditando({...editando, scope: e.target.value, scope_ids: []})}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
+                  <option value="all">Tudo — válido para qualquer produto</option>
+                  <option value="category">Categoria específica</option>
+                  <option value="family">Família de produtos</option>
+                  <option value="product">Produto(s) específico(s) — SKU</option>
+                </select>
+                {editando.scope && editando.scope !== 'all' && (
+                  <div className="mt-2">
+                    <label className="text-xs font-bold text-gray-500 mb-1 block">
+                      {editando.scope === 'product' ? 'SKUs (separados por vírgula)' : editando.scope === 'category' ? 'Slugs de categoria (separados por vírgula)' : 'Nomes de família (separados por vírgula)'}
+                    </label>
+                    <input
+                      value={(editando.scope_ids || []).join(', ')}
+                      onChange={e => setEditando({...editando, scope_ids: e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean)})}
+                      placeholder={editando.scope === 'product' ? 'Ex: LED-001, LED-002' : editando.scope === 'category' ? 'Ex: lampadas, refletor' : 'Ex: Inlumix, SMART'}
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                    {editando.scope_ids?.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {editando.scope_ids.map((id: string) => (
+                          <span key={id} className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">{id}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Limites de uso */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Início</label>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Limite total de usos</label>
+                  <input type="number" value={editando.usage_limit || ''} onChange={e => setEditando({...editando, usage_limit: e.target.value})}
+                    placeholder="Ilimitado" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Limite por cliente</label>
+                  <input type="number" value={editando.usage_limit_per_customer || ''} onChange={e => setEditando({...editando, usage_limit_per_customer: e.target.value})}
+                    placeholder="Ilimitado" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                </div>
+              </div>
+
+              {/* Datas */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Data de início</label>
                   <input type="date" value={editando.starts_at?.split('T')[0] || ''} onChange={e => setEditando({...editando, starts_at: e.target.value})}
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Expiração</label>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Data de expiração</label>
                   <input type="date" value={editando.ends_at?.split('T')[0] || ''} onChange={e => setEditando({...editando, ends_at: e.target.value})}
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <input type="checkbox" id="ativo" checked={editando.active !== false} onChange={e => setEditando({...editando, active: e.target.checked})} className="w-4 h-4 accent-green-600" />
-                <label htmlFor="ativo" className="text-sm font-bold text-gray-700">Cupom ativo</label>
+
+              {/* Toggles */}
+              <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                <p className="text-xs font-black text-gray-500 uppercase tracking-wide">Condições especiais</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-gray-700">Frete grátis</p>
+                    <p className="text-xs text-gray-500">Zera o frete ao aplicar este cupom</p>
+                  </div>
+                  <button type="button" onClick={() => setEditando({...editando, free_shipping: !editando.free_shipping})}
+                    className={`relative w-11 h-6 rounded-full transition-colors ${editando.free_shipping ? 'bg-green-600' : 'bg-gray-300'}`}>
+                    <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${editando.free_shipping ? 'translate-x-5' : ''}`} />
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-gray-700">Apenas primeira compra</p>
+                    <p className="text-xs text-gray-500">Válido somente para novos clientes</p>
+                  </div>
+                  <button type="button" onClick={() => setEditando({...editando, first_order_only: !editando.first_order_only})}
+                    className={`relative w-11 h-6 rounded-full transition-colors ${editando.first_order_only ? 'bg-green-600' : 'bg-gray-300'}`}>
+                    <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${editando.first_order_only ? 'translate-x-5' : ''}`} />
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-gray-700">Cupom ativo</p>
+                    <p className="text-xs text-gray-500">Visível e aplicável no site</p>
+                  </div>
+                  <button type="button" onClick={() => setEditando({...editando, active: !editando.active})}
+                    className={`relative w-11 h-6 rounded-full transition-colors ${editando.active !== false ? 'bg-green-600' : 'bg-gray-300'}`}>
+                    <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${editando.active !== false ? 'translate-x-5' : ''}`} />
+                  </button>
+                </div>
               </div>
+
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setModal(false)} className="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50 transition-colors">Cancelar</button>
               <button onClick={salvarCupom} disabled={!editando.code || !editando.discount_value}
                 className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-black py-3 rounded-lg transition-colors">
-                {editando.id ? 'Salvar' : 'Criar cupom'}
+                {editando.id ? 'Salvar alterações' : 'Criar cupom'}
               </button>
             </div>
           </div>
