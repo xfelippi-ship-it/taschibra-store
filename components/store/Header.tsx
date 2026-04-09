@@ -26,15 +26,6 @@ export default function Header() {
 
   return (
     <>
-      {/* Top bar — esconde no mobile */}
-      <div className="hidden md:flex bg-green-600 text-white text-xs py-2 px-6 items-center justify-center gap-6">
-        <span>Atendimento</span><span className="text-green-300">|</span>
-        <span>Compra Segura</span><span className="text-green-300">|</span>
-        <span>Perguntas Frequentes</span><span className="text-green-300">|</span>
-        <span>Política de Entrega</span><span className="text-green-300">|</span>
-        <span className="flex items-center gap-1"><Phone size={12} /> (47) 99149-3270</span>
-      </div>
-
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center gap-3 md:gap-6">
 

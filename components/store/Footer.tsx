@@ -73,6 +73,13 @@ export default function Footer() {
       {/* Rodape final */}
       <div className="max-w-7xl mx-auto border-t border-green-900 pt-6 flex flex-wrap items-center justify-between gap-4 text-xs text-green-600">
         <div>
+          <div className="flex flex-wrap gap-4 mb-3">
+            <a href="#" className="hover:text-green-400 transition-colors">Atendimento</a>
+            <a href="#" className="hover:text-green-400 transition-colors">Compra Segura</a>
+            <a href="#" className="hover:text-green-400 transition-colors">Perguntas Frequentes</a>
+            <a href="#" className="hover:text-green-400 transition-colors">Política de Entrega</a>
+            <a href="tel:4799149-3270" className="hover:text-green-400 transition-colors flex items-center gap-1">📞 (47) 99149-3270</a>
+          </div>
           <p>Blumenox Iluminacao LTDA - CNPJ: 02.477.605/0001-01</p>
           <p className="mt-0.5">Rodovia BR 470 KM 65,931, n 2135 - Encano do Norte, Indaial/SC - CEP 89085-144</p>
           <p className="mt-0.5">Taschibra Store 2025 - Todos os direitos reservados</p>
