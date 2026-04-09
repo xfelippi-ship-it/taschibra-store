@@ -82,17 +82,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   function addCupom(c: Cupom) {
     setCupons(prev => {
-      // Remove se ja existe o mesmo codigo
       const sem = prev.filter(x => x.code !== c.code)
-      // Maximo 2 cupons
       if (sem.length >= 2) return prev
       const novo = [...sem, c]
-      // Ordena: fixo (percentage=false) primeiro, percentual depois
-      // Assim o calculo aplica fixo primeiro, depois % sobre o saldo
+
+      const isPerc = (x: Cupom) => x.discount_type === 'percent' || x.discount_type === 'percentage'
+
       return novo.sort((a, b) => {
-        const aPerc = a.discount_type === 'percent' || a.discount_type === 'percentage' ? 1 : 0
-        const bPerc = b.discount_type === 'percent' || b.discount_type === 'percentage' ? 1 : 0
-        return aPerc - bPerc
+        const aPerc = isPerc(a)
+        const bPerc = isPerc(b)
+
+        // Fixo + Percentual: fixo primeiro
+        if (!aPerc && bPerc) return -1
+        if (aPerc && !bPerc) return 1
+
+        // Dois fixos: menor valor primeiro
+        if (!aPerc && !bPerc) return a.discount_value - b.discount_value
+
+        // Dois percentuais: menor percentual primeiro
+        return a.discount_value - b.discount_value
       })
     })
   }
@@ -101,7 +109,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const total = items.reduce((sum, i) => sum + (i.promo_price || i.price) * i.quantity, 0)
   const count = items.reduce((sum, i) => sum + i.quantity, 0)
-  const totalDesconto = cupons.reduce((sum, c) => sum + c.discount_amount, 0)
+  // Recalcula descontos em cascata respeitando a ordem
+  const totalDesconto = (() => {
+    let saldo = total
+    let soma = 0
+    for (const cp of cupons) {
+      const isPerc = cp.discount_type === 'percent' || cp.discount_type === 'percentage'
+      const desc = isPerc ? saldo * (cp.discount_value / 100) : cp.discount_value
+      const descReal = Math.min(desc, saldo)
+      soma += descReal
+      saldo -= descReal
+    }
+    return soma
+  })()
   const freeShipping = cupons.some(c => c.free_shipping)
 
   // Compatibilidade com codigo legado que usa cupom singular
