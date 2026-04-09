@@ -55,7 +55,6 @@ export default function TopBarTab() {
     setSalvando(false)
     setMsg({ tipo: 'ok', texto: 'Top Bar salva com sucesso!' })
     setTimeout(() => setMsg(null), 3000)
-    carregar()
   }
 
   async function uploadImagem(file: File) {
