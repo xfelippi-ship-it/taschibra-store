@@ -10,6 +10,7 @@ const supabase = createClient(
 
 export default function TopBarTab() {
   const [id, setId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
   const [active, setActive] = useState(false)
   const [texto, setTexto] = useState('')
   const [subtexto, setSubtexto] = useState('')
@@ -26,6 +27,7 @@ export default function TopBarTab() {
   useEffect(() => { carregar() }, [])
 
   async function carregar() {
+    setLoading(true)
     const { data: rows } = await supabase
       .from('top_bar')
       .select('*')
@@ -34,7 +36,7 @@ export default function TopBarTab() {
     if (rows && rows.length > 0) {
       const row = rows[0]
       setId(row.id)
-      setActive(row.active)
+      setActive(row.active === true || row.active === 'true')
       setTexto(row.texto || '')
       setSubtexto(row.subtexto || '')
       setLink(row.link || '')
@@ -43,6 +45,7 @@ export default function TopBarTab() {
       setCorTexto(row.cor_texto || '#ffffff')
       setImagemUrl(row.imagem_url || '')
     }
+    setLoading(false)
   }
 
   async function salvar() {
@@ -220,8 +223,9 @@ export default function TopBarTab() {
         </div>
       )}
       <button onClick={salvar} disabled={salvando}
-        className="w-full bg-green-600 hover:bg-green-700 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50">
-        <Save size={18} /> {salvando ? 'Salvando...' : 'Salvar Top Bar'}
+        disabled={salvando || loading}
+      className="w-full bg-green-600 hover:bg-green-700 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50">
+        <Save size={18} /> {loading ? 'Carregando...' : salvando ? 'Salvando...' : 'Salvar Top Bar'}
       </button>
     </div>
   )
