@@ -72,14 +72,13 @@ export default function ProductGrid({ title, categorySlug, limit = 8 }: { title:
 
   useEffect(() => {
     async function load() {
-      let query = supabase
+      let q = supabase
         .from('products')
         .select('id, name, slug, price, promo_price, category_slug, main_image')
-        .limit(limit)
       if (categorySlug) {
-        query = query.eq('category_slug', categorySlug)
+        q = q.eq('category_slug', categorySlug)
       }
-      const { data } = await query
+      const { data } = await q.limit(limit)
       setProdutos(data || [])
       setLoading(false)
     }
