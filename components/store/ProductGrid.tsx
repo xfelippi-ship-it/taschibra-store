@@ -75,7 +75,6 @@ export default function ProductGrid({ title, categorySlug, limit = 8 }: { title:
       let query = supabase
         .from('products')
         .select('id, name, slug, price, promo_price, category_slug, main_image')
-        .eq('published', true)
         .limit(limit)
       if (categorySlug) {
         query = query.eq('category_slug', categorySlug)
