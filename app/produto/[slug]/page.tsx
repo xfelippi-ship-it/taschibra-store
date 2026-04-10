@@ -227,6 +227,9 @@ export default function ProdutoPage() {
             <span className="text-xs text-gray-500 ml-1">Taschibra</span>
           </div>
 
+          {/* Variações — antes do preço pois definem o valor */}
+          <VariacoesProduto produtoId={produto.id} onSelect={setVariacaoSelecionada} />
+
           {/* Preço */}
           <div className="bg-green-50 border border-green-100 rounded-xl p-4 mb-4">
             {nParcelas > 1 && (
@@ -266,8 +269,6 @@ export default function ProdutoPage() {
             </button>
           </div>
 
-          <VariacoesProduto produtoId={produto.id} onSelect={setVariacaoSelecionada} />
-          <CalculaFrete produtoId={produto.id} />
 
           {/* Abas */}
           {temAbas && (
