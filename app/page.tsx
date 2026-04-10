@@ -11,9 +11,9 @@ export default function Home() {
       <Header />
       <HeroBanner />
       <TrustBar />
-      <ProductGrid title="Lançamentos" />
+      <ProductGrid title="Lançamentos" categorySlug="lancamentos" limit={8} />
       <PromoBanner />
-      <ProductGrid title="Mais Vendidos" />
+      <ProductGrid title="Mais Vendidos" categorySlug="outlet" limit={8} />
       <Footer />
     </main>
   )

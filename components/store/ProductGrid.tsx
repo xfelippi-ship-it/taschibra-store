@@ -66,31 +66,26 @@ function ProdCard({ p }: { p: Produto }) {
   )
 }
 
-export default function ProductGrid({ title }: { title: string }) {
+export default function ProductGrid({ title, categorySlug, limit = 8 }: { title: string; categorySlug?: string; limit?: number }) {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
-      const cat = title.toLowerCase() === 'lançamentos' ? 'lancamentos' : 'mais-vendidos'
-      const { data } = await supabase
+      let query = supabase
         .from('products')
         .select('id, name, slug, price, promo_price, category_slug, main_image')
-        .eq('category_slug', cat)
-        .limit(8)
-      if (data && data.length > 0) {
-        setProdutos(data)
-      } else {
-        const { data: fallback } = await supabase
-          .from('products')
-          .select('id, name, slug, price, promo_price, category_slug, main_image')
-          .limit(8)
-        setProdutos(fallback || [])
+        .eq('published', true)
+        .limit(limit)
+      if (categorySlug) {
+        query = query.eq('category_slug', categorySlug)
       }
+      const { data } = await query
+      setProdutos(data || [])
       setLoading(false)
     }
     load()
-  }, [title])
+  }, [title, categorySlug, limit])
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-10">
@@ -99,7 +94,7 @@ export default function ProductGrid({ title }: { title: string }) {
           <h2 className="text-xl font-black text-gray-800">{title}</h2>
           <div className="w-9 h-0.5 bg-green-600 mt-1.5 rounded" />
         </div>
-        <Link href="/produtos" className="text-sm font-bold text-green-600">Ver todos →</Link>
+        <Link href={categorySlug ? `/produtos/${categorySlug}` : "/produtos"} className="text-sm font-bold text-green-600">Ver todos →</Link>
       </div>
       {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
