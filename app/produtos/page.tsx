@@ -37,13 +37,39 @@ function ProdutosContent() {
       const from = (pagina - 1) * PAGE_SIZE
       const to = from + PAGE_SIZE - 1
 
-      let query = supabase.from("products").select("*", { count: "exact" }).eq("active", true).order("name").range(from, to)
+      let query = supabase.from("products").select("*", { count: "exact" }).order("name").range(from, to)
       if (categoria) {
         query = query.ilike("category_slug", categoria)
         const label: Record<string, string> = {
-          lancamentos: "Lançamentos", lampadas: "Lâmpadas", "material-eletrico": "Mat. Elétrico",
-          smart: "SMART", outlet: "Outlet", teto: "Teto", refletor: "Refletor",
-          decorativo: "Decorativo", parede: "Parede", perfil: "Perfil", exclusivos: "Exclusivos",
+          "lancamentos": "Lançamentos",
+          "lampadas": "Lâmpadas",
+          "lampadas-led": "Lâmpadas LED",
+          "lampadas-decor": "Lâmpadas Decor",
+          "material-eletrico": "Material Elétrico",
+          "material-eletrico-carregadores-e-cabos-usb": "Carregadores e Cabos USB",
+          "material-eletrico-extensoes": "Extensões",
+          "smart": "SMART",
+          "outlet": "Outlet",
+          "teto": "Teto",
+          "teto-painel": "Painel",
+          "teto-spot": "Spot",
+          "teto-plafon": "Plafon",
+          "teto-pendente": "Pendente",
+          "teto-lustre": "Lustre",
+          "teto-luminaria": "Luminária",
+          "refletor": "Refletor",
+          "decorativo": "Decorativo",
+          "parede": "Parede",
+          "perfil": "Perfil",
+          "exclusivos": "Exclusivos",
+          "cinta-eletrificada": "Cinta Eletrificada",
+          "pecas-de-reposicao": "Peças de Reposição",
+          "trilho-magnetico": "Trilho Magnético",
+          "marcenaria": "Marcenaria",
+          "sinalizacao": "Sinalização",
+          "piso": "Piso",
+          "mesa": "Mesa",
+          "profissional": "Profissional",
         }
         setTitulo(label[categoria] || categoria.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()))
       } else {
