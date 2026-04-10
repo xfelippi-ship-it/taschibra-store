@@ -2,6 +2,7 @@
 'use client'
 import Image from 'next/image'
 import BannersTab from '@/components/admin/BannersTab'
+import ProdutosTab from '@/components/admin/ProdutosTab'
 import DashboardTab from '@/components/admin/DashboardTab'
 import TopBarTab from '@/components/admin/TopBarTab'
 import { useState, useEffect } from 'react'
@@ -578,67 +579,7 @@ export default function AdminPage() {
       <main className="flex-1 p-8 overflow-auto">
         {aba === 'dashboard' && <DashboardTab />}
 
-        {aba === 'produtos' && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h1 className="text-2xl font-black text-gray-800">Produtos</h1>
-              <button onClick={() => { setProdutoEdit({}); setModal(true) }}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">
-                <Plus size={16} /> Novo Produto
-              </button>
-            </div>
-            <div className="flex gap-3 mb-4">
-              <input type="text" placeholder="Buscar por nome ou SKU..." value={busca} onChange={e => setBusca(e.target.value)} className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
-              <select value={ordem} onChange={e => setOrdem(e.target.value as "asc"|"desc")} className="border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white font-semibold text-gray-700"><option value="asc">A → Z</option><option value="desc">Z → A</option></select>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Produto</th>
-                    <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">SKU</th>
-                    <th className="text-right px-5 py-3 text-xs font-black text-gray-500 uppercase">Preço</th>
-                    <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Estoque</th>
-                    <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
-                    <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    <tr><td colSpan={6} className="text-center py-8 text-gray-400">Carregando...</td></tr>
-                  ) : produtos.filter(p => busca === "" || p.name.toLowerCase().includes(busca.toLowerCase()) || (p.sku||"").toLowerCase().includes(busca.toLowerCase())).sort((a,b) => ordem === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)).map(p => (
-                    <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                      <td className="px-5 py-4">
-                        <p className="font-bold text-sm text-gray-800 max-w-xs truncate">{p.name}</p>
-                        {p.badge && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold capitalize">{p.badge}</span>}
-                      </td>
-                      <td className="px-5 py-4 text-sm text-gray-500 font-mono">{p.sku}</td>
-                      <td className="px-5 py-4 text-right">
-                        {p.promo_price && <p className="text-xs text-gray-400 line-through">R$ {Number(p.price).toFixed(2).replace('.', ',')}</p>}
-                        <p className="font-black text-green-700">R$ {Number(p.promo_price || p.price).toFixed(2).replace('.', ',')}</p>
-                      </td>
-                      <td className="px-5 py-4 text-center">
-                        <span className={`font-bold text-sm ${p.stock_qty < 10 ? 'text-red-500' : 'text-gray-700'}`}>{p.stock_qty}</span>
-                      </td>
-                      <td className="px-5 py-4 text-center">
-                        <button onClick={() => toggleAtivo(p.id, p.active)}
-                          className={`text-xs font-bold px-3 py-1 rounded-full transition-colors ${p.active ? 'bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-700' : 'bg-gray-100 text-gray-500 hover:bg-green-100 hover:text-green-700'}`}>
-                          {p.active ? 'Ativo' : 'Inativo'}
-                        </button>
-                      </td>
-                      <td className="px-5 py-4 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <button onClick={() => { setProdutoEdit(p); setModal(true) }} className="text-blue-500 hover:text-blue-700"><Pencil size={15} /></button>
-                          <button onClick={() => excluirProduto(p.id)} className="text-red-400 hover:text-red-600"><Trash2 size={15} /></button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        {aba === 'produtos' && <ProdutosTab />}
 
         {aba === 'pedidos' && (
           <div>
