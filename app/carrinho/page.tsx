@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import CalculaFrete from '@/components/store/CalculaFrete'
 import { useCart } from '@/contexts/CartContext'
 import { createClient } from '@supabase/supabase-js'
 import Header from '@/components/store/Header'
@@ -260,10 +261,13 @@ export default function CarrinhoPage() {
 
               <div className="flex justify-between text-sm text-gray-600">
                 <span>Frete</span>
-                <span className={freeShipping ? 'text-green-600 font-black' : 'text-green-600 font-semibold'}>
-                  {freeShipping ? 'GRÁTIS' : 'Calcular'}
+                <span className="text-green-600 font-black">
+                  {freeShipping ? 'GRÁTIS' : ''}
                 </span>
               </div>
+              {!freeShipping && (
+                <CalculaFrete produtoId={itens[0]?.id || ''} />
+              )}
 
               <div className="border-t border-gray-100 pt-3 flex justify-between items-center font-black text-gray-800">
                 <span className="text-base">Total</span>
