@@ -84,7 +84,7 @@ export default function VariacoesProduto({ produtoId, onSelect }: Props) {
   return (
     <div className="space-y-4 mb-5">
       {tipos.map(tipo => {
-        const opcoes = variacoes.filter(v => v.type === tipo)
+        const opcoes = variacoes.filter(v => v.type === tipo && v.stock_qty > 0)
         const selecionado = selecionados[tipo]
 
         return (
@@ -96,7 +96,7 @@ export default function VariacoesProduto({ produtoId, onSelect }: Props) {
             <div className="flex flex-wrap gap-2">
               {opcoes.map(v => {
                 const ativo = selecionado === v.value
-                const semEstoque = v.stock_qty === 0
+                const semEstoque = false // variações esgotadas são ocultadas
                 const isTemp = tipo === 'temperatura'
 
                 return (

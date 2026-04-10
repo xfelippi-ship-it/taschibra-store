@@ -184,7 +184,7 @@ export default function ProdutoPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-4 md:py-8 md:grid md:grid-cols-2 md:gap-16 md:items-start pb-24 md:pb-8">
+      <div className="max-w-7xl mx-auto px-4 py-4 md:py-8 md:grid md:grid-cols-2 md:gap-16 md:items-start pb-24 md:pb-8 overflow-visible">
 
         {/* Imagens */}
         <div className="mb-4 md:mb-0">
