@@ -37,7 +37,7 @@ function ProdutosContent() {
       const from = (pagina - 1) * PAGE_SIZE
       const to = from + PAGE_SIZE - 1
 
-      let query = supabase.from("products").select("*", { count: "exact" }).order("name").range(from, to)
+      let query = supabase.from("products").select("*", { count: "exact" }).order("name")
       if (categoria) {
         query = query.ilike("category_slug", categoria)
         const label: Record<string, string> = {
@@ -76,7 +76,7 @@ function ProdutosContent() {
         setTitulo("Todos os Produtos")
       }
 
-      const { data, count } = await query
+      const { data, count } = await query.range(from, to)
       setProdutos(data || [])
       setTotal(count || 0)
       setLoading(false)
