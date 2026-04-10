@@ -230,6 +230,8 @@ export default function ProdutoPage() {
           {/* Variações — antes do preço pois definem o valor */}
           <VariacoesProduto produtoId={produto.id} onSelect={setVariacaoSelecionada} />
 
+          <CalculaFrete produtoId={produto.id} />
+
           {/* Preço */}
           <div className="bg-green-50 border border-green-100 rounded-xl p-4 mb-4">
             {nParcelas > 1 && (
