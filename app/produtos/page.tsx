@@ -22,6 +22,7 @@ const PAGE_SIZE = 48
 function ProdutosContent() {
   const params = useSearchParams()
   const categoria = params.get("categoria") || ""
+  const busca = params.get("busca") || ""
   const [produtos, setProdutos] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [pagina, setPagina] = useState(1)
@@ -29,7 +30,7 @@ function ProdutosContent() {
   const [titulo, setTitulo] = useState("Todos os Produtos")
   const { addItem } = useCart()
 
-  useEffect(() => { setPagina(1) }, [categoria])
+  useEffect(() => { setPagina(1) }, [categoria, busca])
 
   useEffect(() => {
     async function carregar() {
@@ -38,7 +39,10 @@ function ProdutosContent() {
       const to = from + PAGE_SIZE - 1
 
       let query = supabase.from("products").select("*", { count: "exact" }).order("name")
-      if (categoria) {
+      if (busca) {
+        query = query.or(`name.ilike.%${busca}%,sku.ilike.%${busca}%,description.ilike.%${busca}%`)
+        setTitulo(`Resultados para: "${busca}"`)
+      } else if (categoria) {
         query = query.ilike("category_slug", categoria)
         const label: Record<string, string> = {
           "lancamentos": "Lançamentos",
