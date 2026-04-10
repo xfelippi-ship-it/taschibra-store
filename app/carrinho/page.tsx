@@ -265,8 +265,8 @@ export default function CarrinhoPage() {
                   {freeShipping ? 'GRÁTIS' : ''}
                 </span>
               </div>
-              {!freeShipping && (
-                <CalculaFrete produtoId={itens[0]?.id || ''} />
+              {!freeShipping && itens.length > 0 && (
+                <CalculaFrete produtoId={itens[0].id} />
               )}
 
               <div className="border-t border-gray-100 pt-3 flex justify-between items-center font-black text-gray-800">
