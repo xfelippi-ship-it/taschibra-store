@@ -9,6 +9,7 @@ import CategoriasTab from '@/components/admin/CategoriasTab'
 import { useState, useEffect } from 'react'
 import { Package, ShoppingBag, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { registrarAuditoria } from '@/lib/auditLog'
 
 
 type Produto = {
@@ -302,8 +303,10 @@ function CuponsTab() {
     }
     if (editando.id) {
       await supabase.from('coupons').update(cupom).eq('id', editando.id)
+      await registrarAuditoria({ executedBy: 'admin', acao: 'cupom_editado', entidade: 'coupons', detalhe: `Código: ${cupom.code}` })
     } else {
       await supabase.from('coupons').insert(cupom)
+      await registrarAuditoria({ executedBy: 'admin', acao: 'cupom_criado', entidade: 'coupons', detalhe: `Código: ${cupom.code}` })
     }
     setModal(false)
     setEditando({})
@@ -312,12 +315,14 @@ function CuponsTab() {
 
   async function toggleAtivo(id: string, ativo: boolean) {
     await supabase.from('coupons').update({ active: !ativo }).eq('id', id)
+      await registrarAuditoria({ executedBy: 'admin', acao: ativo ? 'cupom_desativado' : 'cupom_ativado', entidade: 'coupons', detalhe: `ID: ${id}` })
     carregarCupons()
   }
 
   async function excluirCupom(id: string) {
     if (!confirm('Excluir este cupom?')) return
     await supabase.from('coupons').delete().eq('id', id)
+      await registrarAuditoria({ executedBy: meuEmail || 'admin', acao: 'cupom_excluido', entidade: 'coupons', detalhe: `ID: ${id}` })
     carregarCupons()
   }
 

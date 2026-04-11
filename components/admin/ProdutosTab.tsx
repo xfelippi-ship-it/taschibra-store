@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { registrarAuditoria } from '@/lib/auditLog'
 
 
 type Produto = {
@@ -108,7 +109,16 @@ export default function ProdutosTab({ meuPapel = 'master' }: { meuPapel?: string
   async function salvarProduto() {
     if (!produtoEdit.name) return
     if (produtoEdit.id) {
+      const { data: antes } = await supabase.from('products').select('name,price,promo_price,main_image').eq('id', produtoEdit.id).single()
       await supabase.from('products').update(produtoEdit).eq('id', produtoEdit.id)
+      await registrarAuditoria({
+        executedBy: 'admin',
+        acao: 'produto_editado',
+        entidade: 'products',
+        detalhe: `Produto: ${produtoEdit.name} (SKU: ${produtoEdit.sku || '-'})`,
+        valorAntes: antes || undefined,
+        valorDepois: { name: produtoEdit.name, price: produtoEdit.price, promo_price: produtoEdit.promo_price }
+      })
     } else {
       const slug = produtoEdit.name.toLowerCase()
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')

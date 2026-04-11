@@ -15,3 +15,17 @@ export async function GET() {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data || [])
 }
+
+export async function POST(req: Request) {
+  const { executedBy, acao, entidade, detalhe, valorAntes, valorDepois } = await req.json()
+  await supabaseAdmin.from('audit_log').insert({
+    executed_by: executedBy,
+    user_email: entidade === 'admin_users' ? detalhe : executedBy,
+    acao,
+    entidade,
+    detalhe,
+    valor_antes: valorAntes || null,
+    valor_depois: valorDepois || null,
+  })
+  return NextResponse.json({ ok: true })
+}

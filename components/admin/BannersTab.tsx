@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Plus, Pencil, Trash2, X, Upload, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { registrarAuditoria } from '@/lib/auditLog'
 
 
 type Banner = {
@@ -122,8 +123,10 @@ export default function BannersTab() {
     }
     if (editando.id) {
       await supabase.from('banners').update(dados).eq('id', editando.id)
+      await registrarAuditoria({ executedBy: 'admin', acao: 'banner_editado', entidade: 'banners', detalhe: `Banner ID: ${editando.id}` })
     } else {
       await supabase.from('banners').insert(dados)
+      await registrarAuditoria({ executedBy: 'admin', acao: 'banner_criado', entidade: 'banners', detalhe: 'Novo banner criado' })
     }
     setModal(false)
     setPreview(false)
@@ -134,6 +137,7 @@ export default function BannersTab() {
   async function toggleAtivo(id: string | undefined, ativo: boolean) {
     if (!id) return
     await supabase.from('banners').update({ active: !ativo }).eq('id', id)
+      await registrarAuditoria({ executedBy: 'admin', acao: ativo ? 'banner_desativado' : 'banner_ativado', entidade: 'banners', detalhe: `Banner ID: ${id}` })
     carregar()
   }
 
@@ -141,6 +145,7 @@ export default function BannersTab() {
     if (!confirm('Excluir este banner?')) return
     if (!id) return
     await supabase.from('banners').delete().eq('id', id)
+      await registrarAuditoria({ executedBy: 'admin', acao: 'banner_excluido', entidade: 'banners', detalhe: `Banner ID: ${id}` })
     carregar()
   }
 
