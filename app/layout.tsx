@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Nunito } from "next/font/google"
 import "./globals.css"
+import CookieBanner from '@/components/store/CookieBanner'
 import { CartProvider } from "@/contexts/CartContext"
 
 const nunito = Nunito({
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CartProvider>
 {children}
         </CartProvider>
+      <CookieBanner />
       </body>
     </html>
   )

@@ -627,7 +627,7 @@ export default function ProdutosTab() {
                   ))}
                   <button onClick={salvarFeatures} disabled={featuresSaving}
                     className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-black text-sm py-3 rounded-xl transition-colors">
-                    {featuresSaving ? 'Salvando...' : '💾 Salvar Funcionalidades'}
+                    {featuresSaving ? 'Salvando...' : 'Salvar Funcionalidades'}
                   </button>
                 </div>
               )}

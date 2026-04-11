@@ -105,6 +105,15 @@ export default function Footer() {
           </div>
         </div>
       </div>
-    </footer>
+      <div className="bg-gray-900 border-t border-gray-800 py-3">
+    <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-gray-500">
+      <span>© {new Date().getFullYear()} Taschibra S.A. — CNPJ 83.600.393/0001-53</span>
+      <div className="flex gap-4">
+        <a href="/privacidade" className="hover:text-green-400 transition-colors">Política de Privacidade</a>
+        <a href="/termos" className="hover:text-green-400 transition-colors">Termos de Uso</a>
+      </div>
+    </div>
+  </div>
+</footer>
   )
 }
