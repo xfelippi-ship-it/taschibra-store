@@ -556,6 +556,79 @@ function CuponsTab() {
   )
 }
 
+
+function AuditoriaTab() {
+  const [logs, setLogs] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filtro, setFiltro] = useState('')
+
+  useEffect(() => { carregarLogs() }, [])
+
+  async function carregarLogs() {
+    setLoading(true)
+    const res = await fetch('/api/audit-log')
+    const data = await res.json()
+    setLogs(data || [])
+    setLoading(false)
+  }
+
+  const logsFiltrados = filtro
+    ? logs.filter(l => l.user_email?.includes(filtro) || l.acao?.includes(filtro) || l.detalhe?.includes(filtro))
+    : logs
+
+  const acaoCor: Record<string, string> = {
+    convite_enviado: 'bg-blue-100 text-blue-700',
+    papeis_alterados: 'bg-yellow-100 text-yellow-700',
+    desabilitar: 'bg-red-100 text-red-600',
+    reabilitar: 'bg-green-100 text-green-700',
+    reset_senha: 'bg-purple-100 text-purple-700',
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-black text-gray-800">Log de Auditoria</h1>
+        <button onClick={carregarLogs} className="text-xs text-green-600 hover:text-green-700 font-bold border border-green-200 px-3 py-2 rounded-lg">↻ Atualizar</button>
+      </div>
+      <div className="mb-4">
+        <input type="text" placeholder="Filtrar por e-mail, ação ou detalhe..."
+          value={filtro} onChange={e => setFiltro(e.target.value)}
+          className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+      </div>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Data/Hora</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Usuário</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Ação</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Detalhe</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan={4} className="text-center py-8 text-gray-400">Carregando...</td></tr>
+            ) : logsFiltrados.length === 0 ? (
+              <tr><td colSpan={4} className="text-center py-8 text-gray-400">Nenhum registro encontrado.</td></tr>
+            ) : logsFiltrados.map((l, i) => (
+              <tr key={l.id || i} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="px-5 py-3 text-xs text-gray-500 whitespace-nowrap">{new Date(l.created_at).toLocaleString('pt-BR')}</td>
+                <td className="px-5 py-3 text-sm text-gray-700 font-medium">{l.user_email}</td>
+                <td className="px-5 py-3">
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${acaoCor[l.acao] || 'bg-gray-100 text-gray-600'}`}>
+                    {l.acao?.replace(/_/g, ' ')}
+                  </span>
+                </td>
+                <td className="px-5 py-3 text-sm text-gray-500">{l.detalhe || '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 export default function AdminPage() {
   const [autenticado, setAutenticado] = useState(false)
   const [meuPapel, setMeuPapel] = useState<string>('master')
@@ -689,6 +762,7 @@ export default function AdminPage() {
               { id: 'topbar',     label: 'Top Bar',    icon: <Megaphone size={16} />,    papeis: ['master','marketing'] },
               { id: 'categorias', label: 'Categorias', icon: <Tag size={16} />,          papeis: ['master'] },
               { id: 'usuarios',   label: 'Usuários',   icon: <Users size={16} />,        papeis: ['master'] },
+              { id: 'auditoria',  label: 'Auditoria',  icon: <BarChart3 size={16} />,    papeis: ['master'] },
             ].filter(a => meuPapel === 'master' ? true : a.papeis.includes(meuPapel))),
           ].map(item => (
             <button key={item.id} onClick={() => setAba(item.id as any)}
@@ -751,6 +825,7 @@ export default function AdminPage() {
 
         {aba === 'cupons' && <CuponsTab />}
         {aba === 'usuarios' && <UsuariosTab />}
+        {aba === 'auditoria' && <AuditoriaTab />}
         {aba === 'banners' && <BannersTab />}
         {aba === 'topbar' && <TopBarTab />}
         {aba === 'categorias' && <CategoriasTab />}
