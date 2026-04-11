@@ -28,17 +28,17 @@ type SubCat = { id: string; label: string; slug: string; sort_order: number }
 // ─── Menu horizontal ─────────────────────────────────────────────────────────
 
 const menuItems = [
-  { label: 'Lançamentos',      slug: 'lancamentos',    type: 'link' },
+  { label: 'Lançamentos',      slug: 'lancamentos',    type: 'sub' },
   { label: 'Ambientes',        slug: 'ambientes',      type: 'mega' },
-  { label: 'Lâmpadas',         slug: 'lampadas',       type: 'link' },
-  { label: 'SMART',            slug: 'smart',          type: 'link' },
-  { label: 'Decorativo',       slug: 'decorativo',     type: 'link' },
+  { label: 'Lâmpadas',         slug: 'lampadas',       type: 'sub' },
+  { label: 'SMART',            slug: 'smart',          type: 'sub' },
+  { label: 'Decorativo',       slug: 'decorativo',     type: 'sub' },
   { label: 'Trilhos & Perfis', slug: 'trilhos-perfis', type: 'mega' },
-  { label: 'Pilhas',           slug: 'pilhas',         type: 'link' },
-  { label: 'Energia',          slug: 'energia',        type: 'link' },
-  { label: 'Fechaduras',       slug: 'fechaduras',     type: 'link' },
-  { label: 'Profissional',     slug: 'profissional',   type: 'link' },
-  { label: 'Outlet',           slug: 'outlet',         type: 'link' },
+  { label: 'Pilhas',           slug: 'pilhas',         type: 'sub' },
+  { label: 'Energia',          slug: 'energia',        type: 'sub' },
+  { label: 'Fechaduras',       slug: 'fechaduras',     type: 'sub' },
+  { label: 'Profissional',     slug: 'profissional',   type: 'sub' },
+  { label: 'Outlet',           slug: 'outlet',         type: 'sub' },
 ] as const
 
 // ─── Dados dos megamenus inline ───────────────────────────────────────────────
@@ -248,6 +248,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen]     = useState(false)
   const [activeMega, setActiveMega] = useState<string | null>(null)
   const [todasOpen, setTodasOpen]   = useState(false)
+  const [subcatsMenu, setSubcatsMenu] = useState<Record<string, SubCat[]>>({})
   const { count } = useCart()
   const router    = useRouter()
   const headerRef = useRef<HTMLDivElement>(null)
@@ -265,6 +266,21 @@ export default function Header() {
   function openTodas()             { cancelDelay(); setTodasOpen(true); setActiveMega(null) }
   function closeTodas()            { delay(() => setTodasOpen(false)) }
   function closeAll()              { setActiveMega(null); setTodasOpen(false) }
+
+  useEffect(() => {
+    supabase
+      .from('category_subcategories')
+      .select('id,category_slug,label,slug,sort_order')
+      .order('sort_order')
+      .then(({ data }) => {
+        const grouped: Record<string, SubCat[]> = {}
+        for (const s of (data || [])) {
+          if (!grouped[s.category_slug]) grouped[s.category_slug] = []
+          grouped[s.category_slug].push(s)
+        }
+        setSubcatsMenu(grouped)
+      })
+  }, [])
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -339,13 +355,49 @@ export default function Header() {
 
             {menuItems.map(item => {
               const isActive = activeMega === item.slug
-              if (item.type === 'link') return (
-                <Link key={item.slug} href={`/produtos?categoria=${encodeURIComponent(item.slug)}`}
-                  onClick={closeAll}
-                  className="px-3 py-2.5 text-sm font-bold text-gray-700 hover:text-green-600 border-b-2 border-transparent hover:border-green-500 transition-all whitespace-nowrap flex-shrink-0 flex items-center">
-                  {item.label}
-                </Link>
-              )
+              if (item.type === 'sub') {
+                const subs = subcatsMenu[item.slug] || []
+                const isActiveSub = activeMega === item.slug
+                if (!subs.length) return (
+                  <Link key={item.slug} href={`/produtos?categoria=${encodeURIComponent(item.slug)}`}
+                    onClick={closeAll}
+                    className="px-3 py-2.5 text-sm font-bold text-gray-700 hover:text-green-600 border-b-2 border-transparent hover:border-green-500 transition-all whitespace-nowrap flex-shrink-0 flex items-center">
+                    {item.label}
+                  </Link>
+                )
+                return (
+                  <div key={item.slug} onMouseEnter={() => openMega(item.slug)} onMouseLeave={closeMega} className="relative flex items-stretch">
+                    <Link href={`/produtos?categoria=${encodeURIComponent(item.slug)}`}
+                      onClick={closeAll}
+                      className={`px-3 py-2.5 text-sm font-bold border-b-2 transition-all whitespace-nowrap flex-shrink-0 flex items-center gap-1 ${
+                        isActiveSub ? 'text-green-600 border-green-500' : 'text-gray-700 border-transparent hover:text-green-600 hover:border-green-500'
+                      }`}>
+                      {item.label}
+                      <ChevronDown size={11} className={`transition-transform ${isActiveSub ? 'rotate-180' : ''}`} />
+                    </Link>
+                    {isActiveSub && (
+                      <div onMouseEnter={cancelDelay} onMouseLeave={closeMega}
+                        className="absolute top-full left-0 bg-white border border-gray-200 rounded-xl shadow-lg z-50 min-w-48 py-2">
+                        {subs.map((sub: SubCat) => (
+                          <Link key={sub.id} href={`/produtos?categoria=${encodeURIComponent(sub.slug)}`}
+                            onClick={closeAll}
+                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:text-green-700 hover:bg-green-50 transition-colors">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
+                            {sub.label}
+                          </Link>
+                        ))}
+                        <div className="border-t border-gray-100 mt-1 pt-1">
+                          <Link href={`/produtos?categoria=${encodeURIComponent(item.slug)}`}
+                            onClick={closeAll}
+                            className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-green-600 hover:bg-green-50 transition-colors">
+                            Ver todos →
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              }
               return (
                 <div key={item.slug} onMouseEnter={() => openMega(item.slug)} onMouseLeave={closeMega} className="flex items-stretch">
                   <button className={`px-3 py-2.5 text-sm font-bold border-b-2 transition-all whitespace-nowrap flex-shrink-0 flex items-center gap-1 ${
