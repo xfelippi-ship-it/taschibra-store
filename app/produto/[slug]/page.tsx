@@ -75,7 +75,7 @@ function CompreJunto({ categorySlug, produtoAtual }: {
   produtoAtual: { id: string; name: string; slug: string; price: number; promo_price: number; main_image?: string }
 }) {
   const [sugestoes, setSugestoes] = useState<ProdCard[]>([])
-  const [selecionados, setSelecionados] = useState<Set<string>>(new Set())
+  const [selecionados, setSelecionados] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     supabase.from('complement_rules').select('target_slug').eq('source_slug', categorySlug).order('sort_order').limit(2)
@@ -87,7 +87,7 @@ function CompreJunto({ categorySlug, produtoAtual }: {
           .in('category_slug', slugs).eq('active', true).limit(2)
         if (data?.length) {
           setSugestoes(data)
-          setSelecionados(new Set(data.map((p: ProdCard) => p.id)))
+          setSelecionados(Object.fromEntries(data.map((p: ProdCard) => [p.id, true]))
         }
       })
   }, [categorySlug])
@@ -97,7 +97,7 @@ function CompreJunto({ categorySlug, produtoAtual }: {
   const todos = [produtoAtual, ...sugestoes]
   const totalOriginal = todos.reduce((a, p) => a + p.price, 0)
   const totalPix = todos
-    .filter(p => !selecionados.size || p.id === produtoAtual.id || selecionados.has(p.id))
+    .filter(p => !selecionados.size || p.id === produtoAtual.id || !!selecionados[p.id])
     .reduce((a, p) => {
       const preco = p.promo_price && p.promo_price > 0 ? p.promo_price : p.price
       return a + preco
@@ -121,15 +121,15 @@ function CompreJunto({ categorySlug, produtoAtual }: {
 
         {sugestoes.map(p => {
           const preco = p.promo_price && p.promo_price > 0 ? p.promo_price : p.price
-          const selecionado = selecionados.has(p.id)
+          const selecionado = !!selecionados[p.id]
           return (
             <div key={p.id} className="flex items-center gap-3">
               <span className="text-2xl text-gray-300 font-light">+</span>
               <div className="flex flex-col items-center gap-2 w-36">
                 <div
                   onClick={() => setSelecionados(prev => {
-                    const next = new Set(prev)
-                    if (next.has(p.id)) next.delete(p.id); else next.add(p.id)
+                    const next = { ...prev }
+                    next[p.id] = !next[p.id]
                     return next
                   })}
                   className={`relative bg-gray-50 border-2 rounded-xl p-3 w-full flex items-center justify-center h-28 cursor-pointer transition-colors ${selecionado ? 'border-green-500' : 'border-gray-200 opacity-60'}`}>
@@ -452,7 +452,7 @@ export default function ProdutoPage() {
         </div>
       )}
 
-      {/* ── SEÇÃO 4: Similares + Complementares ── */
+      {/* ── SEÇÃO 4: Similares + Complementares ── */}
       <ProdutosRelacionados categorySlug={produto.category_slug} produtoAtualId={produto.id} />
 
       {/* ── SEÇÃO 5: Avaliações ── */}
