@@ -248,10 +248,10 @@ export default function Header() {
 
         <nav className="hidden md:block border-t border-gray-100 relative">
           <div className="max-w-7xl mx-auto px-4 flex items-stretch">
-            <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-gray-600 hover:text-green-600 whitespace-nowrap border-b-2 border-transparent hover:border-green-500 transition-all flex-shrink-0 mr-1">
+            <Link href="/produtos" className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-gray-600 hover:text-green-600 whitespace-nowrap border-b-2 border-transparent hover:border-green-500 transition-all flex-shrink-0 mr-1">
               <Menu size={13} />
               Todas Categorias
-            </button>
+            </Link>
             <div className="w-px bg-gray-200 my-2 mx-1 flex-shrink-0" />
             {menuItems.map(item => {
               const isActive = activeMega === item.slug
@@ -281,11 +281,7 @@ export default function Header() {
                     <MegaCard key={item.slug} {...item} type="ambiente" onClick={closeMega} />
                   ))}
                 </div>
-                <div className="mt-4 pt-3 border-t border-gray-100 flex justify-end">
-                  <Link href="/produtos" onClick={closeMega} className="text-xs text-green-600 font-semibold hover:underline">
-                    Ver todos os ambientes →
-                  </Link>
-                </div>
+
               </div>
             </div>
           )}
