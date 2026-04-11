@@ -81,7 +81,7 @@ function UsuariosTab() {
       user_email: emailUsuario,
       acao: 'papeis_alterados',
       entidade: 'admin_users',
-      detalhe: `Novos papéis: ${novosPapeis.join(', ')}`
+      detalhe: `Usuário: ${emailUsuario} | Novos papéis: ${novosPapeis.join(', ')}`
     })
     carregarUsuarios()
   }
@@ -94,7 +94,7 @@ function UsuariosTab() {
       user_email: emailUsuario,
       acao: acao,
       entidade: 'admin_users',
-      detalhe: `Usuário ${acao === 'desabilitar' ? 'desabilitado' : 'reabilitado'}`
+      detalhe: `Usuário: ${emailUsuario} | ${acao === 'desabilitar' ? 'Desabilitado' : 'Reabilitado'}`
     })
     carregarUsuarios()
   }
@@ -109,7 +109,7 @@ function UsuariosTab() {
         user_email: emailUsuario,
         acao: 'reset_senha',
         entidade: 'admin_users',
-        detalhe: 'E-mail de redefinição enviado'
+        detalhe: `Usuário: ${emailUsuario} | E-mail de redefinição enviado`
       })
       alert(`E-mail de redefinição enviado para ${emailUsuario}`)
     }

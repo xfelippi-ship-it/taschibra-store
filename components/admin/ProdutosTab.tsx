@@ -115,7 +115,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
         executedBy: meuEmail,
         acao: 'produto_editado',
         entidade: 'products',
-        detalhe: `Produto: ${produtoEdit.name} (SKU: ${produtoEdit.sku || '-'})`,
+        detalhe: `Produto: ${produtoEdit.name} | SKU: ${produtoEdit.sku || '-'} | Preço: R$${antes?.price ?? '-'} → R$${produtoEdit.price}`,
         valorAntes: antes || undefined,
         valorDepois: { name: produtoEdit.name, price: produtoEdit.price, promo_price: produtoEdit.promo_price }
       })
