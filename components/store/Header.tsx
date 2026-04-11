@@ -7,12 +7,7 @@ import dynamic from 'next/dynamic'
 const TopBar = dynamic(() => import('@/components/store/TopBar'), { ssr: false })
 import Image from 'next/image'
 import { useCart } from '@/contexts/CartContext'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { supabase } from '@/lib/supabase'
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 

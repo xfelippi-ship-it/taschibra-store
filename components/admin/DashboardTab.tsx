@@ -1,12 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
 import { TrendingUp, ShoppingBag, Package, AlertTriangle, ArrowUp, ArrowDown, Users, BarChart2 } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 type Pedido = {
   id: string

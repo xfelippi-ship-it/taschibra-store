@@ -2,16 +2,12 @@
 "use client"
 import { useEffect, useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
-import { createClient } from "@supabase/supabase-js"
 import Header from "@/components/store/Header"
 import Footer from "@/components/store/Footer"
 import { useCart } from "@/contexts/CartContext"
 import Link from "next/link"
+import { supabase } from '@/lib/supabase'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 const badgeColors: Record<string, string> = {
   novo: "bg-green-600", smart: "bg-blue-500", oferta: "bg-red-500", exclusivo: "bg-purple-600",

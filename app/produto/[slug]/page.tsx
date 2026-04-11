@@ -1,7 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import { ShoppingCart, Heart, Shield, ChevronRight, Star, Package, Zap, Thermometer, Ruler } from 'lucide-react'
@@ -9,11 +8,8 @@ import CalculaFrete from '@/components/store/CalculaFrete'
 import VariacoesProduto from '@/components/store/VariacoesProduto'
 import { useCart } from '@/contexts/CartContext'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 type Variacao = {
   id: string; name: string; type: string; value: string

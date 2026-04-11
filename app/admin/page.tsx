@@ -7,13 +7,9 @@ import DashboardTab from '@/components/admin/DashboardTab'
 import TopBarTab from '@/components/admin/TopBarTab'
 import CategoriasTab from '@/components/admin/CategoriasTab'
 import { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
 import { Package, ShoppingBag, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 type Produto = {
   id: string; name: string; sku: string; price: number; promo_price: number

@@ -2,14 +2,10 @@
 import { useState, useEffect } from 'react'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
-import { createClient } from '@supabase/supabase-js'
 import { Package, ChevronRight, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 const statusLabel: Record<string, string> = {
   pending: 'Aguardando pagamento',

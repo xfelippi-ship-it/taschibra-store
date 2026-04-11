@@ -2,16 +2,12 @@
 import { useState, useEffect } from 'react'
 import CalculaFrete from '@/components/store/CalculaFrete'
 import { useCart } from '@/contexts/CartContext'
-import { createClient } from '@supabase/supabase-js'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import Link from 'next/link'
 import { Trash2, Plus, Minus, ShoppingBag, Tag, X, Check } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 export default function CarrinhoPage() {
   const { items, removeItem, updateQty, total, count, clearCart, cupons, addCupom, removeCupom, totalDesconto, freeShipping } = useCart()
