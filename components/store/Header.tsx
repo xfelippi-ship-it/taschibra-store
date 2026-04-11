@@ -110,10 +110,10 @@ function TodasCategoriasPanel({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     async function load() {
       const [{ data: catsData }, { data: subsData }] = await Promise.all([
-        supabase.from('categories').select('id,name,slug,icon_svg,panel_image_url,panel_bg_color,panel_title,panel_tagline').order('name'),
+        supabase.from('categories').select('id,name,slug,icon_svg,panel_image_url,panel_bg_color,panel_title,panel_tagline,show_in_menu').order('name'),
         supabase.from('category_subcategories').select('id,category_slug,label,slug,sort_order').order('sort_order'),
       ])
-      const c = catsData || []
+      const c = (catsData || []).filter((x: CatData & {show_in_menu?: boolean}) => x.show_in_menu !== false)
       setCats(c)
       if (c.length) setAtiva(c[0])
       const grouped: Record<string, SubCat[]> = {}
@@ -200,7 +200,7 @@ function TodasCategoriasPanel({ onClose }: { onClose: () => void }) {
         {/* Col 3 — Painel visual */}
         {ativa && (
           <div className="flex-1 relative overflow-hidden" style={bgStyle}>
-            <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.38)' }} />
+            <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.20)' }} />
             <div className="relative z-10 p-8 flex flex-col justify-end h-full">
               {ativa.panel_title && (
                 <h3 className="text-white text-2xl font-black mb-2 leading-tight">{ativa.panel_title}</h3>
