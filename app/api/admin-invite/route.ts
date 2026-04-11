@@ -17,10 +17,8 @@ export async function POST(req: Request) {
   let userId: string
 
   if (existingUser) {
-    // Já existe — apenas registra/atualiza no admin_users
     userId = existingUser.id
   } else {
-    // Novo usuário — envia convite com redirect para o admin
     const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
       redirectTo: 'https://taschibra-store.vercel.app/admin'
     })
@@ -28,14 +26,23 @@ export async function POST(req: Request) {
     userId = data.user.id
   }
 
-  await supabaseAdmin.from('admin_users').upsert({
-    email,
-    user_id: userId,
-    role: 'admin',
-    papeis,
-    ativo: true,
-    status: existingUser ? 'ativo' : 'aguardando'
-  }, { onConflict: 'email' })
+  // Verifica se já existe na admin_users
+  const { data: existing } = await supabaseAdmin
+    .from('admin_users')
+    .select('id')
+    .eq('email', email)
+    .single()
+
+  if (existing) {
+    await supabaseAdmin
+      .from('admin_users')
+      .update({ papeis, ativo: true, user_id: userId, status: existingUser ? 'ativo' : 'aguardando' })
+      .eq('email', email)
+  } else {
+    await supabaseAdmin
+      .from('admin_users')
+      .insert({ email, user_id: userId, role: 'admin', papeis, ativo: true, status: existingUser ? 'ativo' : 'aguardando' })
+  }
 
   await supabaseAdmin.from('audit_log').insert({
     user_email: email,
