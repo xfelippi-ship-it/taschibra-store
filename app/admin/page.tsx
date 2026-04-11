@@ -57,29 +57,15 @@ function UsuariosTab() {
     if (!email.trim()) return
     setEnviando(true)
     setMsg(null)
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: { shouldCreateUser: true }
+    const res = await fetch('/api/admin-invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim(), papeis: papeisSelecionados })
     })
-    if (error) {
-      setMsg({ tipo: 'erro', texto: 'Erro ao enviar convite: ' + error.message })
+    const json = await res.json()
+    if (!res.ok) {
+      setMsg({ tipo: 'erro', texto: 'Erro ao enviar convite: ' + (json.error || 'tente novamente') })
     } else {
-      const { data: existing } = await supabase.from('admin_users').select('id').eq('email', email.trim()).single()
-      if (!existing) {
-        await supabase.from('admin_users').insert({
-          email: email.trim(),
-          role: 'admin',
-          papeis: papeisSelecionados,
-          ativo: true,
-          status: 'aguardando'
-        })
-      }
-      await supabase.from('audit_log').insert({
-        user_email: email.trim(),
-        acao: 'convite_enviado',
-        entidade: 'admin_users',
-        detalhe: `Papéis: ${papeisSelecionados.join(', ')}`
-      })
       setMsg({ tipo: 'ok', texto: `Convite enviado para ${email.trim()}!` })
       setEmail('')
       setPapeisSelecionados(['marketing'])
