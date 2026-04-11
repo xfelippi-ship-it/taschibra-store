@@ -128,11 +128,13 @@ export default function DadosPage() {
     setExcluindo(true)
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email: user?.email || '', password: senhaExclusao
+        email: email, password: senhaExclusao
       })
       if (error) { alert('Senha incorreta.'); setExcluindo(false); return }
-      await supabase.from('customer_addresses').delete().eq('customer_id', customer?.id || '')
-      await supabase.from('customers').delete().eq('auth_user_id', user?.id || '')
+      if (clienteId) {
+        await supabase.from('customer_addresses').delete().eq('customer_id', clienteId)
+        await supabase.from('customers').delete().eq('id', clienteId)
+      }
       await supabase.auth.signOut()
       alert('Conta excluída. Seus dados foram removidos.')
       window.location.href = '/'
