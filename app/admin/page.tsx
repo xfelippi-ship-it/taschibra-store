@@ -452,6 +452,7 @@ function CuponsTab() {
 
 export default function AdminPage() {
   const [autenticado, setAutenticado] = useState(false)
+  const [meuPapel, setMeuPapel] = useState<string>('master')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [erroLogin, setErroLogin] = useState('')
