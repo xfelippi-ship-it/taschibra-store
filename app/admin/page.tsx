@@ -29,6 +29,7 @@ function UsuariosTab() {
   const [usuarios, setUsuarios] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
+  const [papel, setPapel] = useState<'master'|'marketing'|'vendas'>('marketing')
   const [enviando, setEnviando] = useState(false)
   const [msg, setMsg] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null)
 
@@ -54,7 +55,7 @@ function UsuariosTab() {
     } else {
       const { data: existing } = await supabase.from('admin_users').select('id').eq('email', email.trim()).single()
       if (!existing) {
-        await supabase.from('admin_users').insert({ email: email.trim(), role: 'admin' })
+        await supabase.from('admin_users').insert({ email: email.trim(), role: 'admin', papel: papel })
       }
       setMsg({ tipo: 'ok', texto: `Convite enviado para ${email.trim()}!` })
       setEmail('')
@@ -87,6 +88,18 @@ function UsuariosTab() {
             placeholder="nome@taschibra.com.br"
             className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
           />
+          <select value={papel} onChange={e => setPapel(e.target.value as 'master'|'marketing'|'vendas')}
+            className="border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
+            <option value="master">Master</option>
+            <option value="marketing">Marketing</option>
+            <option value="vendas">Vendas</option>
+          </select>
+          <select value={papel} onChange={e => setPapel(e.target.value as 'master'|'marketing'|'vendas')}
+            className="border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-green-500 bg-white font-bold text-gray-700">
+            <option value="master">Master</option>
+            <option value="marketing">Marketing</option>
+            <option value="vendas">Vendas</option>
+          </select>
           <button
             onClick={convidar}
             disabled={enviando || !email.trim()}
@@ -122,9 +135,17 @@ function UsuariosTab() {
                   <p className="font-bold text-sm text-gray-800">{u.email}</p>
                 </td>
                 <td className="px-5 py-4">
-                  <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold capitalize">
-                    {u.role || 'admin'}
-                  </span>
+                  <select
+                    value={u.papel || 'master'}
+                    onChange={async e => {
+                      await supabase.from('admin_users').update({ papel: e.target.value }).eq('id', u.id)
+                      carregarUsuarios()
+                    }}
+                    className="text-xs border border-gray-200 rounded-lg px-2 py-1 outline-none focus:border-green-500 bg-white font-bold text-gray-700">
+                    <option value="master">Master</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="vendas">Vendas</option>
+                  </select>
                 </td>
                 <td className="px-5 py-4 text-sm text-gray-500">
                   {u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '—'}
@@ -456,11 +477,12 @@ export default function AdminPage() {
     if (error || !data.user) {
       setErroLogin('E-mail ou senha incorretos.')
     } else {
-      const { data: adminData } = await supabase.from('admin_users').select('id').eq('user_id', data.user.id).single()
+      const { data: adminData } = await supabase.from('admin_users').select('id, papel').eq('user_id', data.user.id).single()
       if (!adminData) {
         await supabase.auth.signOut()
         setErroLogin('Você não tem permissão de acesso.')
       } else {
+        setMeuPapel((adminData as any).papel || 'master')
         setAutenticado(true)
       }
     }
@@ -553,14 +575,16 @@ export default function AdminPage() {
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {[
-            { id: 'dashboard', label: 'Dashboard', icon: <BarChart3 size={16} /> },
-            { id: 'produtos', label: 'Produtos', icon: <Package size={16} /> },
-            { id: 'pedidos', label: 'Pedidos', icon: <ShoppingBag size={16} /> },
-            { id: 'cupons', label: 'Cupons', icon: <Tag size={16} /> },
-            { id: 'usuarios', label: 'Usuários', icon: <Users size={16} /> },
-            { id: 'banners', label: 'Banners', icon: <ImageIcon size={16} /> },
-            { id: 'topbar', label: 'Top Bar', icon: <Megaphone size={16} /> },
-            { id: 'categorias', label: 'Categorias', icon: <Tag size={16} /> },
+            ...([
+              { id: 'dashboard',  label: 'Dashboard',  icon: <BarChart3 size={16} />,    papeis: ['master','marketing','vendas'] },
+              { id: 'produtos',   label: 'Produtos',   icon: <Package size={16} />,      papeis: ['master','marketing'] },
+              { id: 'pedidos',    label: 'Pedidos',    icon: <ShoppingBag size={16} />,  papeis: ['master','vendas'] },
+              { id: 'cupons',     label: 'Cupons',     icon: <Tag size={16} />,          papeis: ['master','vendas'] },
+              { id: 'banners',    label: 'Banners',    icon: <ImageIcon size={16} />,    papeis: ['master','marketing'] },
+              { id: 'topbar',     label: 'Top Bar',    icon: <Megaphone size={16} />,    papeis: ['master','marketing'] },
+              { id: 'categorias', label: 'Categorias', icon: <Tag size={16} />,          papeis: ['master'] },
+              { id: 'usuarios',   label: 'Usuários',   icon: <Users size={16} />,        papeis: ['master'] },
+            ].filter(a => a.papeis.includes(meuPapel))),
           ].map(item => (
             <button key={item.id} onClick={() => setAba(item.id as any)}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
@@ -581,7 +605,7 @@ export default function AdminPage() {
       <main className="flex-1 p-8 overflow-auto">
         {aba === 'dashboard' && <DashboardTab />}
 
-        {aba === 'produtos' && <ProdutosTab />}
+        {aba === 'produtos' && <ProdutosTab meuPapel={meuPapel} />}
 
         {aba === 'pedidos' && (
           <div>
@@ -655,23 +679,25 @@ export default function AdminPage() {
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Preço cartão *</label>
-                  <input type="number" step="0.01" value={produtoEdit.price || ''} onChange={e => setProdutoEdit({...produtoEdit, price: parseFloat(e.target.value)})}
-                    placeholder="0,00" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+              {meuPapel !== 'marketing' && (
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-1 block">Preço cartão *</label>
+                    <input type="number" step="0.01" value={produtoEdit.price || ''} onChange={e => setProdutoEdit({...produtoEdit, price: parseFloat(e.target.value)})}
+                      placeholder="0,00" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-1 block">Preço PIX</label>
+                    <input type="number" step="0.01" value={produtoEdit.promo_price || ''} onChange={e => setProdutoEdit({...produtoEdit, promo_price: parseFloat(e.target.value)})}
+                      placeholder="0,00" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-1 block">Estoque *</label>
+                    <input type="number" value={produtoEdit.stock_qty || ''} onChange={e => setProdutoEdit({...produtoEdit, stock_qty: parseInt(e.target.value)})}
+                      placeholder="0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                  </div>
                 </div>
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Preço PIX</label>
-                  <input type="number" step="0.01" value={produtoEdit.promo_price || ''} onChange={e => setProdutoEdit({...produtoEdit, promo_price: parseFloat(e.target.value)})}
-                    placeholder="0,00" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
-                </div>
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Estoque *</label>
-                  <input type="number" value={produtoEdit.stock_qty || ''} onChange={e => setProdutoEdit({...produtoEdit, stock_qty: parseInt(e.target.value)})}
-                    placeholder="0" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
-                </div>
-              </div>
+              )}
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setModal(false)} className="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50 transition-colors">Cancelar</button>

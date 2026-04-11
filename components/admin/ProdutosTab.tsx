@@ -33,7 +33,7 @@ const variacaoVazia = (productId: string): Variacao => ({
 
 type Feature = { id?: string; title: string; description: string; image_url: string; sort_order: number }
 
-export default function ProdutosTab() {
+export default function ProdutosTab({ meuPapel = 'master' }: { meuPapel?: string }) {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
   const [busca, setBusca] = useState('')
@@ -200,7 +200,7 @@ export default function ProdutosTab() {
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase w-8"></th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Produto</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">SKU</th>
-              <th className="text-right px-5 py-3 text-xs font-black text-gray-500 uppercase">Preço</th>
+              {meuPapel !== 'marketing' && <th className="text-right px-5 py-3 text-xs font-black text-gray-500 uppercase">Preço</th>}
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Estoque</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Ações</th>
@@ -355,7 +355,7 @@ export default function ProdutosTab() {
                         placeholder="Ex: 7897079082876"
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 font-mono" />
                     </div>
-                  </div>
+                  </div>}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-bold text-gray-700 mb-1 block">Família/Linha</label>
@@ -370,7 +370,7 @@ export default function ProdutosTab() {
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  {meuPapel !== 'marketing' && <div className="grid grid-cols-3 gap-4">
                     <div>
                       <label className="text-sm font-bold text-gray-700 mb-1 block">Preço cartão *</label>
                       <input type="number" step="0.01" value={produtoEdit.price || ''}
@@ -392,7 +392,7 @@ export default function ProdutosTab() {
                         placeholder="0"
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                     </div>
-                  </div>
+                  </div>}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-bold text-gray-700 mb-1 block">Peso (kg)</label>
