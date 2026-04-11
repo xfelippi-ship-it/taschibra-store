@@ -30,7 +30,7 @@ const variacaoVazia = (productId: string): Variacao => ({
 
 type Feature = { id?: string; title: string; description: string; image_url: string; sort_order: number }
 
-export default function ProdutosTab({ meuPapel = 'master' }: { meuPapel?: string }) {
+export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }: { meuPapel?: string, meuEmail?: string }) {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
   const [busca, setBusca] = useState('')
@@ -112,7 +112,7 @@ export default function ProdutosTab({ meuPapel = 'master' }: { meuPapel?: string
       const { data: antes } = await supabase.from('products').select('name,price,promo_price,main_image').eq('id', produtoEdit.id).single()
       await supabase.from('products').update(produtoEdit).eq('id', produtoEdit.id)
       await registrarAuditoria({
-        executedBy: 'admin',
+        executedBy: meuEmail,
         acao: 'produto_editado',
         entidade: 'products',
         detalhe: `Produto: ${produtoEdit.name} (SKU: ${produtoEdit.sku || '-'})`,

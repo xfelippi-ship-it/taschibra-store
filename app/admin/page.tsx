@@ -637,6 +637,7 @@ function AuditoriaTab() {
 export default function AdminPage() {
   const [autenticado, setAutenticado] = useState(false)
   const [meuPapel, setMeuPapel] = useState<string>('master')
+  const [meuEmail, setMeuEmail] = useState<string>('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [erroLogin, setErroLogin] = useState('')
@@ -666,6 +667,7 @@ export default function AdminPage() {
       } else {
         const papeis = (adminData as any).papeis || [(adminData as any).papel || 'master']
         setMeuPapel(papeis.includes('master') ? 'master' : papeis[0] || 'master')
+        setMeuEmail(data.user.email || '')
         setLoadingLogin(false)
         setAutenticado(true)
       }
@@ -789,7 +791,7 @@ export default function AdminPage() {
       <main className="flex-1 p-8 overflow-auto">
         {aba === 'dashboard' && <DashboardTab />}
 
-        {aba === 'produtos' && <ProdutosTab meuPapel={meuPapel} />}
+        {aba === 'produtos' && <ProdutosTab meuPapel={meuPapel} meuEmail={meuEmail} />}
 
         {aba === 'pedidos' && (
           <div>
@@ -831,7 +833,7 @@ export default function AdminPage() {
         {aba === 'cupons' && <CuponsTab />}
         {aba === 'usuarios' && <UsuariosTab />}
         {aba === 'auditoria' && <AuditoriaTab />}
-        {aba === 'banners' && <BannersTab />}
+        {aba === 'banners' && <BannersTab meuEmail={meuEmail} />}
         {aba === 'topbar' && <TopBarTab />}
         {aba === 'categorias' && <CategoriasTab />}
       </main>

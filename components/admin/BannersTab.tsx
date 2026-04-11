@@ -75,7 +75,7 @@ function BannerPreview({ b }: { b: Banner }) {
   )
 }
 
-export default function BannersTab() {
+export default function BannersTab({ meuEmail = 'admin' }: { meuEmail?: string }) {
   const [banners, setBanners] = useState<Banner[]>([])
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(false)
@@ -123,10 +123,10 @@ export default function BannersTab() {
     }
     if (editando.id) {
       await supabase.from('banners').update(dados).eq('id', editando.id)
-      await registrarAuditoria({ executedBy: 'admin', acao: 'banner_editado', entidade: 'banners', detalhe: `Banner ID: ${editando.id}` })
+      await registrarAuditoria({ executedBy: meuEmail, acao: 'banner_editado', entidade: 'banners', detalhe: `Banner ID: ${editando.id}` })
     } else {
       await supabase.from('banners').insert(dados)
-      await registrarAuditoria({ executedBy: 'admin', acao: 'banner_criado', entidade: 'banners', detalhe: 'Novo banner criado' })
+      await registrarAuditoria({ executedBy: meuEmail, acao: 'banner_criado', entidade: 'banners', detalhe: 'Novo banner criado' })
     }
     setModal(false)
     setPreview(false)
@@ -145,7 +145,7 @@ export default function BannersTab() {
     if (!confirm('Excluir este banner?')) return
     if (!id) return
     await supabase.from('banners').delete().eq('id', id)
-      await registrarAuditoria({ executedBy: 'admin', acao: 'banner_excluido', entidade: 'banners', detalhe: `Banner ID: ${id}` })
+      await registrarAuditoria({ executedBy: meuEmail, acao: 'banner_excluido', entidade: 'banners', detalhe: `Banner ID: ${id}` })
     carregar()
   }
 
