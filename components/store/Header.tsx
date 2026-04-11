@@ -100,7 +100,7 @@ function MegaCard({ label, slug, desc, type, onClick }: {
 }
 
 
-// ─── Ícones fixos por slug ───────────────────────────────────────────────────
+// ─── Ícones fixos por slug (v2) ───────────────────────────────────────────────────
 const ICONES_MENU: Record<string, string> = {
   ambientes:        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>',
   lampadas:         '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="4"/><path d="M12 6a6 6 0 016 6c0 2.22-1.2 4.16-3 5.2V19a1 1 0 01-1 1h-4a1 1 0 01-1-1v-1.8C7.2 16.16 6 14.22 6 12a6 6 0 016-6z"/><line x1="9" y1="21" x2="15" y2="21"/></svg>',
