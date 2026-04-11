@@ -31,6 +31,8 @@ const variacaoVazia = (productId: string): Variacao => ({
   sku: '', ean: '', price: 0, promo_price: 0, stock_qty: 0, active: true
 })
 
+type Feature = { id?: string; title: string; description: string; image_url: string; sort_order: number }
+
 export default function ProdutosTab() {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
@@ -48,7 +50,6 @@ export default function ProdutosTab() {
   const [modalVar, setModalVar] = useState(false)
 
   // Funcionalidades
-  type Feature = { id?: string; title: string; description: string; image_url: string; sort_order: number }
   const [features, setFeatures] = useState<Feature[]>([])
   const [featuresSaving, setFeaturesSaving] = useState(false)
 
