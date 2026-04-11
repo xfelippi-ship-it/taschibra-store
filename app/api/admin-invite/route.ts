@@ -10,19 +10,31 @@ export async function POST(req: Request) {
   const { email, papeis } = await req.json()
   if (!email || !papeis) return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 })
 
-  const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-    redirectTo: 'https://taschibra-store.vercel.app/admin'
-  })
+  // Verifica se usuário já existe no Auth
+  const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
+  const existingUser = existingUsers?.users?.find((u: any) => u.email === email)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  let userId: string
+
+  if (existingUser) {
+    // Já existe — apenas registra/atualiza no admin_users
+    userId = existingUser.id
+  } else {
+    // Novo usuário — envia convite com redirect para o admin
+    const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+      redirectTo: 'https://taschibra-store.vercel.app/admin'
+    })
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+    userId = data.user.id
+  }
 
   await supabaseAdmin.from('admin_users').upsert({
     email,
-    user_id: data.user.id,
+    user_id: userId,
     role: 'admin',
     papeis,
     ativo: true,
-    status: 'aguardando'
+    status: existingUser ? 'ativo' : 'aguardando'
   }, { onConflict: 'email' })
 
   await supabaseAdmin.from('audit_log').insert({
