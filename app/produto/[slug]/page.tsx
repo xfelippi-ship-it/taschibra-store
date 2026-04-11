@@ -105,7 +105,7 @@ function ProdutosRelacionados({ categorySlug, produtoAtualId }: { categorySlug: 
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 border-t border-gray-100">
-      <h2 className="text-lg font-black text-gray-800 mb-5">Produtos da mesma linha</h2>
+      <h2 className="text-lg font-black text-gray-800 mb-5">Produtos Similares</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {produtos.map(p => {
           const preco = p.promo_price && p.promo_price > 0 ? p.promo_price : p.price
