@@ -25,7 +25,7 @@ function UsuariosTab() {
   const [usuarios, setUsuarios] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
-  const [papel, setPapel] = useState<'master'|'marketing'|'vendas'>('marketing')
+  const [papeisSelecionados, setPapeisSelecionados] = useState<string[]>(['marketing'])
   const [enviando, setEnviando] = useState(false)
   const [msg, setMsg] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null)
 
@@ -36,6 +36,21 @@ function UsuariosTab() {
     const { data } = await supabase.from('admin_users').select('*').order('created_at', { ascending: false })
     setUsuarios(data || [])
     setLoading(false)
+  }
+
+  function togglePapel(papel: string) {
+    if (papel === 'master') {
+      setPapeisSelecionados(['master'])
+      return
+    }
+    setPapeisSelecionados(prev => {
+      const semMaster = prev.filter(p => p !== 'master')
+      if (semMaster.includes(papel)) {
+        const novo = semMaster.filter(p => p !== papel)
+        return novo.length === 0 ? ['marketing'] : novo
+      }
+      return [...semMaster, papel]
+    })
   }
 
   async function convidar() {
@@ -51,19 +66,72 @@ function UsuariosTab() {
     } else {
       const { data: existing } = await supabase.from('admin_users').select('id').eq('email', email.trim()).single()
       if (!existing) {
-        await supabase.from('admin_users').insert({ email: email.trim(), role: 'admin', papel: papel })
+        await supabase.from('admin_users').insert({
+          email: email.trim(),
+          role: 'admin',
+          papeis: papeisSelecionados,
+          ativo: true
+        })
       }
+      await supabase.from('audit_log').insert({
+        user_email: email.trim(),
+        acao: 'convite_enviado',
+        entidade: 'admin_users',
+        detalhe: `Papéis: ${papeisSelecionados.join(', ')}`
+      })
       setMsg({ tipo: 'ok', texto: `Convite enviado para ${email.trim()}!` })
       setEmail('')
+      setPapeisSelecionados(['marketing'])
       carregarUsuarios()
     }
     setEnviando(false)
   }
 
-  async function removerUsuario(id: string, emailUsuario: string) {
-    if (!confirm(`Remover acesso de ${emailUsuario}?`)) return
-    await supabase.from('admin_users').delete().eq('id', id)
+  async function alterarPapeis(id: string, emailUsuario: string, novosPapeis: string[]) {
+    await supabase.from('admin_users').update({ papeis: novosPapeis }).eq('id', id)
+    await supabase.from('audit_log').insert({
+      user_email: emailUsuario,
+      acao: 'papeis_alterados',
+      entidade: 'admin_users',
+      detalhe: `Novos papéis: ${novosPapeis.join(', ')}`
+    })
     carregarUsuarios()
+  }
+
+  async function desabilitarUsuario(id: string, emailUsuario: string, ativo: boolean) {
+    const acao = ativo ? 'desabilitar' : 'reabilitar'
+    if (!confirm(`${acao === 'desabilitar' ? 'Desabilitar' : 'Reabilitar'} acesso de ${emailUsuario}?`)) return
+    await supabase.from('admin_users').update({ ativo: !ativo }).eq('id', id)
+    await supabase.from('audit_log').insert({
+      user_email: emailUsuario,
+      acao: acao,
+      entidade: 'admin_users',
+      detalhe: `Usuário ${acao === 'desabilitar' ? 'desabilitado' : 'reabilitado'}`
+    })
+    carregarUsuarios()
+  }
+
+  async function resetarSenha(emailUsuario: string) {
+    if (!confirm(`Enviar e-mail de redefinição de senha para ${emailUsuario}?`)) return
+    const { error } = await supabase.auth.resetPasswordForEmail(emailUsuario)
+    if (error) {
+      alert('Erro ao enviar e-mail: ' + error.message)
+    } else {
+      await supabase.from('audit_log').insert({
+        user_email: emailUsuario,
+        acao: 'reset_senha',
+        entidade: 'admin_users',
+        detalhe: 'E-mail de redefinição enviado'
+      })
+      alert(`E-mail de redefinição enviado para ${emailUsuario}`)
+    }
+  }
+
+  const papelLabel: Record<string, string> = { master: 'Master', marketing: 'Marketing', vendas: 'Vendas' }
+  const papelCor: Record<string, string> = {
+    master: 'bg-purple-100 text-purple-700',
+    marketing: 'bg-blue-100 text-blue-700',
+    vendas: 'bg-green-100 text-green-700'
   }
 
   return (
@@ -72,36 +140,41 @@ function UsuariosTab() {
         <h1 className="text-2xl font-black text-gray-800">Usuários do Backoffice</h1>
       </div>
 
+      {/* Convidar */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
         <h2 className="font-black text-gray-800 mb-1">Convidar novo usuário</h2>
-        <p className="text-sm text-gray-500 mb-4">O usuário receberá um link de acesso por e-mail. Use apenas e-mails @taschibra.com.br.</p>
-        <div className="flex gap-3">
+        <p className="text-sm text-gray-500 mb-4">O usuário receberá um e-mail com link para criar a própria senha.</p>
+        <div className="flex gap-3 mb-4">
           <input
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && convidar()}
-            placeholder="nome@taschibra.com.br"
+            placeholder="email@exemplo.com"
             className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
           />
-          <select value={papel} onChange={e => setPapel(e.target.value as 'master'|'marketing'|'vendas')}
-            className="border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
-            <option value="master">Master</option>
-            <option value="marketing">Marketing</option>
-            <option value="vendas">Vendas</option>
-          </select>
-          <select value={papel} onChange={e => setPapel(e.target.value as 'master'|'marketing'|'vendas')}
-            className="border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-green-500 bg-white font-bold text-gray-700">
-            <option value="master">Master</option>
-            <option value="marketing">Marketing</option>
-            <option value="vendas">Vendas</option>
-          </select>
           <button
             onClick={convidar}
-            disabled={enviando || !email.trim()}
+            disabled={enviando || !email.trim() || papeisSelecionados.length === 0}
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold text-sm px-6 py-2.5 rounded-lg transition-colors">
             <Plus size={16} /> {enviando ? 'Enviando...' : 'Convidar'}
           </button>
+        </div>
+        {/* Checkboxes de papéis */}
+        <div className="flex gap-4">
+          <p className="text-sm font-bold text-gray-600 mr-2 self-center">Acesso:</p>
+          {(['master', 'marketing', 'vendas'] as const).map(p => (
+            <label key={p} className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={papeisSelecionados.includes(p)}
+                onChange={() => togglePapel(p)}
+                className="w-4 h-4 accent-green-600 cursor-pointer"
+              />
+              <span className={`text-xs font-bold px-2 py-1 rounded-full ${papelCor[p]}`}>{papelLabel[p]}</span>
+              {p === 'master' && <span className="text-xs text-gray-400">(acesso total)</span>}
+            </label>
+          ))}
         </div>
         {msg && (
           <p className={`mt-3 text-sm font-bold px-4 py-2 rounded-lg ${msg.tipo === 'ok' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
@@ -110,49 +183,91 @@ function UsuariosTab() {
         )}
       </div>
 
+      {/* Tabela */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">E-mail</th>
-              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Perfil</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Acesso</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Adicionado em</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Ações</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={4} className="text-center py-8 text-gray-400">Carregando...</td></tr>
+              <tr><td colSpan={5} className="text-center py-8 text-gray-400">Carregando...</td></tr>
             ) : usuarios.length === 0 ? (
-              <tr><td colSpan={4} className="text-center py-8 text-gray-400">Nenhum usuário cadastrado.</td></tr>
-            ) : usuarios.map(u => (
-              <tr key={u.id} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="px-5 py-4">
-                  <p className="font-bold text-sm text-gray-800">{u.email}</p>
-                </td>
-                <td className="px-5 py-4">
-                  <select
-                    value={u.papel || 'master'}
-                    onChange={async e => {
-                      await supabase.from('admin_users').update({ papel: e.target.value }).eq('id', u.id)
-                      carregarUsuarios()
-                    }}
-                    className="text-xs border border-gray-200 rounded-lg px-2 py-1 outline-none focus:border-green-500 bg-white font-bold text-gray-700">
-                    <option value="master">Master</option>
-                    <option value="marketing">Marketing</option>
-                    <option value="vendas">Vendas</option>
-                  </select>
-                </td>
-                <td className="px-5 py-4 text-sm text-gray-500">
-                  {u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '—'}
-                </td>
-                <td className="px-5 py-4 text-center">
-                  <button onClick={() => removerUsuario(u.id, u.email)} className="text-red-400 hover:text-red-600 transition-colors">
-                    <Trash2 size={15} />
-                  </button>
-                </td>
-              </tr>
-            ))}
+              <tr><td colSpan={5} className="text-center py-8 text-gray-400">Nenhum usuário cadastrado.</td></tr>
+            ) : usuarios.map(u => {
+              const papeis: string[] = u.papeis || [u.papel || 'master']
+              const ativo: boolean = u.ativo !== false
+              return (
+                <tr key={u.id} className={`border-b border-gray-100 hover:bg-gray-50 ${!ativo ? 'opacity-50' : ''}`}>
+                  <td className="px-5 py-4">
+                    <p className="font-bold text-sm text-gray-800">{u.email}</p>
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="flex gap-1 flex-wrap">
+                      {(['master', 'marketing', 'vendas'] as const).map(p => (
+                        <button
+                          key={p}
+                          onClick={() => {
+                            if (!ativo) return
+                            const atual = papeis.includes(p)
+                            let novos: string[]
+                            if (p === 'master') {
+                              novos = atual ? ['marketing'] : ['master']
+                            } else {
+                              const semMaster = papeis.filter(x => x !== 'master')
+                              if (atual) {
+                                novos = semMaster.filter(x => x !== p)
+                                if (novos.length === 0) novos = ['marketing']
+                              } else {
+                                novos = [...semMaster.filter(x => x !== 'master'), p]
+                              }
+                            }
+                            alterarPapeis(u.id, u.email, novos)
+                          }}
+                          className={`text-xs font-bold px-2 py-1 rounded-full border transition-all ${
+                            papeis.includes(p)
+                              ? papelCor[p] + ' border-transparent'
+                              : 'bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-200'
+                          } ${!ativo ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                        >
+                          {papelLabel[p]}
+                        </button>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-5 py-4">
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${ativo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
+                      {ativo ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 text-sm text-gray-500">
+                    {u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '—'}
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center justify-center gap-3">
+                      <button
+                        onClick={() => resetarSenha(u.email)}
+                        title="Resetar senha"
+                        className="text-blue-400 hover:text-blue-600 transition-colors text-xs font-bold">
+                        🔑
+                      </button>
+                      <button
+                        onClick={() => desabilitarUsuario(u.id, u.email, ativo)}
+                        title={ativo ? 'Desabilitar' : 'Reabilitar'}
+                        className={`transition-colors text-xs font-bold ${ativo ? 'text-orange-400 hover:text-orange-600' : 'text-green-400 hover:text-green-600'}`}>
+                        {ativo ? '🚫' : '✅'}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
@@ -474,14 +589,14 @@ export default function AdminPage() {
     if (error || !data.user) {
       setErroLogin('E-mail ou senha incorretos.')
     } else {
-      const { data: adminData, error: adminError } = await supabase.from('admin_users').select('id, papel').eq('user_id', data.user.id).single()
+      const { data: adminData, error: adminError } = await supabase.from('admin_users').select('id, papeis, papel').eq('user_id', data.user.id).single()
       if (!adminData || adminError) {
         await supabase.auth.signOut()
         setErroLogin('Você não tem permissão de acesso.')
         setLoadingLogin(false)
       } else {
-        const papelUsuario = (adminData as any).papel || 'master'
-        setMeuPapel(papelUsuario)
+        const papeis = (adminData as any).papeis || [(adminData as any).papel || 'master']
+        setMeuPapel(papeis.includes('master') ? 'master' : papeis[0] || 'master')
         setLoadingLogin(false)
         setAutenticado(true)
       }
@@ -583,7 +698,7 @@ export default function AdminPage() {
               { id: 'topbar',     label: 'Top Bar',    icon: <Megaphone size={16} />,    papeis: ['master','marketing'] },
               { id: 'categorias', label: 'Categorias', icon: <Tag size={16} />,          papeis: ['master'] },
               { id: 'usuarios',   label: 'Usuários',   icon: <Users size={16} />,        papeis: ['master'] },
-            ].filter(a => a.papeis.includes(meuPapel))),
+            ].filter(a => meuPapel === 'master' ? true : a.papeis.includes(meuPapel))),
           ].map(item => (
             <button key={item.id} onClick={() => setAba(item.id as any)}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
