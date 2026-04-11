@@ -87,7 +87,7 @@ function CompreJunto({ categorySlug, produtoAtual }: {
           .in('category_slug', slugs).eq('active', true).limit(2)
         if (data?.length) {
           setSugestoes(data)
-          setSelecionados(Object.fromEntries(data.map((p: ProdCard) => [p.id, true]))
+          setSelecionados(Object.fromEntries(data.map((p: ProdCard) => [p.id, true])))
         }
       })
   }, [categorySlug])
