@@ -47,8 +47,7 @@ export default function ProdutosTab() {
   const [abaModal, setAbaModal] = useState<'dados' | 'variacoes' | 'funcionalidades'>('dados')
 
   // Modal variação
-
-  // Funcionalidades
+  const [modalVar, setModalVar] = useState(false)
   const [features, setFeatures] = useState<Feature[]>([])
   const [featuresSaving, setFeaturesSaving] = useState(false)
 
@@ -79,8 +78,6 @@ export default function ProdutosTab() {
     setFeaturesSaving(false)
     alert('Funcionalidades salvas!')
   }
-
-  const [modalVar, setModalVar] = useState(false)
   const [varEdit, setVarEdit] = useState<Variacao | null>(null)
 
   useEffect(() => { carregar() }, [])
@@ -326,48 +323,6 @@ export default function ProdutosTab() {
                 <button onClick={() => { setAbaModal('variacoes'); carregarVariacoes(produtoEdit.id!) }}
                   className={`px-4 py-2 text-sm font-bold transition-colors border-b-2 ${abaModal === 'variacoes' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
                   Variações {variacoesPorProduto[produtoEdit.id!] ? `(${variacoesPorProduto[produtoEdit.id!].length})` : ''}
-
-              {abaModal === 'funcionalidades' && produtoEdit.id && (
-              <div className="space-y-3 overflow-y-auto max-h-[55vh] pr-1">
-              <p className="text-xs text-gray-500">Cadastre até 4 funcionalidades. Campos em branco não são exibidos.</p>
-              {features.slice(0, 4).map((f, i) => (
-              <div key={i} className="border border-gray-200 rounded-xl p-4 space-y-3">
-              <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">Funcionalidade {i + 1}</span>
-              {f.title && <span className="text-xs text-green-600 font-bold">Preenchida</span>}
-              </div>
-              <div>
-              <label className="text-xs font-bold text-gray-600 mb-1 block">Titulo</label>
-              <input value={f.title} onChange={e => {
-              const next = [...features]; next[i] = { ...next[i], title: e.target.value }; setFeatures(next)
-              }} placeholder="Ex: Alta eficiencia energetica"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500" />
-              </div>
-              <div>
-              <label className="text-xs font-bold text-gray-600 mb-1 block">Descricao</label>
-              <textarea value={f.description} onChange={e => {
-              const next = [...features]; next[i] = { ...next[i], description: e.target.value }; setFeatures(next)
-              }} placeholder="Descricao breve" rows={2}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500 resize-none" />
-              </div>
-              <div>
-              <label className="text-xs font-bold text-gray-600 mb-1 block">URL da imagem</label>
-              <input value={f.image_url} onChange={e => {
-              const next = [...features]; next[i] = { ...next[i], image_url: e.target.value }; setFeatures(next)
-              }} placeholder="https://..."
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500" />
-              {f.image_url && (
-              <img src={f.image_url} alt="" className="mt-2 h-16 object-contain border border-gray-100 rounded-lg p-1 bg-gray-50" />
-              )}
-              </div>
-              </div>
-              ))}
-              <button onClick={() => salvarFeatures(produtoEdit.id!)} disabled={featuresSaving}
-              className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-black text-sm py-3 rounded-xl transition-colors">
-              {featuresSaving ? 'Salvando...' : 'Salvar Funcionalidades'}
-              </button>
-              </div>
-              )}
                 </button>
               )}
               {produtoEdit.id && (
@@ -517,6 +472,48 @@ export default function ProdutosTab() {
                       ))}
                     </div>
                   )}
+                </div>
+              )}
+
+              {abaModal === 'funcionalidades' && produtoEdit.id && (
+                <div className="space-y-3">
+                  <p className="text-xs text-gray-500 pb-1">Cadastre até 4 funcionalidades. Campos em branco não são exibidos.</p>
+                  {features.slice(0, 4).map((f, i) => (
+                    <div key={i} className="border border-gray-200 rounded-xl p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">Funcionalidade {i + 1}</span>
+                        {f.title && <span className="text-xs text-green-600 font-bold">Preenchida</span>}
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-600 mb-1 block">Título</label>
+                        <input value={f.title} onChange={e => {
+                          const next = [...features]; next[i] = { ...next[i], title: e.target.value }; setFeatures(next)
+                        }} placeholder="Ex: Alta eficiência energética"
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-600 mb-1 block">Descrição</label>
+                        <textarea value={f.description} onChange={e => {
+                          const next = [...features]; next[i] = { ...next[i], description: e.target.value }; setFeatures(next)
+                        }} placeholder="Descrição breve" rows={2}
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500 resize-none" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-600 mb-1 block">URL da imagem</label>
+                        <input value={f.image_url} onChange={e => {
+                          const next = [...features]; next[i] = { ...next[i], image_url: e.target.value }; setFeatures(next)
+                        }} placeholder="https://..."
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500" />
+                        {f.image_url && (
+                          <img src={f.image_url} alt="" className="mt-2 h-16 object-contain border border-gray-100 rounded-lg p-1 bg-gray-50" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  <button onClick={() => salvarFeatures(produtoEdit.id!)} disabled={featuresSaving}
+                    className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-black text-sm py-3 rounded-xl transition-colors">
+                    {featuresSaving ? 'Salvando...' : 'Salvar Funcionalidades'}
+                  </button>
                 </div>
               )}
             </div>
