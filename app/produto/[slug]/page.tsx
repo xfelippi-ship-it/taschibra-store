@@ -66,6 +66,60 @@ function calcParcelas(preco: number): { n: number; valor: string } {
   return { n: 1, valor: brl(preco) }
 }
 
+
+// ─── Produtos relacionados ─────────────────────────────────────────────────
+
+function ProdutosRelacionados({ categorySlug, produtoAtualId }: { categorySlug: string; produtoAtualId: string }) {
+  const [produtos, setProdutos] = useState<Produto[]>([])
+
+  useEffect(() => {
+    if (!categorySlug) return
+    supabase
+      .from('products')
+      .select('id, name, slug, price, promo_price, main_image')
+      .eq('category_slug', categorySlug)
+      .neq('id', produtoAtualId)
+      .eq('active', true)
+      .limit(4)
+      .then(({ data }) => setProdutos(data || []))
+  }, [categorySlug, produtoAtualId])
+
+  if (!produtos.length) return null
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8 border-t border-gray-100">
+      <h2 className="text-lg font-black text-gray-800 mb-5">Produtos da mesma linha</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {produtos.map(p => {
+          const preco = p.promo_price && p.promo_price > 0 ? p.promo_price : p.price
+          const desconto = p.promo_price && p.promo_price > 0 && p.price > p.promo_price
+            ? Math.round((1 - p.promo_price / p.price) * 100) : 0
+          return (
+            <Link key={p.id} href={`/produto/${p.slug}`}
+              className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-green-400 hover:shadow-md transition-all group">
+              <div className="bg-gray-50 flex items-center justify-center h-40 p-3">
+                {p.main_image
+                  ? <img src={p.main_image} alt={p.name} className="h-32 object-contain group-hover:scale-105 transition-transform" />
+                  : <span className="text-5xl">💡</span>}
+              </div>
+              <div className="p-3">
+                <p className="text-xs font-semibold text-gray-700 leading-tight line-clamp-2 mb-2">{p.name}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs bg-teal-500 text-white font-black px-1.5 py-0.5 rounded">PIX</span>
+                  <span className="text-sm font-black text-green-700">R$ {brl(preco)}</span>
+                  {desconto > 0 && (
+                    <span className="text-xs bg-green-100 text-green-700 font-bold px-1.5 py-0.5 rounded-full">-{desconto}%</span>
+                  )}
+                </div>
+              </div>
+            </Link>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function ProdutoPage() {
   const { slug } = useParams<{ slug: string }>()
   const [produto, setProduto] = useState<Produto | null>(null)
@@ -96,6 +150,7 @@ export default function ProdutoPage() {
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
         <div className="inline-block w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
       </div>
+      <ProdutosRelacionados categorySlug={produto.category_slug} produtoAtualId={produto.id} />
       <Footer />
     </>
   )
@@ -107,6 +162,7 @@ export default function ProdutoPage() {
         <p className="text-gray-500 mb-4">Produto não encontrado.</p>
         <Link href="/produtos" className="text-green-600 font-bold underline">Ver todos os produtos</Link>
       </div>
+      <ProdutosRelacionados categorySlug={produto.category_slug} produtoAtualId={produto.id} />
       <Footer />
     </>
   )
@@ -152,7 +208,7 @@ export default function ProdutoPage() {
   const categoriaLabel = produto.category_slug
     ? produto.category_slug.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
     : 'Produtos'
-  const categoriaHref = produto.category_slug ? `/produtos/${produto.category_slug}` : '/produtos'
+  const categoriaHref = produto.category_slug ? `/produtos?categoria=${produto.category_slug}` : '/produtos'
 
   function handleAdd() {
     addItem({
@@ -363,6 +419,7 @@ export default function ProdutoPage() {
         </button>
       </div>
 
+      <ProdutosRelacionados categorySlug={produto.category_slug} produtoAtualId={produto.id} />
       <Footer />
     </>
   )
