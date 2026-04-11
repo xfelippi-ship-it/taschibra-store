@@ -55,6 +55,15 @@ type Produto = {
   brand?: string
 }
 
+
+type Feature = {
+  id: string
+  title: string
+  description: string | null
+  image_url: string | null
+  sort_order: number
+}
+
 function brl(v: number) {
   return v.toFixed(2).replace('.', ',')
 }
@@ -182,6 +191,12 @@ export default function ProdutoPage() {
   const [adicionado, setAdicionado] = useState(false)
   const [variacaoSelecionada, setVariacaoSelecionada] = useState<Variacao | null>(null)
   const [abaAtiva, setAbaAtiva] = useState<'descricao' | 'tecnico' | 'garantia'>('descricao')
+  const [features, setFeatures] = useState<Feature[]>([])
+  const [reviewText, setReviewText] = useState('')
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewAuthor, setReviewAuthor] = useState('')
+  const [reviewSent, setReviewSent] = useState(false)
+  const [reviews, setReviews] = useState<{id:string;author_name:string;rating:number;comment:string;verified:boolean;created_at:string}[]>([])
   const { addItem } = useCart()
 
   useEffect(() => {
@@ -194,7 +209,19 @@ export default function ProdutoPage() {
       setProduto(data)
       setLoading(false)
     }
-    if (slug) load()
+    async function loadExtras(id: string) {
+      const [{ data: feats }, { data: revs }] = await Promise.all([
+        supabase.from('product_features').select('id,title,description,image_url,sort_order').eq('product_id', id).order('sort_order'),
+        supabase.from('product_reviews').select('id,author_name,rating,comment,verified,created_at').eq('product_id', id).order('created_at', { ascending: false })
+      ])
+      setFeatures(feats || [])
+      setReviews(revs || [])
+    }
+    if (slug) load().then(() => {
+      supabase.from('products').select('id').eq('slug', slug).single().then(({ data }) => {
+        if (data?.id) loadExtras(data.id)
+      })
+    })
   }, [slug])
 
   if (loading) return (
@@ -203,6 +230,94 @@ export default function ProdutoPage() {
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
         <div className="inline-block w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
       </div>
+
+      {/* ── Avaliações ── */}
+      <div className="max-w-7xl mx-auto px-4 pb-8">
+        <div className="border-t border-gray-100 py-8">
+          <h2 className="text-lg font-black text-gray-800 mb-6 flex items-center gap-3">
+            <span className="w-1 h-5 bg-yellow-400 rounded-full block" />
+            Avaliações dos clientes
+          </h2>
+          <div className="grid md:grid-cols-[200px_1fr] gap-6 items-start">
+            {/* Painel resumo */}
+            <div className="bg-gray-50 rounded-xl p-5 text-center">
+              <div className="text-4xl font-black text-gray-800">
+                {reviews.length > 0 ? (reviews.reduce((a,r) => a + r.rating, 0) / reviews.length).toFixed(1) : '—'}
+              </div>
+              <div className="text-yellow-400 text-lg my-1">
+                {reviews.length > 0 ? '★'.repeat(Math.round(reviews.reduce((a,r) => a + r.rating,0)/reviews.length)) : '☆☆☆☆☆'}
+              </div>
+              <div className="text-xs text-gray-500">{reviews.length} avaliações</div>
+              {[5,4,3,2,1].map(star => {
+                const count = reviews.filter(r => r.rating === star).length
+                const pct = reviews.length ? Math.round(count / reviews.length * 100) : 0
+                return (
+                  <div key={star} className="flex items-center gap-2 mt-1.5 text-xs">
+                    <span className="text-gray-500 w-3">{star}</span>
+                    <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-yellow-400 rounded-full" style={{ width: pct + '%' }} />
+                    </div>
+                    <span className="text-gray-400 w-7 text-right">{pct}%</span>
+                  </div>
+                )
+              })}
+            </div>
+            {/* Lista de reviews */}
+            <div className="flex flex-col gap-3">
+              {reviews.length === 0 && (
+                <p className="text-sm text-gray-400 italic">Nenhuma avaliação ainda. Seja o primeiro!</p>
+              )}
+              {reviews.slice(0, 5).map(r => (
+                <div key={r.id} className="border border-gray-200 rounded-xl p-4 bg-white">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-xs font-bold text-green-700 flex-shrink-0">
+                      {r.author_name.slice(0,2).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-gray-800">{r.author_name}</p>
+                      <p className="text-xs text-gray-400">{r.verified ? 'Compra verificada · ' : ''}{new Date(r.created_at).toLocaleDateString('pt-BR')}</p>
+                    </div>
+                    <div className="text-yellow-400 text-sm">{'★'.repeat(r.rating)}{'☆'.repeat(5-r.rating)}</div>
+                  </div>
+                  {r.comment && <p className="text-sm text-gray-600 leading-relaxed">{r.comment}</p>}
+                </div>
+              ))}
+              {/* Form nova avaliação */}
+              {!reviewSent ? (
+                <div className="border border-dashed border-gray-300 rounded-xl p-4 bg-gray-50">
+                  <p className="text-sm font-bold text-gray-700 mb-3">Deixe sua avaliação</p>
+                  <div className="flex gap-1 mb-3">
+                    {[1,2,3,4,5].map(s => (
+                      <button key={s} onClick={() => setReviewRating(s)}
+                        className={`text-xl transition-colors ${s <= reviewRating ? 'text-yellow-400' : 'text-gray-300'}`}>★</button>
+                    ))}
+                  </div>
+                  <input value={reviewAuthor} onChange={e => setReviewAuthor(e.target.value)}
+                    placeholder="Seu nome" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-2 outline-none focus:border-green-500" />
+                  <textarea value={reviewText} onChange={e => setReviewText(e.target.value)}
+                    placeholder="Conte sua experiência com o produto..." rows={3}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 outline-none focus:border-green-500 resize-none" />
+                  <button onClick={async () => {
+                    if (!reviewAuthor.trim() || !reviewText.trim()) return
+                    await supabase.from('product_reviews').insert({
+                      product_id: produto!.id, author_name: reviewAuthor,
+                      rating: reviewRating, comment: reviewText, verified: false
+                    })
+                    setReviewSent(true)
+                  }} className="bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">
+                    Enviar avaliação
+                  </button>
+                </div>
+              ) : (
+                <div className="border border-green-200 rounded-xl p-4 bg-green-50 text-sm text-green-700 font-semibold text-center">
+                  ✅ Obrigado pela sua avaliação!
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <Footer />
     </>
   )
@@ -470,6 +585,71 @@ export default function ProdutoPage() {
         </button>
       </div>
 
+
+      {/* ── Seções inferiores ── */}
+      <div className="max-w-7xl mx-auto px-4 pb-24 md:pb-8">
+
+        {/* Detalhes + Funcionalidades — sempre visível se houver descrição */}
+        {(produto.description || features.length > 0) && (
+          <div className="border-t border-gray-100 py-8">
+            {produto.description && (
+              <>
+                <h2 className="text-lg font-black text-gray-800 mb-4 flex items-center gap-3">
+                  <span className="w-1 h-5 bg-green-600 rounded-full block" />
+                  Detalhes
+                </h2>
+                <p className="text-sm text-gray-600 leading-relaxed mb-6 max-w-3xl">{produto.description}</p>
+              </>
+            )}
+            {features.length > 0 && (
+              <>
+                <h3 className="text-base font-black text-gray-800 mb-4 flex items-center gap-3">
+                  <span className="w-1 h-5 bg-blue-500 rounded-full block" />
+                  Principais funcionalidades
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {features.map(f => (
+                    <div key={f.id} className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+                      <div className="bg-gray-50 h-28 flex items-center justify-center">
+                        {f.image_url
+                          ? <img src={f.image_url} alt={f.title} className="h-24 object-contain" />
+                          : <span className="text-4xl opacity-20">⚡</span>}
+                      </div>
+                      <div className="p-3">
+                        <p className="text-xs font-bold text-gray-800 mb-1">{f.title}</p>
+                        {f.description && <p className="text-xs text-gray-500 leading-relaxed">{f.description}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Especificações técnicas — obrigatório se tiver specs */}
+        {specs.length > 0 && (
+          <div className="border-t border-gray-100 py-8">
+            <h2 className="text-lg font-black text-gray-800 mb-4 flex items-center gap-3">
+              <span className="w-1 h-5 bg-indigo-500 rounded-full block" />
+              Especificações técnicas
+            </h2>
+            <table className="w-full text-sm border border-gray-200 rounded-xl overflow-hidden">
+              <tbody>
+                {specs.map((s, i) => (
+                  <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                    <td className="py-2.5 px-4 text-gray-500 font-medium w-1/2">
+                      <span className="flex items-center gap-1.5">{s.icon}{s.label}</span>
+                    </td>
+                    <td className="py-2.5 px-4 text-gray-800 font-semibold">{s.valor}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+      </div>
       <ProdutosRelacionados categorySlug={produto.category_slug} produtoAtualId={produto.id} />
       <Footer />
     </>
