@@ -44,7 +44,7 @@ export default function ProdutosTab() {
   // Modal produto
   const [modal, setModal] = useState(false)
   const [produtoEdit, setProdutoEdit] = useState<Partial<Produto>>({})
-  const [abaModal, setAbaModal] = useState<'dados' | 'variacoes'>('dados')
+  const [abaModal, setAbaModal] = useState<'dados' | 'variacoes' | 'funcionalidades'>('dados')
 
   // Modal variação
 
