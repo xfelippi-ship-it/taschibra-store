@@ -46,6 +46,50 @@ function calcParcelas(preco: number): { n: number; valor: string } {
   return { n: 1, valor: brl(preco) }
 }
 
+// ─── Cupom inline ────────────────────────────────────────────────────────────
+function CupomInput() {
+  const [codigo, setCodigo] = useState('')
+  const [msg, setMsg] = useState<{tipo: 'ok'|'erro'; texto: string} | null>(null)
+  const [aplicado, setAplicado] = useState(false)
+  const { applyCoupon } = useCart()
+
+  async function aplicar() {
+    if (!codigo.trim()) return
+    const result = await applyCoupon(codigo.trim().toUpperCase())
+    if (result.success) {
+      setMsg({ tipo: 'ok', texto: `Cupom "${codigo.toUpperCase()}" aplicado! ${result.message}` })
+      setAplicado(true)
+    } else {
+      setMsg({ tipo: 'erro', texto: result.message || 'Cupom inválido.' })
+    }
+  }
+
+  return (
+    <div className="mt-3">
+      <p className="text-xs font-bold text-gray-600 mb-1.5">Tem um cupom de desconto?</p>
+      <div className="flex gap-2">
+        <input
+          value={codigo}
+          onChange={e => { setCodigo(e.target.value); setMsg(null) }}
+          onKeyDown={e => e.key === 'Enter' && aplicar()}
+          placeholder="Digite o código"
+          disabled={aplicado}
+          className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500 uppercase disabled:bg-gray-50 disabled:text-gray-400"
+        />
+        <button onClick={aplicar} disabled={aplicado}
+          className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold text-sm px-4 py-2 rounded-lg transition-colors">
+          {aplicado ? '✓' : 'Aplicar'}
+        </button>
+      </div>
+      {msg && (
+        <p className={`text-xs mt-1.5 font-semibold ${msg.tipo === 'ok' ? 'text-green-600' : 'text-red-500'}`}>
+          {msg.texto}
+        </p>
+      )}
+    </div>
+  )
+}
+
 // ─── Card produto ─────────────────────────────────────────────────────────────
 function CardProduto({ p }: { p: ProdCard }) {
   const preco = p.promo_price && p.promo_price > 0 ? p.promo_price : p.price
@@ -315,17 +359,24 @@ export default function ProdutoPage() {
         <div className="mb-4 md:mb-0">
           <div className="bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-center h-64 md:h-96 overflow-hidden mb-3">
             {imagens.length > 0
-              ? <img src={imagens[imgAtiva]} alt={produto.name} className="h-56 md:h-80 object-contain" />
+              ? imagens[imgAtiva]?.match(/\.(mp4|webm|mov)/i)
+                ? <video src={imagens[imgAtiva]} controls className="h-56 md:h-80 object-contain" />
+                : <img src={imagens[imgAtiva]} alt={produto.name} className="h-56 md:h-80 object-contain" />
               : <span className="text-8xl md:text-9xl">💡</span>}
           </div>
           {imagens.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
-              {imagens.map((img, i) => (
-                <button key={i} onClick={() => setImgAtiva(i)}
-                  className={`flex-shrink-0 w-14 h-14 border-2 rounded-lg overflow-hidden transition-colors ${imgAtiva === i ? 'border-green-500' : 'border-gray-200'}`}>
-                  <img src={img} alt="" className="w-full h-full object-contain" />
-                </button>
-              ))}
+              {imagens.map((img, i) => {
+                const isVideo = img.match(/\.(mp4|webm|mov)/i)
+                return (
+                  <button key={i} onClick={() => setImgAtiva(i)}
+                    className={`flex-shrink-0 w-14 h-14 border-2 rounded-lg overflow-hidden transition-colors ${imgAtiva === i ? 'border-green-500' : 'border-gray-200'}`}>
+                    {isVideo
+                      ? <div className="w-full h-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">▶</div>
+                      : <img src={img} alt="" className="w-full h-full object-contain" />}
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>
@@ -346,6 +397,8 @@ export default function ProdutoPage() {
           </div>
           <VariacoesProduto produtoId={produto.id} onSelect={setVariacaoSelecionada} />
           <CalculaFrete produtoId={produto.id} />
+          {/* Cupom */}
+          <CupomInput />
           {/* Preço */}
           <div className="bg-green-50 border border-green-100 rounded-xl p-4 mb-4">
             {nParcelas > 1 && (
@@ -387,6 +440,8 @@ export default function ProdutoPage() {
           )}
         </div>
       </div>
+
+      {/* ── SEÇÃO 4: Similares + Complementares ── */}
 
       {/* ── SEÇÃO 1: Detalhes ── */}
       {produto.description && (
@@ -452,8 +507,18 @@ export default function ProdutoPage() {
         </div>
       )}
 
-      {/* ── SEÇÃO 4: Similares + Complementares ── */}
-      <ProdutosRelacionados categorySlug={produto.category_slug} produtoAtualId={produto.id} />
+      {/* ── SEÇÃO COMPRE JUNTO ── */}
+      {produto.sku && (
+        <div className="max-w-7xl mx-auto px-4 border-t border-gray-100 py-8">
+          <h2 className="text-lg font-black text-gray-800 mb-5 flex items-center gap-3">
+            <span className="w-1 h-5 bg-orange-400 rounded-full block" />Aproveite e compre junto
+          </h2>
+          <CompreJunto categorySlug={produto.category_slug} produtoAtual={{
+            id: produto.id, name: produto.name, slug: produto.slug,
+            price: precoCartao, promo_price: precoVista, main_image: produto.main_image
+          }} />
+        </div>
+      )}
 
       {/* ── SEÇÃO 5: Avaliações ── */}
       <div className="max-w-7xl mx-auto px-4 border-t border-gray-100 py-8 mb-24 md:mb-8">
