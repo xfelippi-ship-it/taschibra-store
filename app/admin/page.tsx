@@ -473,16 +473,18 @@ export default function AdminPage() {
     if (error || !data.user) {
       setErroLogin('E-mail ou senha incorretos.')
     } else {
-      const { data: adminData } = await supabase.from('admin_users').select('id, papel').eq('user_id', data.user.id).single()
-      if (!adminData) {
+      const { data: adminData, error: adminError } = await supabase.from('admin_users').select('id, papel').eq('user_id', data.user.id).single()
+      if (!adminData || adminError) {
         await supabase.auth.signOut()
         setErroLogin('Você não tem permissão de acesso.')
+        setLoadingLogin(false)
       } else {
-        setMeuPapel((adminData as any).papel || 'master')
+        const papelUsuario = (adminData as any).papel || 'master'
+        setMeuPapel(papelUsuario)
+        setLoadingLogin(false)
         setAutenticado(true)
       }
     }
-    setLoadingLogin(false)
   }
 
   useEffect(() => {
