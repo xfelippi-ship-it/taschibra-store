@@ -29,44 +29,42 @@ export default function Footer() {
       {/* Selos de seguranca */}
       <div className="max-w-7xl mx-auto border-t border-green-900 pt-8 pb-6">
         <p className="text-xs text-green-600 uppercase tracking-widest font-bold mb-5 text-center">Compra 100% Segura</p>
-        <div className="flex flex-wrap items-stretch justify-center gap-4">
+        <div className="flex flex-wrap items-center justify-center gap-3">
 
           {/* SSL */}
-          <div className="bg-white rounded-2xl px-6 py-4 flex flex-col items-center gap-2 shadow-sm w-32 border border-gray-100">
-            <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-7 h-7 fill-current text-green-600"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-            </div>
-            <p className="text-xs font-black text-gray-800 text-center">Site Seguro</p>
-            <p className="text-xs text-gray-400 text-center -mt-1">SSL certificado</p>
+          <div className="bg-white rounded-xl px-5 py-3 flex flex-col items-center gap-1 shadow-sm border border-gray-100 h-20 justify-center">
+            <img src="/logos/SSL SEGURANCA.png" alt="Site Seguro SSL" className="h-10 object-contain" />
+            <p className="text-[10px] text-gray-400 text-center">SSL CERTIFICADO</p>
           </div>
 
           {/* PagarMe */}
-          <div className="bg-white rounded-2xl px-6 py-4 flex flex-col items-center gap-2 shadow-sm w-32 border border-gray-100">
-            <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-7 h-7 fill-current text-emerald-600"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-            </div>
-            <p className="text-xs font-black text-gray-800 text-center">Pagar.me</p>
-            <p className="text-xs text-gray-400 text-center -mt-1">Pagamento seguro</p>
+          <div className="bg-white rounded-xl px-5 py-3 flex flex-col items-center gap-1 shadow-sm border border-gray-100 h-20 justify-center">
+            <img src="/logos/PAGAR.ME.png" alt="Pagar.me" className="h-10 object-contain" />
+            <p className="text-[10px] text-gray-400 text-center">PAGAMENTO SEGURO</p>
           </div>
 
           {/* ClearSale */}
-          <div className="bg-white rounded-2xl px-6 py-4 flex flex-col items-center gap-2 shadow-sm w-32 border border-gray-100">
-            <div className="w-12 h-12 bg-orange-50 rounded-full flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-7 h-7 fill-current text-orange-500"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            </div>
-            <p className="text-xs font-black text-gray-800 text-center">ClearSale</p>
-            <p className="text-xs text-gray-400 text-center -mt-1">Antifraude</p>
+          <div className="bg-white rounded-xl px-5 py-3 flex flex-col items-center gap-1 shadow-sm border border-gray-100 h-20 justify-center">
+            <img src="/logos/CLEAR SALE.png" alt="ClearSale Antifraude" className="h-10 object-contain" />
+            <p className="text-[10px] text-gray-400 text-center">ANTIFRAUDE</p>
           </div>
 
           {/* Melhor Envio */}
-          <div className="bg-white rounded-2xl px-6 py-4 flex flex-col items-center gap-2 shadow-sm w-32 border border-gray-100">
-            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-7 h-7 fill-current text-blue-500"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-            </div>
-            <p className="text-xs font-black text-gray-800 text-center">Melhor Envio</p>
-            <p className="text-xs text-gray-400 text-center -mt-1">Entrega garantida</p>
+          <div className="bg-white rounded-xl px-5 py-3 flex flex-col items-center gap-1 shadow-sm border border-gray-100 h-20 justify-center">
+            <img src="/logos/me_3.webp" alt="Melhor Envio" className="h-10 object-contain" />
+            <p className="text-[10px] text-gray-400 text-center">ENTREGA GARANTIDA</p>
           </div>
 
+        </div>
+
+        {/* Bandeiras de pagamento */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
+          <img src="/logos/VISA.png" alt="Visa" className="h-7 object-contain opacity-90 hover:opacity-100 transition-opacity" />
+          <img src="/logos/MASTER.png" alt="Mastercard" className="h-7 object-contain opacity-90 hover:opacity-100 transition-opacity" />
+          <img src="/logos/ELO.png" alt="Elo" className="h-7 object-contain opacity-90 hover:opacity-100 transition-opacity" />
+          <img src="/logos/PIX.png" alt="Pix" className="h-7 object-contain opacity-90 hover:opacity-100 transition-opacity" />
+          <img src="/logos/BOLETO.png" alt="Boleto" className="h-7 object-contain opacity-90 hover:opacity-100 transition-opacity" />
+          <img src="/logos/AMERICAN EXPRESS.png" alt="American Express" className="h-7 object-contain opacity-90 hover:opacity-100 transition-opacity" />
         </div>
       </div>
 
