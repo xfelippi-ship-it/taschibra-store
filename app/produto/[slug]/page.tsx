@@ -67,13 +67,47 @@ function calcParcelas(preco: number): { n: number; valor: string } {
 }
 
 
-// ─── Produtos relacionados ─────────────────────────────────────────────────
+// ─── Card de produto ──────────────────────────────────────────────────────────
+
+function ProdutoCard({ p }: { p: Produto }) {
+  const preco = p.promo_price && p.promo_price > 0 ? p.promo_price : p.price
+  const desconto = p.promo_price && p.promo_price > 0 && p.price > p.promo_price
+    ? Math.round((1 - p.promo_price / p.price) * 100) : 0
+  return (
+    <Link href={`/produto/${p.slug}`}
+      className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-green-400 hover:shadow-md transition-all group flex flex-col">
+      <div className="bg-gray-50 flex items-center justify-center h-36 p-3 relative">
+        {desconto > 0 && (
+          <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">-{desconto}%</span>
+        )}
+        {p.main_image
+          ? <img src={p.main_image} alt={p.name} className="h-28 object-contain group-hover:scale-105 transition-transform" />
+          : <span className="text-5xl">💡</span>}
+      </div>
+      <div className="p-3 flex flex-col flex-1">
+        <p className="text-xs font-semibold text-gray-700 leading-tight line-clamp-2 mb-auto pb-2">{p.name}</p>
+        <div className="flex items-center gap-1.5 flex-wrap mt-2">
+          <span className="text-xs bg-teal-500 text-white font-black px-1.5 py-0.5 rounded">PIX</span>
+          <span className="text-sm font-black text-green-700">R$ {brl(preco)}</span>
+        </div>
+        {p.price > preco && (
+          <p className="text-[10px] text-gray-400 mt-0.5">ou R$ {brl(p.price)} no cartão</p>
+        )}
+      </div>
+    </Link>
+  )
+}
+
+// ─── Seção de produtos sugeridos (similares + complementares) ─────────────────
 
 function ProdutosRelacionados({ categorySlug, produtoAtualId }: { categorySlug: string; produtoAtualId: string }) {
-  const [produtos, setProdutos] = useState<Produto[]>([])
+  const [similares, setSimilares] = useState<Produto[]>([])
+  const [complementares, setComplementares] = useState<{ label: string; produtos: Produto[] }[]>([])
 
   useEffect(() => {
     if (!categorySlug) return
+
+    // Similares — mesma categoria
     supabase
       .from('products')
       .select('id, name, slug, price, promo_price, main_image')
@@ -81,41 +115,61 @@ function ProdutosRelacionados({ categorySlug, produtoAtualId }: { categorySlug: 
       .neq('id', produtoAtualId)
       .eq('active', true)
       .limit(4)
-      .then(({ data }) => setProdutos(data || []))
+      .then(({ data }) => setSimilares(data || []))
+
+    // Regras de complementares para esta categoria
+    supabase
+      .from('complement_rules')
+      .select('target_slug, label, sort_order')
+      .eq('source_slug', categorySlug)
+      .order('sort_order')
+      .then(async ({ data: rules }) => {
+        if (!rules?.length) return
+        const grupos = await Promise.all(
+          rules.map(async (rule) => {
+            const { data: prods } = await supabase
+              .from('products')
+              .select('id, name, slug, price, promo_price, main_image')
+              .eq('category_slug', rule.target_slug)
+              .eq('active', true)
+              .limit(4)
+            return { label: rule.label, produtos: prods || [] }
+          })
+        )
+        setComplementares(grupos.filter(g => g.produtos.length > 0))
+      })
   }, [categorySlug, produtoAtualId])
 
-  if (!produtos.length) return null
+  if (!similares.length && !complementares.length) return null
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 border-t border-gray-100">
-      <h2 className="text-lg font-black text-gray-800 mb-5">Produtos da mesma linha</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {produtos.map(p => {
-          const preco = p.promo_price && p.promo_price > 0 ? p.promo_price : p.price
-          const desconto = p.promo_price && p.promo_price > 0 && p.price > p.promo_price
-            ? Math.round((1 - p.promo_price / p.price) * 100) : 0
-          return (
-            <Link key={p.id} href={`/produto/${p.slug}`}
-              className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-green-400 hover:shadow-md transition-all group">
-              <div className="bg-gray-50 flex items-center justify-center h-40 p-3">
-                {p.main_image
-                  ? <img src={p.main_image} alt={p.name} className="h-32 object-contain group-hover:scale-105 transition-transform" />
-                  : <span className="text-5xl">💡</span>}
-              </div>
-              <div className="p-3">
-                <p className="text-xs font-semibold text-gray-700 leading-tight line-clamp-2 mb-2">{p.name}</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs bg-teal-500 text-white font-black px-1.5 py-0.5 rounded">PIX</span>
-                  <span className="text-sm font-black text-green-700">R$ {brl(preco)}</span>
-                  {desconto > 0 && (
-                    <span className="text-xs bg-green-100 text-green-700 font-bold px-1.5 py-0.5 rounded-full">-{desconto}%</span>
-                  )}
-                </div>
-              </div>
-            </Link>
-          )
-        })}
-      </div>
+    <div className="border-t border-gray-100 mt-4">
+      {/* Similares */}
+      {similares.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-1 h-6 bg-green-600 rounded-full" />
+            <h2 className="text-base font-black text-gray-800">Produtos Similares</h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {similares.map(p => <ProdutoCard key={p.id} p={p} />)}
+          </div>
+        </div>
+      )}
+
+      {/* Complementares */}
+      {complementares.map(grupo => (
+        <div key={grupo.label} className="max-w-7xl mx-auto px-4 pb-8">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-1 h-6 bg-yellow-400 rounded-full" />
+            <h2 className="text-base font-black text-gray-800">Produtos Complementares</h2>
+            <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{grupo.label}</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {grupo.produtos.map(p => <ProdutoCard key={p.id} p={p} />)}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
