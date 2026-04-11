@@ -24,9 +24,12 @@ function ProdutosContent() {
   const [pagina, setPagina] = useState(1)
   const [loading, setLoading] = useState(true)
   const [titulo, setTitulo] = useState("Todos os Produtos")
+  const [ordem, setOrdem] = useState("name_asc")
+  const [precoMin, setPrecoMin] = useState("")
+  const [precoMax, setPrecoMax] = useState("")
   const { addItem } = useCart()
 
-  useEffect(() => { setPagina(1) }, [categoria, busca])
+  useEffect(() => { setPagina(1) }, [categoria, busca, ordem, precoMin, precoMax])
 
   useEffect(() => {
     async function carregar() {
@@ -34,7 +37,12 @@ function ProdutosContent() {
       const from = (pagina - 1) * PAGE_SIZE
       const to = from + PAGE_SIZE - 1
 
-      let query = supabase.from("products").select("*", { count: "exact" }).order("name", { ascending: true })
+      const [ordemCampo, ordemDir] = ordem.split("_")
+      const ascending = ordemDir === "asc"
+      const campoOrdem = ordemCampo === "name" ? "name" : ordemCampo === "preco" ? "price" : "created_at"
+      let query = supabase.from("products").select("*", { count: "exact" }).order(campoOrdem, { ascending })
+      if (precoMin) query = query.gte("price", parseFloat(precoMin))
+      if (precoMax) query = query.lte("price", parseFloat(precoMax))
       if (busca) {
         query = query.or(`name.ilike.%${busca}%,sku.ilike.%${busca}%,description.ilike.%${busca}%`)
         setTitulo(`Resultados para: "${busca}"`)
@@ -83,7 +91,7 @@ function ProdutosContent() {
       window.scrollTo({ top: 0, behavior: "smooth" })
     }
     carregar()
-  }, [categoria, pagina])
+  }, [categoria, pagina, busca, ordem, precoMin, precoMax])
 
   const totalPaginas = Math.ceil(total / PAGE_SIZE)
 
@@ -97,9 +105,38 @@ function ProdutosContent() {
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-black text-gray-800">{titulo}</h1>
           <span className="text-sm text-gray-500">{total} produtos encontrados</span>
+        </div>
+
+        {/* Barra de filtros */}
+        <div className="flex flex-wrap items-center gap-3 mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-bold text-gray-600 whitespace-nowrap">Ordenar por:</label>
+            <select value={ordem} onChange={e => setOrdem(e.target.value)}
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500 bg-white">
+              <option value="name_asc">Nome A-Z</option>
+              <option value="name_desc">Nome Z-A</option>
+              <option value="preco_asc">Menor preço</option>
+              <option value="preco_desc">Maior preço</option>
+              <option value="created_at_desc">Mais recentes</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-bold text-gray-600 whitespace-nowrap">Preço:</label>
+            <input type="number" placeholder="Mín" value={precoMin} onChange={e => setPrecoMin(e.target.value)}
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500 w-24 bg-white" />
+            <span className="text-gray-400 text-sm">—</span>
+            <input type="number" placeholder="Máx" value={precoMax} onChange={e => setPrecoMax(e.target.value)}
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500 w-24 bg-white" />
+          </div>
+          {(precoMin || precoMax || ordem !== "name_asc") && (
+            <button onClick={() => { setOrdem("name_asc"); setPrecoMin(""); setPrecoMax("") }}
+              className="text-xs text-red-500 hover:text-red-700 font-bold border border-red-200 hover:border-red-400 px-3 py-2 rounded-lg transition-colors">
+              ✕ Limpar filtros
+            </button>
+          )}
         </div>
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
