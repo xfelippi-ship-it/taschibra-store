@@ -200,7 +200,7 @@ function TodasCategoriasPanel({ onClose }: { onClose: () => void }) {
         {/* Col 3 — Painel visual */}
         {ativa && (
           <div className="flex-1 relative overflow-hidden" style={bgStyle}>
-            <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.20)' }} />
+            <div className="absolute inset-0" style={{ background: ativa?.panel_image_url ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0)' }} />
             <div className="relative z-10 p-8 flex flex-col justify-end h-full">
               {ativa.panel_title && (
                 <h3 className="text-white text-2xl font-black mb-2 leading-tight">{ativa.panel_title}</h3>
