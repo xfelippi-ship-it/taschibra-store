@@ -248,7 +248,7 @@ export default function Header() {
 
         <nav className="hidden md:block border-t border-gray-100 relative">
           <div className="max-w-7xl mx-auto px-4 flex items-stretch">
-            <button className="flex items-center gap-2 px-4 py-2.5 text-[11px] font-medium text-gray-600 hover:text-green-600 whitespace-nowrap border-b-2 border-transparent hover:border-green-500 transition-all flex-shrink-0 mr-1">
+            <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-gray-600 hover:text-green-600 whitespace-nowrap border-b-2 border-transparent hover:border-green-500 transition-all flex-shrink-0 mr-1">
               <Menu size={13} />
               Todas Categorias
             </button>
@@ -258,14 +258,14 @@ export default function Header() {
               if (item.type === 'link') return (
                 <Link key={item.slug} href={`/produtos?categoria=${encodeURIComponent(item.slug)}`}
                   onClick={closeMega}
-                  className="px-3 py-2.5 text-[11px] text-gray-600 hover:text-green-600 border-b-2 border-transparent hover:border-green-500 transition-all whitespace-nowrap flex-shrink-0 flex items-center">
+                  className="px-3 py-2.5 text-sm font-bold text-gray-700 hover:text-green-600 border-b-2 border-transparent hover:border-green-500 transition-all whitespace-nowrap flex-shrink-0 flex items-center">
                   {item.label}
                 </Link>
               )
               return (
                 <button key={item.slug}
                   onClick={() => setActiveMega(isActive ? null : item.slug)}
-                  className={`px-3 py-2.5 text-[11px] font-medium border-b-2 transition-all whitespace-nowrap flex-shrink-0 flex items-center gap-1 ${isActive ? 'text-green-600 border-green-500' : 'text-gray-600 border-transparent hover:text-green-600 hover:border-green-500'}`}>
+                  className={`px-3 py-2.5 text-sm font-bold border-b-2 transition-all whitespace-nowrap flex-shrink-0 flex items-center gap-1 ${isActive ? 'text-green-600 border-green-500' : 'text-gray-600 border-transparent hover:text-green-600 hover:border-green-500'}`}>
                   {item.label}
                   <ChevronDown size={11} className={`transition-transform ${isActive ? 'rotate-180' : ''}`} />
                 </button>
