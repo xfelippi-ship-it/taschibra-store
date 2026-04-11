@@ -185,7 +185,7 @@ function UsuariosTab() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={5} className="text-center py-8 text-gray-400">Carregando...</td></tr>
+              <tr><td colSpan={4} className="text-center py-8 text-gray-400">Carregando...</td></tr>
             ) : usuarios.length === 0 ? (
               <tr><td colSpan={5} className="text-center py-8 text-gray-400">Nenhum usuário cadastrado.</td></tr>
             ) : usuarios.map(u => {
@@ -606,21 +606,19 @@ function AuditoriaTab() {
             <tr>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Data/Hora</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Executado por</th>
-              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Afetou</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Ação</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Detalhe</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={5} className="text-center py-8 text-gray-400">Carregando...</td></tr>
+              <tr><td colSpan={4} className="text-center py-8 text-gray-400">Carregando...</td></tr>
             ) : logsFiltrados.length === 0 ? (
-              <tr><td colSpan={5} className="text-center py-8 text-gray-400">Nenhum registro encontrado.</td></tr>
+              <tr><td colSpan={4} className="text-center py-8 text-gray-400">Nenhum registro encontrado.</td></tr>
             ) : logsFiltrados.map((l, i) => (
               <tr key={l.id || i} className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="px-5 py-3 text-xs text-gray-500 whitespace-nowrap">{new Date(l.created_at).toLocaleString('pt-BR')}</td>
                 <td className="px-5 py-3 text-sm text-gray-700 font-bold">{l.executed_by || l.user_email}</td>
-                <td className="px-5 py-3 text-sm text-gray-500">{l.user_email !== l.executed_by ? l.user_email : '—'}</td>
                 <td className="px-5 py-3">
                   <span className={`text-xs font-bold px-2 py-1 rounded-full ${acaoCor[l.acao] || 'bg-gray-100 text-gray-600'}`}>
                     {l.acao?.replace(/_/g, ' ')}
