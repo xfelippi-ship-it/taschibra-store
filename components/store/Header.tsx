@@ -174,7 +174,7 @@ function TodasCategoriasPanel({ onClose }: { onClose: () => void }) {
               <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
                 style={{ background: cat.panel_bg_color || '#1e7a3c' }}>
                 {cat.icon_svg
-                  ? <div className="w-4 h-4" dangerouslySetInnerHTML={{ __html: cat.icon_svg }} />
+                <div className="w-4 h-4" dangerouslySetInnerHTML={{ __html: getIcone(cat.slug) }} />
                   : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/></svg>
                 }
               </div>
