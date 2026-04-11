@@ -328,7 +328,7 @@ export default function ProdutosTab() {
                   Variações {variacoesPorProduto[produtoEdit.id!] ? `(${variacoesPorProduto[produtoEdit.id!].length})` : ''}
 
               {abaModal === 'funcionalidades' && produtoEdit.id && (
-              <div className="space-y-4">
+              <div className="space-y-3 overflow-y-auto max-h-[55vh] pr-1">
               <p className="text-xs text-gray-500">Cadastre até 4 funcionalidades. Campos em branco não são exibidos.</p>
               {features.slice(0, 4).map((f, i) => (
               <div key={i} className="border border-gray-200 rounded-xl p-4 space-y-3">
