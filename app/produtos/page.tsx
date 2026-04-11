@@ -24,7 +24,7 @@ function ProdutosContent() {
   const [pagina, setPagina] = useState(1)
   const [loading, setLoading] = useState(true)
   const [titulo, setTitulo] = useState("Todos os Produtos")
-  const [ordem, setOrdem] = useState("name_asc")
+  const [ordem, setOrdem] = useState("sort_asc")
   const [precoMin, setPrecoMin] = useState("")
   const [precoMax, setPrecoMax] = useState("")
   const { addItem } = useCart()
@@ -39,7 +39,7 @@ function ProdutosContent() {
 
       const [ordemCampo, ordemDir] = ordem.split("_")
       const ascending = ordemDir === "asc"
-      const campoOrdem = ordemCampo === "name" ? "name" : ordemCampo === "preco" ? "price" : ordemCampo === "sales" ? "sales_count" : "created_at"
+      const campoOrdem = ordemCampo === "name" ? "name" : ordemCampo === "preco" ? "price" : ordemCampo === "sales" ? "sales_count" : ordemCampo === "sort" ? "sort_order" : "created_at"
       let query = supabase.from("products").select("*", { count: "exact" }).order(campoOrdem, { ascending })
       if (precoMin) query = query.gte("price", parseFloat(precoMin))
       if (precoMax) query = query.lte("price", parseFloat(precoMax))
@@ -116,6 +116,7 @@ function ProdutosContent() {
             <label className="text-xs font-bold text-gray-600 whitespace-nowrap">Ordenar por:</label>
             <select value={ordem} onChange={e => setOrdem(e.target.value)}
               className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500 bg-white">
+              <option value="sort_asc">Relevância</option>
               <option value="name_asc">Nome A-Z</option>
               <option value="name_desc">Nome Z-A</option>
               <option value="preco_asc">Menor preço</option>
