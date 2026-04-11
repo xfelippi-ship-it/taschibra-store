@@ -69,6 +69,100 @@ function CardProduto({ p }: { p: ProdCard }) {
   )
 }
 
+// ─── Compre junto ────────────────────────────────────────────────────────────
+function CompreJunto({ categorySlug, produtoAtual }: {
+  categorySlug: string
+  produtoAtual: { id: string; name: string; slug: string; price: number; promo_price: number; main_image?: string }
+}) {
+  const [sugestoes, setSugestoes] = useState<ProdCard[]>([])
+  const [selecionados, setSelecionados] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    supabase.from('complement_rules').select('target_slug').eq('source_slug', categorySlug).order('sort_order').limit(2)
+      .then(async ({ data: rules }) => {
+        if (!rules?.length) return
+        const slugs = (rules as any[]).map(r => r.target_slug)
+        const { data } = await supabase.from('products')
+          .select('id,name,slug,price,promo_price,main_image')
+          .in('category_slug', slugs).eq('active', true).limit(2)
+        if (data?.length) {
+          setSugestoes(data)
+          setSelecionados(new Set(data.map((p: ProdCard) => p.id)))
+        }
+      })
+  }, [categorySlug])
+
+  if (!sugestoes.length) return null
+
+  const todos = [produtoAtual, ...sugestoes]
+  const totalOriginal = todos.reduce((a, p) => a + p.price, 0)
+  const totalPix = todos
+    .filter(p => !selecionados.size || p.id === produtoAtual.id || selecionados.has(p.id))
+    .reduce((a, p) => {
+      const preco = p.promo_price && p.promo_price > 0 ? p.promo_price : p.price
+      return a + preco
+    }, 0)
+  const desconto = Math.round((1 - totalPix / totalOriginal) * 100)
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 flex-wrap">
+        {/* Produto atual */}
+        <div className="flex flex-col items-center gap-2 w-36">
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 w-full flex items-center justify-center h-28">
+            {produtoAtual.main_image
+              ? <img src={produtoAtual.main_image} alt={produtoAtual.name} className="h-20 object-contain" />
+              : <span className="text-4xl opacity-20">💡</span>}
+          </div>
+          <p className="text-[11px] text-gray-600 text-center leading-tight line-clamp-2">{produtoAtual.name}</p>
+          <p className="text-xs font-black text-green-700">R$ {brl(produtoAtual.promo_price > 0 ? produtoAtual.promo_price : produtoAtual.price)}</p>
+          <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">Este item</span>
+        </div>
+
+        {sugestoes.map(p => {
+          const preco = p.promo_price && p.promo_price > 0 ? p.promo_price : p.price
+          const selecionado = selecionados.has(p.id)
+          return (
+            <div key={p.id} className="flex items-center gap-3">
+              <span className="text-2xl text-gray-300 font-light">+</span>
+              <div className="flex flex-col items-center gap-2 w-36">
+                <div
+                  onClick={() => setSelecionados(prev => {
+                    const next = new Set(prev)
+                    if (next.has(p.id)) next.delete(p.id); else next.add(p.id)
+                    return next
+                  })}
+                  className={`relative bg-gray-50 border-2 rounded-xl p-3 w-full flex items-center justify-center h-28 cursor-pointer transition-colors ${selecionado ? 'border-green-500' : 'border-gray-200 opacity-60'}`}>
+                  {selecionado && <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center text-white text-[10px]">✓</span>}
+                  {p.main_image
+                    ? <img src={p.main_image} alt={p.name} className="h-20 object-contain" />
+                    : <span className="text-4xl opacity-20">💡</span>}
+                </div>
+                <p className="text-[11px] text-gray-600 text-center leading-tight line-clamp-2">{p.name}</p>
+                <p className="text-xs font-black text-green-700">R$ {brl(preco)}</p>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Total + botão */}
+      <div className="mt-5 flex items-center gap-4 flex-wrap bg-green-50 border border-green-100 rounded-xl p-4">
+        <div>
+          <p className="text-xs text-gray-500">Total dos itens selecionados</p>
+          <p className="text-xs text-gray-400 line-through">De R$ {brl(totalOriginal)}</p>
+          <p className="text-xl font-black text-green-700">R$ {brl(totalPix)} <span className="text-sm font-normal text-green-600">no PIX</span></p>
+          {desconto > 0 && <p className="text-xs text-green-600 font-bold">Economia de R$ {brl(totalOriginal - totalPix)} ({desconto}% off)</p>}
+        </div>
+        <Link href="/carrinho"
+          className="bg-green-600 hover:bg-green-700 text-white font-black text-sm px-6 py-3 rounded-xl transition-colors flex items-center gap-2 ml-auto">
+          <ShoppingCart size={16} /> Comprar kit
+        </Link>
+      </div>
+    </div>
+  )
+}
+
 // ─── Produtos relacionados ────────────────────────────────────────────────────
 function ProdutosRelacionados({ categorySlug, produtoAtualId }: { categorySlug: string; produtoAtualId: string }) {
   const [similares, setSimilares] = useState<ProdCard[]>([])
@@ -284,11 +378,13 @@ export default function ProdutoPage() {
               <Heart size={15} /> Favoritar
             </button>
           </div>
-          {/* Garantia */}
-          <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-lg px-4 py-3 text-sm text-gray-600">
-            <Shield size={16} className="text-green-600 flex-shrink-0" />
-            <span><strong>Garantia:</strong> {garantia}</span>
-          </div>
+          {/* Garantia — só aparece se preenchida */}
+          {(produto.warranty || produto.warranty_months) && (
+            <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-lg px-4 py-3 text-sm text-gray-600">
+              <Shield size={16} className="text-green-600 flex-shrink-0" />
+              <span><strong>Garantia:</strong> {garantia}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -343,7 +439,20 @@ export default function ProdutoPage() {
         </div>
       )}
 
-      {/* ── SEÇÃO 4: Similares + Complementares ── */}
+      {/* ── SEÇÃO COMPRE JUNTO ── */}
+      {produto.sku && (
+        <div className="max-w-7xl mx-auto px-4 border-t border-gray-100 py-8">
+          <h2 className="text-lg font-black text-gray-800 mb-5 flex items-center gap-3">
+            <span className="w-1 h-5 bg-orange-400 rounded-full block" />Aproveite e compre junto
+          </h2>
+          <CompreJunto categorySlug={produto.category_slug} produtoAtual={{
+            id: produto.id, name: produto.name, slug: produto.slug,
+            price: precoCartao, promo_price: precoVista, main_image: produto.main_image
+          }} />
+        </div>
+      )}
+
+      {/* ── SEÇÃO 4: Similares + Complementares ── */
       <ProdutosRelacionados categorySlug={produto.category_slug} produtoAtualId={produto.id} />
 
       {/* ── SEÇÃO 5: Avaliações ── */}
