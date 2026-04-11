@@ -70,7 +70,8 @@ function UsuariosTab() {
           email: email.trim(),
           role: 'admin',
           papeis: papeisSelecionados,
-          ativo: true
+          ativo: true,
+          status: 'aguardando'
         })
       }
       await supabase.from('audit_log').insert({
@@ -242,8 +243,12 @@ function UsuariosTab() {
                     </div>
                   </td>
                   <td className="px-5 py-4">
-                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${ativo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
-                      {ativo ? 'Ativo' : 'Inativo'}
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                      !ativo ? 'bg-red-100 text-red-600' :
+                      u.status === 'aguardando' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-green-100 text-green-700'
+                    }`}>
+                      {!ativo ? 'Inativo' : u.status === 'aguardando' ? 'Aguardando' : 'Ativo'}
                     </span>
                   </td>
                   <td className="px-5 py-4 text-sm text-gray-500">
