@@ -5,6 +5,7 @@ import BannersTab from '@/components/admin/BannersTab'
 import ProdutosTab from '@/components/admin/ProdutosTab'
 import DashboardTab from '@/components/admin/DashboardTab'
 import TopBarTab from '@/components/admin/TopBarTab'
+import CategoriasTab from '@/components/admin/CategoriasTab'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Package, ShoppingBag, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone } from 'lucide-react'
@@ -439,7 +440,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -559,6 +560,7 @@ export default function AdminPage() {
             { id: 'usuarios', label: 'Usuários', icon: <Users size={16} /> },
             { id: 'banners', label: 'Banners', icon: <ImageIcon size={16} /> },
             { id: 'topbar', label: 'Top Bar', icon: <Megaphone size={16} /> },
+            { id: 'categorias', label: 'Categorias', icon: <Tag size={16} /> },
           ].map(item => (
             <button key={item.id} onClick={() => setAba(item.id as any)}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
@@ -622,6 +624,7 @@ export default function AdminPage() {
         {aba === 'usuarios' && <UsuariosTab />}
         {aba === 'banners' && <BannersTab />}
         {aba === 'topbar' && <TopBarTab />}
+        {aba === 'categorias' && <CategoriasTab />}
       </main>
 
       {modal && (
