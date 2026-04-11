@@ -165,7 +165,7 @@ function ProdutosRelacionados({ categorySlug, produtoAtualId }: { categorySlug: 
             <h2 className="text-base font-black text-gray-800">Produtos Complementares</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {complementares.flatMap(grupo => grupo.produtos).slice(0, 8).map(p => <ProdutoCard key={p.id} p={p} />)}
+            {complementares.flatMap(grupo => grupo.produtos).slice(0, 4).map(p => <ProdutoCard key={p.id} p={p} />)}
           </div>
         </div>
       )}
