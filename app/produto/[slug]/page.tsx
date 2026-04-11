@@ -157,19 +157,18 @@ function ProdutosRelacionados({ categorySlug, produtoAtualId }: { categorySlug: 
         </div>
       )}
 
-      {/* Complementares */}
-      {complementares.map(grupo => (
-        <div key={grupo.label} className="max-w-7xl mx-auto px-4 pb-8">
+      {/* Complementares — todos os grupos numa única seção */}
+      {complementares.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 pb-8">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-1 h-6 bg-yellow-400 rounded-full" />
             <h2 className="text-base font-black text-gray-800">Produtos Complementares</h2>
-            <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{grupo.label}</span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {grupo.produtos.map(p => <ProdutoCard key={p.id} p={p} />)}
+            {complementares.flatMap(grupo => grupo.produtos).slice(0, 8).map(p => <ProdutoCard key={p.id} p={p} />)}
           </div>
         </div>
-      ))}
+      )}
     </div>
   )
 }
