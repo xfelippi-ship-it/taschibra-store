@@ -69,6 +69,9 @@ export default function DadosPage() {
 
   // Preferências
   const [aceitaMarketing, setAceitaMarketing] = useState(false)
+  const [confirmaExclusao, setConfirmaExclusao] = useState(false)
+  const [senhaExclusao, setSenhaExclusao] = useState('')
+  const [excluindo, setExcluindo] = useState(false)
 
   useEffect(() => {
     const salvo = localStorage.getItem('cliente_logado')
@@ -118,6 +121,23 @@ export default function DadosPage() {
   function feedback(msg: string, tipo: 'ok' | 'erro') {
     if (tipo === 'ok') { setSucesso(msg); setTimeout(() => setSucesso(''), 3000) }
     else { setErro(msg); setTimeout(() => setErro(''), 4000) }
+  }
+
+  async function excluirConta() {
+    if (!senhaExclusao.trim()) return
+    setExcluindo(true)
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: user?.email || '', password: senhaExclusao
+      })
+      if (error) { alert('Senha incorreta.'); setExcluindo(false); return }
+      await supabase.from('customer_addresses').delete().eq('customer_id', customer?.id || '')
+      await supabase.from('customers').delete().eq('auth_user_id', user?.id || '')
+      await supabase.auth.signOut()
+      alert('Conta excluída. Seus dados foram removidos.')
+      window.location.href = '/'
+    } catch { alert('Erro ao excluir conta.') }
+    setExcluindo(false)
   }
 
   async function salvarDadosPessoais() {
@@ -443,9 +463,30 @@ export default function DadosPage() {
           <div className="border-t border-gray-100 pt-5">
             <p className="text-sm font-black text-red-600 mb-2">Aviso</p>
             <p className="text-xs text-gray-500 mb-3">A exclusão da conta remove permanentemente todos os seus dados, pedidos e informações pessoais.</p>
-            <button className="text-sm text-red-500 hover:text-red-700 font-bold border border-red-200 hover:border-red-400 px-4 py-2 rounded-lg transition-colors">
-              Solicitar exclusão de conta
-            </button>
+            {!confirmaExclusao ? (
+              <button onClick={() => setConfirmaExclusao(true)}
+                className="text-sm text-red-500 hover:text-red-700 font-bold border border-red-200 hover:border-red-400 px-4 py-2 rounded-lg transition-colors">
+                Solicitar exclusão de conta
+              </button>
+            ) : (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
+                <p className="text-sm font-black text-red-700">Confirme a exclusão</p>
+                <p className="text-xs text-red-600">Esta ação é irreversível. Digite sua senha para confirmar.</p>
+                <input type="password" value={senhaExclusao} onChange={e => setSenhaExclusao(e.target.value)}
+                  placeholder="Digite sua senha"
+                  className="w-full border border-red-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-red-500" />
+                <div className="flex gap-2">
+                  <button onClick={() => { setConfirmaExclusao(false); setSenhaExclusao('') }}
+                    className="flex-1 border border-gray-200 text-gray-600 font-bold py-2 rounded-lg text-sm hover:bg-gray-50">
+                    Cancelar
+                  </button>
+                  <button onClick={excluirConta} disabled={excluindo || !senhaExclusao.trim()}
+                    className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-black py-2 rounded-lg text-sm">
+                    {excluindo ? 'Excluindo...' : 'Confirmar exclusão'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
           <button onClick={salvarDadosPessoais} disabled={salvando}
             className="w-full bg-green-600 hover:bg-green-700 text-white font-black py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
