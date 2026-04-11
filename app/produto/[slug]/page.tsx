@@ -162,7 +162,6 @@ export default function ProdutoPage() {
         <p className="text-gray-500 mb-4">Produto não encontrado.</p>
         <Link href="/produtos" className="text-green-600 font-bold underline">Ver todos os produtos</Link>
       </div>
-      <ProdutosRelacionados categorySlug={produto.category_slug} produtoAtualId={produto.id} />
       <Footer />
     </>
   )
