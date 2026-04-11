@@ -80,8 +80,8 @@ export default function Footer() {
         <div style={{borderTop:'1px solid #1a4a2a', padding:'16px 0', display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'8px'}}>
           <span style={{color:'#6aab7a', fontSize:'11px'}}>© 2026 Taschibra &nbsp; CNPJ 83.600.393/0001-53</span>
           <div style={{display:'flex', gap:'16px'}}>
-            <a href="/privacidade" style={{color:'#6aab7a', fontSize:'11px', textDecoration:'none'}}>Política de Privacidade</a>
-            <a href="/termos" style={{color:'#6aab7a', fontSize:'11px', textDecoration:'none'}}>Termos de Uso</a>
+            <a href="/privacidade" style={{color:'#6aab7a', fontSize:'12px', textDecoration:'none'}}>Política de Privacidade</a>
+            <a href="/termos" style={{color:'#6aab7a', fontSize:'12px', textDecoration:'none'}}>Termos de Uso</a>
           </div>
         </div>
 
