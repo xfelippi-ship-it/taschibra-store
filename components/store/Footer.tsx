@@ -4,18 +4,12 @@ export default function Footer() {
 
       {/* Colunas principais */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-10">
-
-        {/* Logo + descricao */}
         <div>
-          <div className="mb-4">
-            <img src="/images/logo.png" alt="Taschibra Store" className="h-10 w-auto object-contain" />
-          </div>
-          <p className="text-sm text-green-400 leading-relaxed mt-2">
+          <img src="/images/logo.png" alt="Taschibra Store" className="h-10 object-contain mb-3" />
+          <p style={{fontSize:'13px', color:'#6aab7a', lineHeight:'1.6', margin:0}}>
             Uma das maiores industrias de iluminacao da America Latina. Sede em Indaial/SC. Mais de 30 anos iluminando o Brasil.
           </p>
         </div>
-
-        {/* Links */}
         {[
           { title: 'Comprando', links: ['Segurança', 'Termos de Uso', 'Política de Troca', 'Privacidade'] },
           { title: 'Atendimento', links: ['Minha Conta', 'Meus Pedidos', 'FAQ', '(47) 3281-7640'] },
@@ -25,79 +19,50 @@ export default function Footer() {
             <h4 className="text-white font-black text-xs tracking-widest uppercase mb-4">{col.title}</h4>
             <ul className="space-y-2">
               {col.links.map((l, j) => (
-                <li key={j}><a href="#" className="text-sm text-green-400 hover:text-white transition-colors">{l}</a></li>
+                <li key={j}><a href="#" style={{color:'#6aab7a', fontSize:'13px', textDecoration:'none'}}>{l}</a></li>
               ))}
             </ul>
           </div>
         ))}
       </div>
 
-      {/* Selos + bandeiras */}
-      <div className="max-w-7xl mx-auto border-t border-green-900 pt-8 pb-6">
-
-        <p className="text-xs text-green-500 uppercase tracking-widest font-bold mb-6 text-center">Compra 100% Segura</p>
-
-        {/* 4 selos grandes */}
-        <div className="flex flex-wrap items-stretch justify-center gap-3 mb-6">
+      {/* Selos */}
+      <div className="max-w-7xl mx-auto" style={{borderTop:'1px solid #1a4a2a', padding:'32px 0 28px'}}>
+        <p style={{color:'#4a8a5a', fontSize:'11px', letterSpacing:'2px', fontWeight:700, textAlign:'center', margin:'0 0 24px', textTransform:'uppercase'}}>Compra 100% Segura</p>
+        <div style={{display:'flex', justifyContent:'center', gap:'16px'}}>
           {[
             { img: '/logos/SSL SEGURANCA.png', label: 'SSL Certificado' },
             { img: '/logos/PAGAR.ME.png',      label: 'Pagamento Seguro' },
             { img: '/logos/CLEAR SALE.png',    label: 'Antifraude' },
             { img: '/logos/MELHOR ENVIO.png',  label: 'Entrega Garantida' },
           ].map((selo) => (
-            <div
-              key={selo.label}
-              className="flex flex-col items-center justify-center bg-white rounded-xl gap-3"
-              style={{ width: '160px', height: '110px', padding: '16px 20px' }}
-            >
-              <img src={selo.img} alt={selo.label} className="h-12 w-auto object-contain" />
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-wide text-center leading-tight">
-                {selo.label}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Bandeiras centralizadas */}
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          {[
-            { img: '/logos/VISA.png',             alt: 'Visa' },
-            { img: '/logos/MASTER.png',           alt: 'Mastercard' },
-            { img: '/logos/ELO.png',              alt: 'Elo' },
-            { img: '/logos/PIX.png',              alt: 'Pix' },
-            { img: '/logos/BOLETO.png',           alt: 'Boleto' },
-            { img: '/logos/AMERICAN EXPRESS.png', alt: 'American Express' },
-          ].map((b) => (
-            <div key={b.alt} className="bg-white rounded-lg flex items-center justify-center"
-              style={{ width: '64px', height: '40px', padding: '4px 8px' }}>
-              <img src={b.img} alt={b.alt} className="h-6 w-auto object-contain" />
+            <div key={selo.label} style={{display:'flex', flexDirection:'column', alignItems:'center', gap:'6px'}}>
+              <img src={selo.img} alt={selo.label} style={{height:'62px', width:'160px', objectFit:'contain'}} />
+              <span style={{color:'#6aab7a', fontSize:'10px', fontWeight:700, letterSpacing:'1px', textTransform:'uppercase'}}>{selo.label}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Rodape inferior */}
-      <div className="max-w-7xl mx-auto border-t border-green-900 pt-6">
+      {/* Rodapé inferior */}
+      <div className="max-w-7xl mx-auto" style={{borderTop:'1px solid #1a4a2a', padding:'20px 0 0'}}>
 
         {/* Links uteis */}
-        <div className="flex flex-wrap items-center justify-start gap-6 text-xs text-green-600 mb-3">
-          <a href="#" className="hover:text-white transition-colors">Atendimento</a>
-          <a href="#" className="hover:text-white transition-colors">Compra Segura</a>
-          <a href="#" className="hover:text-white transition-colors">Perguntas Frequentes</a>
-          <a href="#" className="hover:text-white transition-colors">Política de Entrega</a>
-          <span>📞 (47) 99149-3270</span>
+        <div style={{display:'flex', gap:'24px', marginBottom:'16px', flexWrap:'wrap'}}>
+          {['Atendimento','Compra Segura','Perguntas Frequentes','Política de Entrega'].map(l => (
+            <a key={l} href="#" style={{color:'#6aab7a', fontSize:'12px', textDecoration:'none'}}>{l}</a>
+          ))}
+          <span style={{color:'#6aab7a', fontSize:'12px'}}>📞 (47) 99149-3270</span>
         </div>
 
-        {/* Razao social + bandeiras lado a lado */}
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="text-xs text-green-700 space-y-1">
-            <p>Blumenox Iluminacao LTDA — CNPJ: 02.477.605/0001-01</p>
-            <p>Rodovia BR 470 KM 65.931, n 2135 — Encano do Norte, Indaial/SC — CEP 89085-144</p>
-            <p>Taschibra Store 2025 — Todos os direitos reservados</p>
+        {/* Razao social + bandeiras */}
+        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px', gap:'16px', flexWrap:'wrap'}}>
+          <div>
+            <p style={{color:'#6aab7a', fontSize:'11px', lineHeight:'1.9', margin:0}}>Blumenox Iluminacao LTDA — CNPJ: 02.477.605/0001-01</p>
+            <p style={{color:'#6aab7a', fontSize:'11px', lineHeight:'1.9', margin:0}}>Rodovia BR 470 KM 65.931, n 2135 — Encano do Norte, Indaial/SC — CEP 89085-144</p>
+            <p style={{color:'#6aab7a', fontSize:'11px', lineHeight:'1.9', margin:0}}>Taschibra Store 2025 — Todos os direitos reservados</p>
           </div>
-
-          {/* Bandeiras no rodape direito */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div style={{display:'flex', gap:'0px', alignItems:'center'}}>
             {[
               { img: '/logos/VISA.png',             alt: 'Visa' },
               { img: '/logos/MASTER.png',           alt: 'Mastercard' },
@@ -105,25 +70,22 @@ export default function Footer() {
               { img: '/logos/PIX.png',              alt: 'Pix' },
               { img: '/logos/BOLETO.png',           alt: 'Boleto' },
               { img: '/logos/AMERICAN EXPRESS.png', alt: 'American Express' },
-            ].map((b) => (
-              <div key={b.alt} className="bg-white rounded flex items-center justify-center"
-                style={{ width: '52px', height: '32px', padding: '3px 6px' }}>
-                <img src={b.img} alt={b.alt} className="h-5 w-auto object-contain" />
-              </div>
+            ].map((b, i, arr) => (
+              <img key={b.alt} src={b.img} alt={b.alt} style={{height:'36px', width:'72px', objectFit:'contain', marginRight: i < arr.length - 1 ? '-10px' : '0'}} />
             ))}
           </div>
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-green-900 mt-4 pt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-green-700">
-          <span>© 2026 Taschibra &nbsp; CNPJ 83.600.393/0001-53</span>
-          <div className="flex gap-4">
-            <a href="/privacidade" className="hover:text-white transition-colors">Política de Privacidade</a>
-            <a href="/termos" className="hover:text-white transition-colors">Termos de Uso</a>
+        <div style={{borderTop:'1px solid #1a4a2a', padding:'16px 0', display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'8px'}}>
+          <span style={{color:'#6aab7a', fontSize:'11px'}}>© 2026 Taschibra &nbsp; CNPJ 83.600.393/0001-53</span>
+          <div style={{display:'flex', gap:'16px'}}>
+            <a href="/privacidade" style={{color:'#6aab7a', fontSize:'11px', textDecoration:'none'}}>Política de Privacidade</a>
+            <a href="/termos" style={{color:'#6aab7a', fontSize:'11px', textDecoration:'none'}}>Termos de Uso</a>
           </div>
         </div>
-      </div>
 
+      </div>
     </footer>
   )
 }
