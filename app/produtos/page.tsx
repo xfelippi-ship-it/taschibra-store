@@ -38,7 +38,7 @@ function ProdutosContent() {
       const from = (pagina - 1) * PAGE_SIZE
       const to = from + PAGE_SIZE - 1
 
-      let query = supabase.from("products").select("*", { count: "exact" }).order("name")
+      let query = supabase.from("products").select("*", { count: "exact" }).order("name", { ascending: true })
       if (busca) {
         query = query.or(`name.ilike.%${busca}%,sku.ilike.%${busca}%,description.ilike.%${busca}%`)
         setTitulo(`Resultados para: "${busca}"`)
