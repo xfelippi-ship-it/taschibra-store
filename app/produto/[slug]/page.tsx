@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
-import { ShoppingCart, Heart, Shield, ChevronRight, Star, Package, Zap, Thermometer, Ruler } from 'lucide-react'
+import { ShoppingCart, Heart, Shield, ChevronRight, Star, Package, Zap, Thermometer, Ruler, Tag, X, Check } from 'lucide-react'
 import CalculaFrete from '@/components/store/CalculaFrete'
 import VariacoesProduto from '@/components/store/VariacoesProduto'
 import { useCart } from '@/contexts/CartContext'
@@ -52,48 +52,118 @@ function calcParcelas(preco: number): { n: number; valor: string } {
 }
 
 // ─── Cupom ───────────────────────────────────────────────────────────────────
-function CupomInput({ subtotal, items }: { subtotal: number; items: { id: string; qty: number }[] }) {
+function CupomInput({ subtotal }: { subtotal: number }) {
+  const { cupons, addCupom, removeCupom, total } = useCart()
   const [codigo, setCodigo] = useState('')
-  const [msg, setMsg] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null)
-  const [aplicado, setAplicado] = useState(false)
+  const [erro, setErro] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [disponiveis, setDisponiveis] = useState<import('@/contexts/CartContext').Cupom[]>([])
 
-  async function aplicar() {
-    if (!codigo.trim()) return
+  useEffect(() => {
+    supabase.from('coupons')
+      .select('code,description,discount_type,discount_value,free_shipping,scope')
+      .eq('active', true)
+      .limit(6)
+      .then(({ data }) => setDisponiveis(data || []))
+  }, [])
+
+  async function aplicar(code?: string) {
+    const cod = (code || codigo).trim().toUpperCase()
+    if (!cod) return
+    if (cupons.find(c => c.code === cod)) { setErro('Este cupom já foi aplicado'); return }
+    if (cupons.length >= 2) { setErro('Máximo de 2 cupons por compra'); return }
+    setLoading(true); setErro('')
     try {
+      const descontoFixo = cupons.filter(c => c.discount_type === 'fixed').reduce((a, c) => a + c.discount_amount, 0)
+      const saldo = Math.max(0, total - descontoFixo)
       const res = await fetch('/api/cupom', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: codigo.trim().toUpperCase(), subtotal, items }),
+        body: JSON.stringify({ code: cod, subtotal: saldo, items: [] }),
       })
       const data = await res.json()
-      if (!res.ok) {
-        setMsg({ tipo: 'erro', texto: data.error || 'Cupom inválido.' })
-      } else {
-        setMsg({ tipo: 'ok', texto: `Cupom "${codigo.toUpperCase()}" aplicado! ${data.description || ''}` })
-        setAplicado(true)
-      }
-    } catch {
-      setMsg({ tipo: 'erro', texto: 'Erro ao validar cupom.' })
-    }
+      if (!res.ok) { setErro(data.error || 'Cupom inválido') }
+      else { addCupom(data); setCodigo(''); setErro('') }
+    } catch { setErro('Erro ao validar cupom') }
+    setLoading(false)
   }
 
   return (
-    <div className="mt-3">
-      <p className="text-xs font-bold text-gray-600 mb-1.5">Tem um cupom de desconto?</p>
-      <div className="flex gap-2">
-        <input value={codigo} onChange={e => { setCodigo(e.target.value); setMsg(null) }}
-          onKeyDown={e => e.key === 'Enter' && aplicar()}
-          placeholder="Digite o código" disabled={aplicado}
-          className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500 uppercase disabled:bg-gray-50 disabled:text-gray-400" />
-        <button onClick={aplicar} disabled={aplicado}
-          className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold text-sm px-4 py-2 rounded-lg transition-colors">
-          {aplicado ? '✓' : 'Aplicar'}
-        </button>
-      </div>
-      {msg && (
-        <p className={`text-xs mt-1.5 font-semibold ${msg.tipo === 'ok' ? 'text-green-600' : 'text-red-500'}`}>
-          {msg.texto}
-        </p>
+    <div className="mt-3 space-y-2">
+      {/* Cupons aplicados */}
+      {cupons.length > 0 && (
+        <div className="space-y-1.5">
+          {cupons.map(cp => (
+            <div key={cp.code} className="bg-green-50 border border-green-200 rounded-xl px-3 py-2 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Tag size={12} className="text-green-600 flex-shrink-0" />
+                <div>
+                  <p className="text-xs font-black text-green-800">{cp.code}</p>
+                  <p className="text-xs text-green-600">
+                    {cp.discount_type === 'percent' || cp.discount_type === 'percentage'
+                      ? `${Number(cp.discount_value).toFixed(0)}% off · -R$ ${cp.discount_amount.toFixed(2).replace('.', ',')}`
+                      : `R$ ${Number(cp.discount_value).toFixed(0)} off`}
+                    {cp.free_shipping ? ' · Frete grátis' : ''}
+                  </p>
+                </div>
+              </div>
+              <button onClick={() => removeCupom(cp.code)} className="text-gray-300 hover:text-red-500 transition-colors">
+                <X size={13} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      {/* Input */}
+      {cupons.length < 2 && (
+        <div>
+          <div className="flex gap-2">
+            <input value={codigo} onChange={e => { setCodigo(e.target.value.toUpperCase()); setErro('') }}
+              onKeyDown={e => e.key === 'Enter' && aplicar()}
+              placeholder="CUPOM DE DESCONTO"
+              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-green-500 uppercase" />
+            <button onClick={() => aplicar()} disabled={loading || !codigo.trim()}
+              className="bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-700 font-bold text-sm px-4 rounded-lg transition-colors">
+              {loading ? '...' : 'OK'}
+            </button>
+          </div>
+          {erro && <p className="text-red-500 text-xs mt-1 font-medium">{erro}</p>}
+        </div>
+      )}
+      {/* Cupons sugeridos */}
+      {disponiveis.length > 0 && (
+        <div>
+          <p className="text-xs font-bold text-gray-500 mb-1.5 flex items-center gap-1">
+            <Tag size={11} /> Cupons disponíveis
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {disponiveis.map(cp => {
+              const aplicado = cupons.find(c => c.code === cp.code)
+              return (
+                <button key={cp.code}
+                  onClick={() => { if (!aplicado && cupons.length < 2) aplicar(cp.code) }}
+                  disabled={!!aplicado || cupons.length >= 2}
+                  className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full border transition-all ${
+                    aplicado ? 'bg-green-100 border-green-400 text-green-800 font-black cursor-default'
+                    : cupons.length >= 2 ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-white border-green-200 text-green-700 font-bold hover:bg-green-50 hover:border-green-400'}`}>
+                  {aplicado ? <Check size={9} /> : <Tag size={9} />}
+                  {cp.code}
+                  <span className="font-normal">
+                    {cp.discount_type === 'percent' || cp.discount_type === 'percentage'
+                      ? ` ${Number(cp.discount_value).toFixed(0)}% off`
+                      : ` R$ ${Number(cp.discount_value).toFixed(0)} off`}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+          {cupons.length === 2 && (
+            <p className="text-xs text-green-600 font-bold mt-1.5 flex items-center gap-1">
+              <Check size={11} /> Cupons cumulativos aplicados!
+            </p>
+          )}
+        </div>
       )}
     </div>
   )
@@ -360,7 +430,6 @@ export default function ProdutoPage() {
     setTimeout(() => setAdicionado(false), 2000)
   }
 
-  const cartItems = items.map(i => ({ id: i.id, qty: i.qty }))
 
   return (
     <>
@@ -425,7 +494,7 @@ export default function ProdutoPage() {
 
           <VariacoesProduto produtoId={produto.id} onSelect={setVariacaoSelecionada} />
           <CalculaFrete produtoId={produto.id} />
-          <CupomInput subtotal={precoCartao * qty} items={cartItems} />
+          <CupomInput subtotal={precoCartao * qty} />
 
           {/* Preço */}
           <div className="bg-green-50 border border-green-100 rounded-xl p-4 mb-4 mt-4">
