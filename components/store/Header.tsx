@@ -1,36 +1,44 @@
 'use client'
-import { ShoppingCart, User, Search, Phone, Menu, X, ChevronDown } from 'lucide-react'
-import { useState, useRef, useEffect } from 'react'
+import { ShoppingCart, User, Search, Phone, Menu, X, ChevronDown, ChevronRight } from 'lucide-react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 const TopBar = dynamic(() => import('@/components/store/TopBar'), { ssr: false })
 import Image from 'next/image'
 import { useCart } from '@/contexts/CartContext'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+// ─── Dados estáticos do menu ────────────────────────────────────────────────
 
 const menuItems = [
-  { label: 'Lançamentos',     slug: 'lancamentos',    type: 'link' },
-  { label: 'Ambientes',       slug: 'ambientes',      type: 'mega' },
-  { label: 'Lâmpadas',        slug: 'lampadas',       type: 'link' },
-  { label: 'SMART',           slug: 'smart',          type: 'link' },
-  { label: 'Decorativo',      slug: 'decorativo',     type: 'link' },
-  { label: 'Trilhos & Perfis',slug: 'trilhos-perfis', type: 'mega' },
-  { label: 'Pilhas',          slug: 'pilhas',         type: 'link' },
-  { label: 'Energia',         slug: 'energia',        type: 'link' },
-  { label: 'Fechaduras',      slug: 'fechaduras',     type: 'link' },
-  { label: 'Profissional',    slug: 'profissional',   type: 'link' },
-  { label: 'Outlet',          slug: 'outlet',         type: 'link' },
+  { label: 'Lançamentos',      slug: 'lancamentos',    type: 'link' },
+  { label: 'Ambientes',        slug: 'ambientes',      type: 'mega' },
+  { label: 'Lâmpadas',         slug: 'lampadas',       type: 'link' },
+  { label: 'SMART',            slug: 'smart',          type: 'link' },
+  { label: 'Decorativo',       slug: 'decorativo',     type: 'link' },
+  { label: 'Trilhos & Perfis', slug: 'trilhos-perfis', type: 'mega' },
+  { label: 'Pilhas',           slug: 'pilhas',         type: 'link' },
+  { label: 'Energia',          slug: 'energia',        type: 'link' },
+  { label: 'Fechaduras',       slug: 'fechaduras',     type: 'link' },
+  { label: 'Profissional',     slug: 'profissional',   type: 'link' },
+  { label: 'Outlet',           slug: 'outlet',         type: 'link' },
 ] as const
 
 const ambientes = [
-  { label: 'Mesa / Sala',  slug: 'pendentes',      desc: 'Pendentes · Spots · Fitas LED' },
-  { label: 'Teto',         slug: 'plafons',        desc: 'Embutidos · Plafons · Trilhos' },
-  { label: 'Externo',      slug: 'refletores',     desc: 'Refletores · Postes · Jardim' },
-  { label: 'Parede',       slug: 'parede',         desc: 'Arandelas · Balizadores' },
-  { label: 'Piso',         slug: 'piso',           desc: 'Balizadores · Embutidos' },
-  { label: 'Sinalização',  slug: 'sinalizacao',    desc: 'Emergência · Setorização' },
-  { label: 'Marcenaria',   slug: 'marcenaria',     desc: 'Perfis LED · Fitas · Embutidos' },
-  { label: 'Exclusivos',   slug: 'exclusivos',     desc: 'Design · Decorativos' },
+  { label: 'Mesa / Sala',  slug: 'pendentes',   desc: 'Pendentes · Spots · Fitas LED' },
+  { label: 'Teto',         slug: 'plafons',     desc: 'Embutidos · Plafons · Trilhos' },
+  { label: 'Externo',      slug: 'refletores',  desc: 'Refletores · Postes · Jardim' },
+  { label: 'Parede',       slug: 'parede',      desc: 'Arandelas · Balizadores' },
+  { label: 'Piso',         slug: 'piso',        desc: 'Balizadores · Embutidos' },
+  { label: 'Sinalização',  slug: 'sinalizacao', desc: 'Emergência · Setorização' },
+  { label: 'Marcenaria',   slug: 'marcenaria',  desc: 'Perfis LED · Fitas · Embutidos' },
+  { label: 'Exclusivos',   slug: 'exclusivos',  desc: 'Design · Decorativos' },
 ]
 
 const trilhosPerfis = [
@@ -39,20 +47,22 @@ const trilhosPerfis = [
   { label: 'Cinta Soho',       slug: 'cinta-soho',       desc: 'Fita eletrificada flexível 48V' },
 ]
 
-const ambienteIcons: Record<string, string> = {
-  'pendentes':   'M16 3v6M11 14 Q16 23 21 14M11 14 a5 3 0 0 1 10 0',
-  'plafons':     '',
-  'refletores':  '',
-  'parede':      '',
-  'piso':        '',
-  'sinalizacao': '',
-  'marcenaria':  '',
-  'exclusivos':  '',
-}
+// Todas Categorias — lista fixa mapeando para slugs do banco
+const todasCategorias = [
+  { label: 'Lâmpadas',         slug: 'lampadas',        icon: '💡' },
+  { label: 'Refletores',       slug: 'refletores',      icon: '🔦' },
+  { label: 'Plafons',          slug: 'plafons',         icon: '🔆' },
+  { label: 'Pendentes',        slug: 'pendentes',       icon: '🪔' },
+  { label: 'SMART',            slug: 'smart',           icon: '📱' },
+  { label: 'Material Elétrico',slug: 'material-eletrico',icon: '🔌' },
+  { label: 'Outlet',           slug: 'outlet',          icon: '🏷️' },
+]
+
+// ─── Ícones SVG inline por slug ──────────────────────────────────────────────
 
 function IconAmbiente({ slug }: { slug: string }) {
   if (slug === 'pendentes') return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
       <line x1="16" y1="3" x2="16" y2="9" stroke="#555" strokeWidth="1.5" strokeLinecap="round"/>
       <ellipse cx="16" cy="14" rx="5" ry="3" fill="#fbbf24" opacity=".95"/>
       <path d="M11 14 Q16 23 21 14" fill="#fbbf24" opacity=".55"/>
@@ -60,7 +70,7 @@ function IconAmbiente({ slug }: { slug: string }) {
     </svg>
   )
   if (slug === 'plafons') return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
       <rect x="4" y="6" width="24" height="3" rx="1.5" fill="#2a2a4e"/>
       <circle cx="10" cy="7.5" r="2.5" fill="#fbbf24" opacity=".9"/>
       <circle cx="22" cy="7.5" r="2.5" fill="#fbbf24" opacity=".9"/>
@@ -71,7 +81,7 @@ function IconAmbiente({ slug }: { slug: string }) {
     </svg>
   )
   if (slug === 'refletores') return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
       <line x1="16" y1="28" x2="16" y2="15" stroke="#2a3a2a" strokeWidth="2" strokeLinecap="round"/>
       <path d="M10 15 Q16 9 22 15" fill="#fbbf24" opacity=".85"/>
       <circle cx="16" cy="12" r="3" fill="#fbbf24"/>
@@ -81,7 +91,7 @@ function IconAmbiente({ slug }: { slug: string }) {
     </svg>
   )
   if (slug === 'parede') return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
       <rect x="4" y="4" width="3" height="24" rx="1.5" fill="#2a2a4e"/>
       <rect x="7" y="13" width="5" height="2" rx="1" fill="#3a3a6e"/>
       <path d="M12 10 L12 22 Q12 26 17 26 Q22 26 22 22 L22 10 Q22 6 17 6 Q12 6 12 10Z" fill="#fbbf24" opacity=".8"/>
@@ -89,7 +99,7 @@ function IconAmbiente({ slug }: { slug: string }) {
     </svg>
   )
   if (slug === 'piso') return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
       <rect x="4" y="26" width="24" height="2.5" rx="1.2" fill="#2a2a4e"/>
       <rect x="10" y="20" width="12" height="6" rx="2" fill="#2a2a4e"/>
       <rect x="12" y="18" width="8" height="4" rx="1.5" fill="#fbbf24" opacity=".9"/>
@@ -97,7 +107,7 @@ function IconAmbiente({ slug }: { slug: string }) {
     </svg>
   )
   if (slug === 'sinalizacao') return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
       <rect x="5" y="11" width="22" height="10" rx="2.5" fill="#2a2a4e" stroke="#3a3a6e" strokeWidth="1"/>
       <rect x="7" y="13" width="7" height="6" rx="1.5" fill="#fbbf24" opacity=".9"/>
       <rect x="18" y="13" width="7" height="6" rx="1.5" fill="#fbbf24" opacity=".9"/>
@@ -106,7 +116,7 @@ function IconAmbiente({ slug }: { slug: string }) {
     </svg>
   )
   if (slug === 'marcenaria') return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
       <rect x="4" y="9" width="24" height="4" rx="1.5" fill="#2a1a0a" opacity=".9"/>
       <rect x="4" y="21" width="24" height="4" rx="1.5" fill="#2a1a0a" opacity=".9"/>
       <rect x="6" y="13" width="20" height="2.5" rx="1" fill="#fbbf24" opacity=".95"/>
@@ -115,7 +125,7 @@ function IconAmbiente({ slug }: { slug: string }) {
     </svg>
   )
   return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
       <circle cx="16" cy="13" r="6" fill="#fbbf24" opacity=".9"/>
       <circle cx="16" cy="13" r="3.5" fill="#fff" opacity=".45"/>
       <circle cx="16" cy="13" r="1.5" fill="#fff" opacity=".9"/>
@@ -130,7 +140,7 @@ function IconAmbiente({ slug }: { slug: string }) {
 
 function IconTrilho({ slug }: { slug: string }) {
   if (slug === 'trilho-magnetico') return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
       <rect x="4" y="13" width="24" height="6" rx="3" fill="#2a2a4e"/>
       <circle cx="10" cy="16" r="2.5" fill="#fbbf24" opacity=".9"/>
       <circle cx="16" cy="16" r="2.5" fill="#fbbf24" opacity=".9"/>
@@ -141,7 +151,7 @@ function IconTrilho({ slug }: { slug: string }) {
     </svg>
   )
   if (slug === 'perfil') return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
       <rect x="4" y="12" width="24" height="5" rx="2" fill="#2a2a4e"/>
       <rect x="6" y="14" width="20" height="2" rx="1" fill="#fbbf24" opacity=".95"/>
       <ellipse cx="16" cy="17" rx="12" ry="3" fill="#fbbf24" opacity=".12"/>
@@ -151,7 +161,7 @@ function IconTrilho({ slug }: { slug: string }) {
     </svg>
   )
   return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
       <path d="M4 16 Q8 10 16 10 Q24 10 28 16 Q24 22 16 22 Q8 22 4 16Z" fill="#2a2a4e" opacity=".8"/>
       <path d="M6 16 Q10 12 16 12 Q22 12 26 16 Q22 20 16 20 Q10 20 6 16Z" fill="#fbbf24" opacity=".85"/>
       <ellipse cx="16" cy="16" rx="4" ry="3" fill="#fbbf24"/>
@@ -159,8 +169,11 @@ function IconTrilho({ slug }: { slug: string }) {
   )
 }
 
+// ─── MegaCard ────────────────────────────────────────────────────────────────
+
 function MegaCard({ label, slug, desc, type, onClick }: {
-  label: string; slug: string; desc: string; type: 'ambiente' | 'trilho'; onClick: () => void
+  label: string; slug: string; desc: string
+  type: 'ambiente' | 'trilho'; onClick: () => void
 }) {
   return (
     <Link
@@ -179,18 +192,164 @@ function MegaCard({ label, slug, desc, type, onClick }: {
   )
 }
 
-export default function Header() {
-  const [search, setSearch] = useState('')
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [activeMega, setActiveMega] = useState<string | null>(null)
-  const { count } = useCart()
-  const router = useRouter()
-  const megaRef = useRef<HTMLDivElement>(null)
+// ─── Painel "Todas Categorias" estilo Intelbras ──────────────────────────────
+
+type CatData = {
+  id: string; name: string; slug: string
+  icon_svg: string | null; panel_image_url: string | null
+  panel_bg_color: string | null; panel_title: string | null
+  panel_tagline: string | null
+}
+
+function TodasCategoriasPanel({ onClose }: { onClose: () => void }) {
+  const [cats, setCats]       = useState<CatData[]>([])
+  const [ativa, setAtiva]     = useState<CatData | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    supabase
+      .from('categories')
+      .select('id,name,slug,icon_svg,panel_image_url,panel_bg_color,panel_title,panel_tagline')
+      .order('name')
+      .then(({ data }) => {
+        const d = data || []
+        setCats(d)
+        if (d.length) setAtiva(d[0])
+        setLoading(false)
+      })
+  }, [])
+
+  if (loading) return (
+    <div className="absolute top-full left-0 right-0 bg-white border-t border-b border-gray-200 shadow-xl z-50 h-64 flex items-center justify-center">
+      <span className="text-sm text-gray-400">Carregando categorias...</span>
+    </div>
+  )
+
+  const bgStyle = ativa?.panel_image_url
+    ? { backgroundImage: `url(${ativa.panel_image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : { backgroundColor: ativa?.panel_bg_color || '#1e7a3c' }
+
+  return (
+    <div className="absolute top-full left-0 right-0 bg-white border-t border-b border-gray-200 shadow-xl z-50">
+      <div className="max-w-7xl mx-auto flex" style={{ minHeight: 280 }}>
+
+        {/* Coluna esquerda — lista de categorias */}
+        <div className="w-64 flex-shrink-0 border-r border-gray-100 py-3">
+          {cats.map(cat => (
+            <Link
+              key={cat.id}
+              href={`/produtos?categoria=${encodeURIComponent(cat.slug)}`}
+              onClick={onClose}
+              onMouseEnter={() => setAtiva(cat)}
+              className={`flex items-center gap-3 px-4 py-2.5 transition-colors group ${
+                ativa?.id === cat.id
+                  ? 'bg-green-50 text-green-700'
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              {/* Ícone */}
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: cat.panel_bg_color || '#1e7a3c' }}
+              >
+                {cat.icon_svg ? (
+                  <div
+                    className="w-4 h-4"
+                    dangerouslySetInnerHTML={{ __html: cat.icon_svg }}
+                  />
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                  </svg>
+                )}
+              </div>
+              <span className="text-sm font-semibold flex-1">{cat.name}</span>
+              <ChevronRight size={14} className={`flex-shrink-0 transition-colors ${ativa?.id === cat.id ? 'text-green-600' : 'text-gray-300 group-hover:text-gray-400'}`} />
+            </Link>
+          ))}
+        </div>
+
+        {/* Painel direito — imagem/cor + título + frase */}
+        {ativa && (
+          <div className="flex-1 relative overflow-hidden" style={bgStyle}>
+            <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.38)' }} />
+            <div className="relative z-10 p-8 flex flex-col justify-end h-full">
+              {ativa.panel_title && (
+                <h3 className="text-white text-2xl font-black mb-2 leading-tight">
+                  {ativa.panel_title}
+                </h3>
+              )}
+              {ativa.panel_tagline && (
+                <p className="text-white text-sm leading-relaxed opacity-90 max-w-md">
+                  {ativa.panel_tagline}
+                </p>
+              )}
+              {!ativa.panel_title && !ativa.panel_tagline && (
+                <p className="text-white text-sm opacity-50 italic">{ativa.name}</p>
+              )}
+              <Link
+                href={`/produtos?categoria=${encodeURIComponent(ativa.slug)}`}
+                onClick={onClose}
+                className="mt-4 w-fit bg-white text-green-700 font-bold text-sm px-5 py-2 rounded-full hover:bg-green-50 transition-colors"
+              >
+                Ver produtos →
+              </Link>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  )
+}
+
+// ─── Header principal ─────────────────────────────────────────────────────────
+
+export default function Header() {
+  const [search, setSearch]         = useState('')
+  const [menuOpen, setMenuOpen]     = useState(false)
+  const [activeMega, setActiveMega] = useState<string | null>(null)
+  const [todasOpen, setTodasOpen]   = useState(false)
+  const { count } = useCart()
+  const router    = useRouter()
+  const headerRef = useRef<HTMLDivElement>(null)
+
+  // Timer para evitar flicker no hover
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function openMega(slug: string) {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    setActiveMega(slug)
+    setTodasOpen(false)
+  }
+
+  function closeMegaDelayed() {
+    timerRef.current = setTimeout(() => setActiveMega(null), 120)
+  }
+
+  function openTodas() {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    setTodasOpen(true)
+    setActiveMega(null)
+  }
+
+  function closeTodas() {
+    timerRef.current = setTimeout(() => setTodasOpen(false), 120)
+  }
+
+  function cancelClose() {
+    if (timerRef.current) clearTimeout(timerRef.current)
+  }
+
+  // Fecha tudo ao clicar fora
+  useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (megaRef.current && !megaRef.current.contains(e.target as Node)) {
+      if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
         setActiveMega(null)
+        setTodasOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClick)
@@ -206,17 +365,22 @@ export default function Header() {
     setMenuOpen(false)
   }
 
-  function closeMega() { setActiveMega(null) }
+  function closeAll() {
+    setActiveMega(null)
+    setTodasOpen(false)
+  }
 
   return (
     <>
       <TopBar />
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm" ref={megaRef}>
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm" ref={headerRef}>
+
+        {/* ── Linha principal ── */}
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center gap-3 md:gap-6">
           <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden flex-shrink-0 text-gray-700 hover:text-green-600 transition-colors">
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
-          <Link href="/" className="flex-shrink-0">
+          <Link href="/" className="flex-shrink-0" onClick={closeAll}>
             <Image src="/images/logo.png" alt="Taschibra Store" width={160} height={40} className="h-9 md:h-12 w-auto" priority />
           </Link>
           <div className="hidden md:flex flex-1 max-w-xl relative">
@@ -246,52 +410,89 @@ export default function Header() {
           </div>
         </div>
 
+        {/* ── Navbar desktop ── */}
         <nav className="hidden md:block border-t border-gray-100 relative">
           <div className="max-w-7xl mx-auto px-4 flex items-stretch">
-            <Link href="/produtos" className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-gray-600 hover:text-green-600 whitespace-nowrap border-b-2 border-transparent hover:border-green-500 transition-all flex-shrink-0 mr-1">
-              <Menu size={13} />
-              Todas Categorias
-            </Link>
+
+            {/* Todas Categorias — hover abre painel */}
+            <div
+              onMouseEnter={openTodas}
+              onMouseLeave={closeTodas}
+              className="relative"
+            >
+              <button className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold whitespace-nowrap border-b-2 transition-all flex-shrink-0 mr-1 ${
+                todasOpen ? 'text-green-600 border-green-500' : 'text-gray-600 border-transparent hover:text-green-600 hover:border-green-500'
+              }`}>
+                <Menu size={13} />
+                Todas Categorias
+              </button>
+            </div>
+
             <div className="w-px bg-gray-200 my-2 mx-1 flex-shrink-0" />
+
+            {/* Itens do menu */}
             {menuItems.map(item => {
               const isActive = activeMega === item.slug
               if (item.type === 'link') return (
                 <Link key={item.slug} href={`/produtos?categoria=${encodeURIComponent(item.slug)}`}
-                  onClick={closeMega}
+                  onClick={closeAll}
                   className="px-3 py-2.5 text-sm font-bold text-gray-700 hover:text-green-600 border-b-2 border-transparent hover:border-green-500 transition-all whitespace-nowrap flex-shrink-0 flex items-center">
                   {item.label}
                 </Link>
               )
               return (
-                <button key={item.slug}
-                  onClick={() => setActiveMega(isActive ? null : item.slug)}
-                  className={`px-3 py-2.5 text-sm font-bold border-b-2 transition-all whitespace-nowrap flex-shrink-0 flex items-center gap-1 ${isActive ? 'text-green-600 border-green-500' : 'text-gray-600 border-transparent hover:text-green-600 hover:border-green-500'}`}>
-                  {item.label}
-                  <ChevronDown size={11} className={`transition-transform ${isActive ? 'rotate-180' : ''}`} />
-                </button>
+                <div
+                  key={item.slug}
+                  onMouseEnter={() => openMega(item.slug)}
+                  onMouseLeave={closeMegaDelayed}
+                  className="relative flex items-stretch"
+                >
+                  <button className={`px-3 py-2.5 text-sm font-bold border-b-2 transition-all whitespace-nowrap flex-shrink-0 flex items-center gap-1 ${
+                    isActive ? 'text-green-600 border-green-500' : 'text-gray-700 border-transparent hover:text-green-600 hover:border-green-500'
+                  }`}>
+                    {item.label}
+                    <ChevronDown size={11} className={`transition-transform ${isActive ? 'rotate-180' : ''}`} />
+                  </button>
+                </div>
               )
             })}
           </div>
 
+          {/* Painel Todas Categorias — hover */}
+          {todasOpen && (
+            <div onMouseEnter={cancelClose} onMouseLeave={closeTodas}>
+              <TodasCategoriasPanel onClose={closeAll} />
+            </div>
+          )}
+
+          {/* Megamenu Ambientes — hover */}
           {activeMega === 'ambientes' && (
-            <div className="absolute top-full left-0 right-0 bg-white border-t border-b border-gray-200 shadow-lg z-50">
+            <div
+              onMouseEnter={cancelClose}
+              onMouseLeave={closeMegaDelayed}
+              className="absolute top-full left-0 right-0 bg-white border-t border-b border-gray-200 shadow-lg z-50"
+            >
               <div className="max-w-7xl mx-auto px-6 py-5">
                 <div className="grid grid-cols-4 gap-3">
                   {ambientes.map(item => (
-                    <MegaCard key={item.slug} {...item} type="ambiente" onClick={closeMega} />
+                    <MegaCard key={item.slug} {...item} type="ambiente" onClick={closeAll} />
                   ))}
                 </div>
-
               </div>
             </div>
           )}
 
+          {/* Megamenu Trilhos & Perfis — hover */}
           {activeMega === 'trilhos-perfis' && (
-            <div className="absolute top-full left-0 right-0 bg-white border-t border-b border-gray-200 shadow-lg z-50">
+            <div
+              onMouseEnter={cancelClose}
+              onMouseLeave={closeMegaDelayed}
+              className="absolute top-full left-0 right-0 bg-white border-t border-b border-gray-200 shadow-lg z-50"
+            >
               <div className="max-w-7xl mx-auto px-6 py-5">
                 <div className="grid grid-cols-3 gap-3 max-w-2xl">
                   {trilhosPerfis.map(item => (
-                    <MegaCard key={item.slug} {...item} type="trilho" onClick={closeMega} />
+                    <MegaCard key={item.slug} {...item} type="trilho" onClick={closeAll} />
                   ))}
                 </div>
               </div>
@@ -299,6 +500,7 @@ export default function Header() {
           )}
         </nav>
 
+        {/* ── Menu mobile ── */}
         {menuOpen && (
           <div className="md:hidden border-t border-gray-100 bg-white">
             <div className="px-4 py-3 border-b border-gray-100">
@@ -325,6 +527,7 @@ export default function Header() {
             </div>
           </div>
         )}
+
       </header>
     </>
   )
