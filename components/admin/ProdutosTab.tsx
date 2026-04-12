@@ -210,8 +210,6 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Estoque</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Badge</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Lançamento</th>
-              <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Badge</th>
-              <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Lançamento</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Ações</th>
             </tr>
