@@ -244,16 +244,16 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                     <td className="px-5 py-4 text-center">
                       <span className={`font-bold text-sm ${p.stock_qty < 10 ? 'text-red-500' : 'text-gray-700'}`}>{p.stock_qty}</span>
                     </td>
-                    <td className="px-5 py-4 text-center cursor-pointer" onClick={() => { const bs = (p.badges && p.badges.length > 0) ? p.badges : (p.badge ? [p.badge] : []); setBadgesTemp(bs); setBadgeModalProduto(p) }} title="Clique para editar badges">
+                    <td className="px-5 py-4 text-center cursor-pointer" onClick={e => { e.stopPropagation(); const bs = (p.badges && p.badges.length > 0) ? p.badges : (p.badge ? [p.badge] : []); setBadgesTemp(bs); setBadgeModalProduto(p) }} title="Clique para editar badges">
                       {(() => {
                         const bs = (p.badges && p.badges.length > 0) ? p.badges : (p.badge ? [p.badge] : [])
-                        const bColors: Record<string,string> = {novo:'bg-green-100 text-green-700',oferta:'bg-red-100 text-red-700',smart:'bg-blue-100 text-blue-700',exclusivo:'bg-purple-100 text-purple-700'}
+                        const bColors: Record<string,string> = {lancamento:'bg-purple-100 text-purple-700',exclusivo:'bg-amber-100 text-amber-700',oferta:'bg-red-100 text-red-700',promocao:'bg-orange-100 text-orange-700',smart:'bg-blue-100 text-blue-700',kit:'bg-green-100 text-green-700',novo:'bg-green-100 text-green-700'}
                         return bs.length > 0
                           ? <div className="flex flex-wrap gap-1 justify-center">{bs.map(b => <span key={b} className={`text-xs font-bold px-2 py-0.5 rounded-full ${bColors[b]||'bg-gray-100 text-gray-600'}`}>{b}</span>)}</div>
                           : <span className="text-gray-400 text-xs hover:text-green-600">+ badge</span>
                       })()}
                     </td>
-                    <td className="px-5 py-4 text-center cursor-pointer" onClick={() => toggleLancamentoProduto(p)} title="Clique para alternar">
+                    <td className="px-5 py-4 text-center cursor-pointer" onClick={e => { e.stopPropagation(); toggleLancamentoProduto(p) }} title="Clique para alternar">
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full transition-colors ${p.is_lancamento ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-gray-100 text-gray-400 hover:bg-purple-50 hover:text-purple-600'}`}>
                         {p.is_lancamento ? 'sim' : '—'}
                       </span>
@@ -417,15 +417,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                     </div>
                   </div>}
-                  <div className="flex items-center gap-3 py-2">
-                    <input type="checkbox" id="is_lancamento"
-                      checked={produtoEdit.is_lancamento || false}
-                      onChange={e => setProdutoEdit({ ...produtoEdit, is_lancamento: e.target.checked })}
-                      className="w-4 h-4 accent-green-600 cursor-pointer" />
-                    <label htmlFor="is_lancamento" className="text-sm font-bold text-gray-700 cursor-pointer">
-                      É lançamento? <span className="text-xs text-gray-400 font-normal">(aparece também na categoria Lançamentos)</span>
-                    </label>
-                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-bold text-gray-700 mb-1 block">Peso (kg)</label>
