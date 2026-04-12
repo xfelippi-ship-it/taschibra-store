@@ -663,7 +663,6 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
           </div>
         </div>
       )}
-      )}
       {badgeModalProduto && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setBadgeModalProduto(null)}>
           <div className="bg-white rounded-xl p-6 w-96 shadow-xl" onClick={e => e.stopPropagation()}>
