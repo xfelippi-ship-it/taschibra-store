@@ -68,13 +68,6 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
       if (data) setCategorias(data)
     })
   }, [])
-  const [categorias, setCategorias] = useState<{slug:string,name:string}[]>([])
-
-  useEffect(() => {
-    supabase.from('categories').select('slug, name').order('name').then(({data}) => {
-      if (data) setCategorias(data)
-    })
-  }, [])
   const [arquivo, setArquivo] = useState<File | null>(null)
   const [preview, setPreview] = useState<Record<string, string>[]>([])
   const [headers, setHeaders] = useState<string[]>([])
