@@ -660,5 +660,34 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
         </div>
       )}
     </div>
+
+      {badgeModalProduto && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setBadgeModalProduto(null)}>
+          <div className="bg-white rounded-xl p-6 w-96 shadow-xl" onClick={e => e.stopPropagation()}>
+            <h3 className="font-black text-gray-800 text-lg mb-1">Badges</h3>
+            <p className="text-xs text-gray-400 mb-4">{badgeModalProduto.name?.substring(0,40)} — Selecione até 3</p>
+            <div className="flex flex-wrap gap-2 mb-6">
+              {(['lancamento','exclusivo','oferta','promocao','smart','kit'] as const).map(b => {
+                const labels: Record<string,string> = {lancamento:'Lançamento',exclusivo:'Exclusivo',oferta:'Oferta',promocao:'Promoção',smart:'Smart',kit:'Kit'}
+                const colors: Record<string,string> = {lancamento:'bg-purple-100 text-purple-700 border-purple-400',exclusivo:'bg-amber-100 text-amber-700 border-amber-400',oferta:'bg-red-100 text-red-700 border-red-400',promocao:'bg-orange-100 text-orange-700 border-orange-400',smart:'bg-blue-100 text-blue-700 border-blue-400',kit:'bg-green-100 text-green-700 border-green-400'}
+                const sel = badgesTemp.includes(b)
+                return (
+                  <button key={b} onClick={() => {
+                    if (sel) setBadgesTemp(badgesTemp.filter(x => x !== b))
+                    else if (badgesTemp.length < 3) setBadgesTemp([...badgesTemp, b])
+                    else alert('Máximo 3 badges por produto')
+                  }} className={`text-sm font-bold px-4 py-2 rounded-full border-2 transition-all ${sel ? colors[b] : 'bg-gray-50 text-gray-400 border-gray-200 hover:border-gray-300'}`}>
+                    {labels[b]}
+                  </button>
+                )
+              })}
+            </div>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setBadgeModalProduto(null)} className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50">Cancelar</button>
+              <button onClick={() => salvarBadges(badgeModalProduto, badgesTemp)} className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-bold">Salvar</button>
+            </div>
+          </div>
+        </div>
+      )}
   )
 }
