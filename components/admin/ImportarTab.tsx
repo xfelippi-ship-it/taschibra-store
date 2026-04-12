@@ -11,20 +11,20 @@ const supabase = createClient(
 )
 
 const CAMPOS = [
-  { id: 'name',                label: 'Nome do produto',       col: 'name' },
-  { id: 'price',               label: 'Preço normal (R$)',      col: 'price' },
-  { id: 'promo_price',         label: 'Preço PIX/promo (R$)',   col: 'promo_price' },
-  { id: 'stock_qty',           label: 'Estoque',                col: 'stock_qty' },
-  { id: 'short_description',   label: 'Descrição curta',        col: 'short_description' },
-  { id: 'description',         label: 'Descrição longa',        col: 'description' },
-  { id: 'category_slug',       label: 'Categoria (slug)',       col: 'category_slug' },
-  { id: 'family',              label: 'Família / Linha',        col: 'family' },
-  { id: 'active',              label: 'Status ativo',           col: 'active' },
-  { id: 'badges',              label: 'Badges',                 col: 'badges' },
-  { id: 'is_lancamento',       label: 'É lançamento',           col: 'is_lancamento' },
-  { id: 'weight_kg',           label: 'Peso (kg)',              col: 'weight_kg' },
-  { id: 'warranty',            label: 'Garantia',               col: 'warranty' },
-  { id: 'ean',                 label: 'EAN',                    col: 'ean' },
+  { id: 'name',                label: 'Nome do produto',       col: 'name',             ptbr: 'nome' },
+  { id: 'price',               label: 'Preço normal (R$)',      col: 'price',            ptbr: 'preco' },
+  { id: 'promo_price',         label: 'Preço PIX/promo (R$)',   col: 'promo_price',      ptbr: 'preco_pix' },
+  { id: 'stock_qty',           label: 'Estoque',                col: 'stock_qty',        ptbr: 'estoque' },
+  { id: 'short_description',   label: 'Descrição curta',        col: 'short_description',ptbr: 'descricao_curta' },
+  { id: 'description',         label: 'Descrição longa',        col: 'description',      ptbr: 'descricao' },
+  { id: 'category_slug',       label: 'Categoria (slug)',       col: 'category_slug',    ptbr: 'categoria' },
+  { id: 'family',              label: 'Família / Linha',        col: 'family',           ptbr: 'familia' },
+  { id: 'active',              label: 'Status ativo (sim/não)', col: 'active',           ptbr: 'ativo' },
+  { id: 'badges',              label: 'Badges (separar com |)', col: 'badges',           ptbr: 'badges' },
+  { id: 'is_lancamento',       label: 'É lançamento (sim/não)', col: 'is_lancamento',    ptbr: 'lancamento' },
+  { id: 'weight_kg',           label: 'Peso (kg)',              col: 'weight_kg',        ptbr: 'peso_kg' },
+  { id: 'warranty',            label: 'Garantia',               col: 'warranty',         ptbr: 'garantia' },
+  { id: 'ean',                 label: 'EAN / Código de barras', col: 'ean',              ptbr: 'ean' },
 ]
 
 type Resultado = { sku: string; status: 'criado' | 'atualizado' | 'erro'; msg?: string }
@@ -43,6 +43,8 @@ function parseCSV(text: string): Record<string, string>[] {
 }
 
 export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string }) {
+  const [exportCategoria, setExportCategoria] = useState('')
+  const [exportando, setExportando] = useState(false)
   const [arquivo, setArquivo] = useState<File | null>(null)
   const [preview, setPreview] = useState<Record<string, string>[]>([])
   const [headers, setHeaders] = useState<string[]>([])
@@ -147,16 +149,85 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
     setProcessando(false)
   }
 
+
+  async function exportarCSV(formato: 'csv' | 'xlsx') {
+    setExportando(true)
+    let query = supabase.from('products').select('sku, name, price, promo_price, stock_qty, short_description, description, category_slug, family, active, badges, is_lancamento, weight_kg, warranty, ean').order('name')
+    if (exportCategoria) query = query.eq('category_slug', exportCategoria)
+    const { data } = await query
+    if (!data) { setExportando(false); return }
+
+    const headers = ['sku','nome','preco','preco_pix','estoque','descricao_curta','descricao','categoria','familia','ativo','badges','lancamento','peso_kg','garantia','ean']
+    const rows = data.map(p => [
+      p.sku, p.name, p.price, p.promo_price, p.stock_qty,
+      p.short_description || '', p.description || '',
+      p.category_slug || '', p.family || '',
+      p.active ? 'sim' : 'nao',
+      Array.isArray(p.badges) ? p.badges.join('|') : (p.badges || ''),
+      p.is_lancamento ? 'sim' : 'nao',
+      p.weight_kg || '', p.warranty || '', p.ean || ''
+    ])
+
+    if (formato === 'csv') {
+      const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n')
+      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a'); a.href = url
+      a.download = `taschibra-produtos-${new Date().toISOString().slice(0,10)}.csv`
+      a.click(); URL.revokeObjectURL(url)
+    } else {
+      // Excel simples via CSV com extensão xlsx (compatível com Excel)
+      const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join('\t')).join('\n')
+      const blob = new Blob([csv], { type: 'application/vnd.ms-excel' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a'); a.href = url
+      a.download = `taschibra-produtos-${new Date().toISOString().slice(0,10)}.xls`
+      a.click(); URL.revokeObjectURL(url)
+    }
+    setExportando(false)
+  }
+
   const criados = resultados.filter(r => r.status === 'criado').length
   const atualizados = resultados.filter(r => r.status === 'atualizado').length
   const erros = resultados.filter(r => r.status === 'erro').length
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-2xl font-black text-gray-800 mb-2">Importar Produtos</h1>
-      <p className="text-sm text-gray-500 mb-6">Importe ou atualize produtos em massa via CSV. Identificação por SKU — se existir, atualiza; se não existir, cria.</p>
+      <h1 className="text-2xl font-black text-gray-800 mb-2">Importar / Exportar Produtos</h1>
+      <p className="text-sm text-gray-500 mb-6">Exporte o catálogo completo ou importe/atualize produtos em massa. Identificação por SKU — se existir, atualiza; se não existir, cria.</p>
 
-      {/* Upload */}
+      {/* Exportar */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+        <h2 className="font-black text-gray-700 mb-1 text-sm uppercase tracking-wide flex items-center gap-2">
+          <span className="text-green-600">↓</span> Exportar Catálogo
+        </h2>
+        <p className="text-xs text-gray-400 mb-4">Baixe todos os produtos ou filtre por categoria. Use para conferir, editar em massa e reimportar.</p>
+        <div className="flex flex-wrap gap-3 items-end">
+          <div className="flex-1 min-w-[200px]">
+            <label className="text-xs font-bold text-gray-500 mb-1 block">Filtrar por categoria (opcional)</label>
+            <input value={exportCategoria} onChange={e => setExportCategoria(e.target.value)}
+              placeholder="ex: lampadas-led, outlet (vazio = todos)"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500" />
+          </div>
+          <button onClick={() => exportarCSV('csv')} disabled={exportando}
+            className="flex items-center gap-2 border border-green-600 text-green-700 font-bold px-4 py-2 rounded-lg hover:bg-green-50 text-sm disabled:opacity-50 transition-colors">
+            ↓ CSV
+          </button>
+          <button onClick={() => exportarCSV('xlsx')} disabled={exportando}
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-lg text-sm disabled:opacity-50 transition-colors">
+            {exportando ? 'Exportando...' : '↓ Excel'}
+          </button>
+        </div>
+      </div>
+
+      {/* Divisor */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex-1 border-t border-gray-200" />
+        <span className="text-xs font-black text-gray-400 uppercase tracking-wide flex items-center gap-1"><span className="text-green-600">↑</span> Importar</span>
+        <div className="flex-1 border-t border-gray-200" />
+      </div>
+
+      {/* Upload */
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
         <h2 className="font-black text-gray-700 mb-4 text-sm uppercase tracking-wide">1. Selecione o arquivo CSV</h2>
         <div
@@ -171,18 +242,18 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
           ) : (
             <div>
               <p className="font-bold text-gray-600">Clique para selecionar o arquivo</p>
-              <p className="text-sm text-gray-400 mt-1">CSV com separador vírgula ou ponto-e-vírgula</p>
+              <p className="text-sm text-gray-400 mt-1">CSV (.csv) ou Excel (.xlsx) — vírgula ou ponto-e-vírgula</p>
             </div>
           )}
         </div>
-        <input ref={inputRef} type="file" accept=".csv,.txt" className="hidden"
+        <input ref={inputRef} type="file" accept=".csv,.txt,.xlsx,.xls" className="hidden"
           onChange={e => e.target.files?.[0] && handleArquivo(e.target.files[0])} />
 
         {/* Formato esperado */}
         <div className="mt-4 bg-gray-50 rounded-lg p-3">
           <p className="text-xs font-black text-gray-500 uppercase mb-1">Colunas reconhecidas no CSV:</p>
-          <p className="text-xs text-gray-500 font-mono">sku, name, price, promo_price, stock_qty, short_description, description, category_slug, family, active, badges, is_lancamento, weight_kg, warranty, ean, slug</p>
-          <p className="text-xs text-gray-400 mt-1">Badges: separe múltiplos com pipe | ex: <span className="font-mono">lancamento|kit</span></p>
+          <p className="text-xs text-gray-500 font-mono">sku, nome, preco, preco_pix, estoque, descricao_curta, descricao, categoria, familia, ativo, badges, lancamento, peso_kg, garantia, ean</p>
+          <p className="text-xs text-gray-400 mt-1">Campos booleanos: use <span className="font-mono">sim</span> ou <span className="font-mono">nao</span> | Badges: separe com pipe | ex: <span className="font-mono">lancamento|kit</span></p>
         </div>
       </div>
 
