@@ -258,7 +258,7 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
           ) : (
             <div>
               <p className="font-bold text-gray-600">Clique para selecionar o arquivo</p>
-              <p className="text-sm text-gray-400 mt-1">CSV (.csv) ou Excel (.xlsx) — vírgula ou ponto-e-vírgula</p>
+              <p className="text-sm text-gray-400 mt-1">Arquivo CSV ou Excel — gerado pelo Excel, Google Sheets ou exportado do sistema</p>
             </div>
           )}
         </div>
