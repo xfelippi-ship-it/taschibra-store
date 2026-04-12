@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { registrarAuditoria } from '@/lib/auditLog'
 import { Upload, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
@@ -61,6 +61,20 @@ function normalizeRow(row: Record<string, string>): Record<string, string> {
 export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string }) {
   const [exportCategoria, setExportCategoria] = useState('')
   const [exportando, setExportando] = useState(false)
+  const [categorias, setCategorias] = useState<{slug:string,name:string}[]>([])
+
+  useEffect(() => {
+    supabase.from('categories').select('slug, name').order('name').then(({data}) => {
+      if (data) setCategorias(data)
+    })
+  }, [])
+  const [categorias, setCategorias] = useState<{slug:string,name:string}[]>([])
+
+  useEffect(() => {
+    supabase.from('categories').select('slug, name').order('name').then(({data}) => {
+      if (data) setCategorias(data)
+    })
+  }, [])
   const [arquivo, setArquivo] = useState<File | null>(null)
   const [preview, setPreview] = useState<Record<string, string>[]>([])
   const [headers, setHeaders] = useState<string[]>([])
@@ -210,10 +224,14 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
         <p className="text-xs text-gray-400 mb-4">Baixe todos os produtos ou filtre por categoria. Edite no Excel e reimporte para atualizar.</p>
         <div className="flex flex-wrap gap-3 items-end">
           <div className="flex-1 min-w-[220px]">
-            <label className="text-xs font-bold text-gray-500 mb-1 block">Filtrar por categoria (opcional)</label>
-            <input value={exportCategoria} onChange={e => setExportCategoria(e.target.value)}
-              placeholder="ex: lampadas-led, outlet — vazio = todos"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500" />
+            <label className="text-xs font-bold text-gray-500 mb-1 block">Qual categoria quer exportar?</label>
+            <select value={exportCategoria} onChange={e => setExportCategoria(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500 bg-white">
+              <option value="">Todas as categorias (exporta tudo)</option>
+              {categorias.map(cat => (
+                <option key={cat.slug} value={cat.slug}>{cat.name}</option>
+              ))}
+            </select>
           </div>
           <button onClick={() => exportarCSV('csv')} disabled={exportando}
             className="border border-green-600 text-green-700 font-bold px-4 py-2 rounded-lg hover:bg-green-50 text-sm disabled:opacity-50 transition-colors">
@@ -256,7 +274,10 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
         <div className="mt-4 bg-gray-50 rounded-lg p-3">
           <p className="text-xs font-black text-gray-500 uppercase mb-1">Colunas aceitas no arquivo:</p>
           <p className="text-xs text-gray-500 font-mono">sku, nome, preco, preco_pix, estoque, descricao_curta, descricao, categoria, familia, ativo, badges, lancamento, peso_kg, garantia, ean</p>
-          <p className="text-xs text-gray-400 mt-1">Booleanos: <span className="font-mono">sim</span> ou <span className="font-mono">nao</span> | Badges: separe com pipe | ex: <span className="font-mono">lancamento|kit</span></p>
+          <div className="mt-2 space-y-1">
+            <p className="text-xs text-gray-500">📌 Nas colunas <span className="font-mono font-bold">ativo</span> e <span className="font-mono font-bold">lancamento</span>: escreva <span className="font-mono font-bold">sim</span> para verdadeiro ou <span className="font-mono font-bold">nao</span> para falso.</p>
+            <p className="text-xs text-gray-500">🏷️ Na coluna <span className="font-mono font-bold">badges</span>: para colocar mais de um badge no mesmo produto, separe com o símbolo <span className="font-mono font-bold">|</span> — exemplo: <span className="font-mono font-bold">lancamento|kit</span> coloca dois badges ao mesmo tempo.</p>
+          </div>
         </div>
       </div>
 
