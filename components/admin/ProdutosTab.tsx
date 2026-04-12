@@ -409,7 +409,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                         placeholder="Ex: 7897079082876"
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 font-mono" />
                     </div>
-                  </div>}
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-bold text-gray-700 mb-1 block">Família/Linha</label>
