@@ -825,6 +825,7 @@ export default function AdminPage() {
             {tem(['master','vendas']) && <BtnItem id="pedidos"    label="Pedidos"    icon={<ShoppingBag size={15} />} />}
             {tem(['master','vendas']) && <BtnItem id="cupons"     label="Cupons"     icon={<Tag size={15} />} />}
             {tem(['master','vendas']) && <BtnItem id="carrinhos"  label="Carrinhos"  icon={<ShoppingBag size={15} />} />}
+            {tem(['master'])          && <BtnItem id="frete"      label="Frete Grátis" icon={<Truck size={15} />} />}
             {tem(['master','vendas']) && <BtnItem id="relatorios" label="Relatórios" icon={<BarChart3 size={15} />} />}
           </Grupo>
         )}
@@ -834,7 +835,6 @@ export default function AdminPage() {
           <Grupo id="loja" label="Loja">
             {tem(['master','marketing']) && <BtnItem id="banners"  label="Banners"       icon={<ImageIcon size={15} />} />}
             {tem(['master','marketing']) && <BtnItem id="topbar"   label="Top Bar"       icon={<Megaphone size={15} />} />}
-            {tem(['master'])            && <BtnItem id="frete"    label="Frete Grátis"  icon={<Truck size={15} />} />}
             {tem(['master','marketing']) && <BtnItem id="midias"   label="Mídias Sociais" icon={<Megaphone size={15} />} />}
           </Grupo>
         )}
