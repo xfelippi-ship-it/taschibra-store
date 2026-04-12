@@ -41,14 +41,14 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
     const novoValor = !produto.is_lancamento
     await supabase.from('products').update({ is_lancamento: novoValor }).eq('id', produto.id)
     await registrarAuditoria({ executedBy: meuEmail, acao: novoValor ? 'marcado_lancamento' : 'desmarcado_lancamento', entidade: 'products', detalhe: `Produto: ${produto.name}` })
-    carregarProdutos()
+    carregar()
   }
 
   async function salvarBadges(produto: any, novosBadges: string[]) {
     await supabase.from('products').update({ badges: novosBadges }).eq('id', produto.id)
     await registrarAuditoria({ executedBy: meuEmail, acao: 'badges_editados', entidade: 'products', detalhe: `Produto: ${produto.name} | Badges: ${novosBadges.join(', ')||'nenhum'}` })
     setBadgeModalProduto(null)
-    carregarProdutos()
+    carregar()
   }
   const [ordem, setOrdem] = useState<'asc' | 'desc'>('asc')
   const [expandidos, setExpandidos] = useState<Set<string>>(new Set())
