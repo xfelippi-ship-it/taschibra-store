@@ -607,7 +607,7 @@ function AuditoriaTab() {
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Data/Hora</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Executado por</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Ação</th>
-              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Detalhe</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Descritivo</th>
             </tr>
           </thead>
           <tbody>

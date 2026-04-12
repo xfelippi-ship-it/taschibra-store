@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { Save, Palette, Image } from 'lucide-react'
+import { registrarAuditoria } from '@/lib/auditLog'
 import { supabase } from '@/lib/supabase'
 
 
@@ -65,8 +66,10 @@ export default function TopBarTab() {
     }
     if (config.id) {
       await supabase.from('top_bar').update(dados).eq('id', config.id)
+      await registrarAuditoria({ executedBy: 'admin', acao: 'topbar_editada', entidade: 'top_bar', detalhe: `Texto: ${dados.texto || dados.text || '-'}` })
     } else {
       await supabase.from('top_bar').insert(dados)
+      await registrarAuditoria({ executedBy: 'admin', acao: 'topbar_criada', entidade: 'top_bar', detalhe: `Texto: ${dados.texto || dados.text || '-'}` })
     }
     setSalvando(false)
     setMsg({ tipo: 'ok', texto: 'Top Bar salva com sucesso!' })
