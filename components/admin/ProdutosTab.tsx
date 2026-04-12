@@ -7,7 +7,7 @@ import { registrarAuditoria } from '@/lib/auditLog'
 
 type Produto = {
   id: string; name: string; sku: string; price: number; promo_price: number
-  stock_qty: number; active: boolean; badge: string; family?: string
+  stock_qty: number; active: boolean; badge: string; badges?: string[]; is_lancamento?: boolean; family?: string
   category_slug?: string; description?: string; main_image?: string
   weight_kg?: number; warranty?: string; ean?: string
 }
@@ -208,13 +208,17 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">SKU</th>
               {meuPapel !== 'marketing' && <th className="text-right px-5 py-3 text-xs font-black text-gray-500 uppercase">Preço</th>}
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Estoque</th>
+              <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Badge</th>
+              <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Lançamento</th>
+              <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Badge</th>
+              <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Lançamento</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Ações</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="text-center py-8 text-gray-400">Carregando...</td></tr>
+              <tr><td colSpan={9} className="text-center py-8 text-gray-400">Carregando...</td></tr>
             ) : produtosFiltrados.map(p => {
               const expandido = expandidos.has(p.id)
               const variacoes = variacoesPorProduto[p.id] || []
@@ -241,6 +245,20 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                       <span className={`font-bold text-sm ${p.stock_qty < 10 ? 'text-red-500' : 'text-gray-700'}`}>{p.stock_qty}</span>
                     </td>
                     <td className="px-5 py-4 text-center">
+                      {(() => {
+                        const bs = (p.badges && p.badges.length > 0) ? p.badges : (p.badge ? [p.badge] : [])
+                        const bColors: Record<string,string> = {novo:'bg-green-100 text-green-700',oferta:'bg-red-100 text-red-700',smart:'bg-blue-100 text-blue-700',exclusivo:'bg-purple-100 text-purple-700'}
+                        return bs.length > 0
+                          ? <div className="flex flex-wrap gap-1 justify-center">{bs.map(b => <span key={b} className={`text-xs font-bold px-2 py-0.5 rounded-full ${bColors[b]||'bg-gray-100 text-gray-600'}`}>{b}</span>)}</div>
+                          : <span className="text-gray-300 text-xs">—</span>
+                      })()}
+                    </td>
+                    <td className="px-5 py-4 text-center">
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${p.is_lancamento ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-400'}`}>
+                        {p.is_lancamento ? 'sim' : '—'}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-center">
                       <button onClick={() => toggleAtivo(p.id, p.active)}
                         className={`text-xs font-bold px-3 py-1 rounded-full transition-colors ${p.active ? 'bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-700' : 'bg-gray-100 text-gray-500 hover:bg-green-100 hover:text-green-700'}`}>
                         {p.active ? 'Ativo' : 'Inativo'}
@@ -258,7 +276,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
 
                   {expandido && (
                     <tr key={`var-${p.id}`} className="bg-gray-50 border-b border-gray-100">
-                      <td colSpan={7} className="px-8 py-3">
+                      <td colSpan={9} className="px-8 py-3">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs font-black text-gray-500 uppercase tracking-wide">
                             Variações ({variacoes.length})
