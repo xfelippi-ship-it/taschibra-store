@@ -770,6 +770,7 @@ export default function AdminPage() {
               { id: 'banners',    label: 'Banners',    icon: <ImageIcon size={16} />,    papeis: ['master','marketing'] },
               { id: 'topbar',     label: 'Top Bar',    icon: <Megaphone size={16} />,    papeis: ['master','marketing'] },
               { id: 'categorias', label: 'Categorias', icon: <Tag size={16} />,          papeis: ['master'] },
+              { id: 'importar',   label: 'Importar CSV', icon: <Upload size={16} />,    papeis: ['master'] },
               { id: 'usuarios',   label: 'Usuários',   icon: <Users size={16} />,        papeis: ['master'] },
               { id: 'auditoria',  label: 'Auditoria',  icon: <BarChart3 size={16} />,    papeis: ['master'] },
             ].filter(a => meuPapel === 'master' ? true : a.papeis.includes(meuPapel))),
