@@ -325,7 +325,7 @@ function CuponsTab() {
   async function excluirCupom(id: string) {
     if (!confirm('Excluir este cupom?')) return
     await supabase.from('coupons').delete().eq('id', id)
-      await registrarAuditoria({ executedBy: meuEmail || 'admin', acao: 'cupom_excluido', entidade: 'coupons', detalhe: `ID: ${id}` })
+      await registrarAuditoria({ executedBy: 'admin', acao: 'cupom_excluido', entidade: 'coupons', detalhe: `ID: ${id}` })
     carregarCupons()
   }
 
@@ -646,7 +646,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'auditoria'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
