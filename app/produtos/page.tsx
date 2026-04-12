@@ -11,6 +11,11 @@ import { supabase } from '@/lib/supabase'
 
 const badgeColors: Record<string, string> = {
   novo: "bg-green-600", smart: "bg-blue-500", oferta: "bg-red-500", exclusivo: "bg-purple-600",
+  lancamento: "bg-purple-600", promocao: "bg-orange-500", kit: "bg-teal-500",
+}
+const badgeLabels: Record<string, string> = {
+  lancamento: "Lançamento", exclusivo: "Exclusivo", oferta: "Oferta",
+  promocao: "Promoção", smart: "Smart", kit: "Kit", novo: "Novo",
 }
 
 const PAGE_SIZE = 48
@@ -166,11 +171,14 @@ function ProdutosContent() {
                   <div key={p.id} className="bg-white rounded-xl border border-gray-200 hover:shadow-md transition-shadow group">
                     <Link href={"/produto/" + p.slug}>
                       <div className="relative aspect-square overflow-hidden rounded-t-xl bg-gray-50">
-                        {badge && badgeColors[badge] && (
-                          <span className={"absolute top-2 left-2 z-10 text-white text-xs font-black px-2 py-0.5 rounded " + badgeColors[badge]}>
-                            {p.badge}
-                          </span>
-                        )}
+                        {(() => {
+                          const bs = (p.badges && p.badges.length > 0) ? p.badges : (badge ? [badge] : [])
+                          return bs.slice(0,2).map((b: string) => badgeColors[b] ? (
+                            <span key={b} className={"absolute top-2 left-2 z-10 text-white text-xs font-black px-2 py-0.5 rounded " + badgeColors[b]} style={{marginTop: bs.indexOf(b) * 22}}>
+                              {badgeLabels[b] || b}
+                            </span>
+                          ) : null)
+                        })()}
                         {p.main_image ? (
                           <img src={p.main_image} alt={p.name}
                             className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-300"

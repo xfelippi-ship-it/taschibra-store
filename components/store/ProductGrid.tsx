@@ -19,6 +19,11 @@ const badgeMap: Record<string, string> = {
 }
 const badgeColors: Record<string, string> = {
   novo: 'bg-green-600', smart: 'bg-blue-500', oferta: 'bg-red-500', exclusivo: 'bg-purple-600',
+  lancamento: 'bg-purple-600', promocao: 'bg-orange-500', kit: 'bg-teal-500',
+}
+const badgeLabels: Record<string, string> = {
+  lancamento: 'Lançamento', exclusivo: 'Exclusivo', oferta: 'Oferta',
+  promocao: 'Promoção', smart: 'Smart', kit: 'Kit', novo: 'Novo',
 }
 
 function ProdCard({ p }: { p: Produto }) {
@@ -40,6 +45,11 @@ function ProdCard({ p }: { p: Produto }) {
         </span>
       )}
       <div className="bg-gray-50 flex items-center justify-center h-44 text-7xl group-hover:scale-105 transition-transform">
+        {badges.length > 0 && badges.slice(0,1).map((b: string) => badgeColors[b] ? (
+          <span key={b} className={"absolute top-2 left-2 z-10 text-white text-xs font-black px-2 py-0.5 rounded " + badgeColors[b]}>
+            {badgeLabels[b] || b}
+          </span>
+        ) : null)}
         {p.main_image ? <img src={p.main_image} alt={p.name} className="h-40 object-contain" /> : '💡'}
       </div>
       <div className="p-4 flex flex-col">
