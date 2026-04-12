@@ -29,6 +29,7 @@ const badgeLabels: Record<string, string> = {
 function ProdCard({ p }: { p: Produto }) {
   const { addItem } = useCart()
   const badge = badgeMap[p.category_slug]
+  const badges = (p.badges && p.badges.length > 0) ? p.badges : (badge ? [badge] : [])
   const desconto = Math.round((1 - p.promo_price / p.price) * 100)
 
   function handleAdd(e: React.MouseEvent) {
