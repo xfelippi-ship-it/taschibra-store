@@ -904,10 +904,7 @@ export default function AdminPage() {
         {aba === 'faq' && <FAQTab />}
         {aba === 'newsletter' && <NewsletterTab />}
         {aba === 'faleconosco' && <FaleConoscoTab />}
-        {aba === 'faq' && <FAQTab />}
-        {aba === 'newsletter' && <NewsletterTab />}
-        {aba === 'faleconosco' && <FaleConoscoTab />}
-        {aba === 'carrinhos' && <CarrinhosAbandonadosTab />}
+        
       </main>
 
       {modal && (
