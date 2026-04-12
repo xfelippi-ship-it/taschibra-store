@@ -9,6 +9,7 @@ import DashboardTab from '@/components/admin/DashboardTab'
 import TopBarTab from '@/components/admin/TopBarTab'
 import CategoriasTab from '@/components/admin/CategoriasTab'
 import FreteGratisTab from '@/components/admin/FreteGratisTab'
+import CarrinhosAbandonadosTab from '@/components/admin/CarrinhosAbandonadosTab'
 import { useState, useEffect } from 'react'
 import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -646,7 +647,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'auditoria'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'auditoria'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -772,7 +773,8 @@ export default function AdminPage() {
               { id: 'topbar',     label: 'Top Bar',    icon: <Megaphone size={16} />,    papeis: ['master','marketing'] },
               { id: 'categorias', label: 'Categorias', icon: <Tag size={16} />,          papeis: ['master'] },
               { id: 'importar',   label: 'Importar CSV', icon: <Upload size={16} />,    papeis: ['master'] },
-              { id: 'frete',      label: 'Frete Grátis', icon: <Truck size={16} />,    papeis: ['master'] },
+              { id: 'frete',      label: 'Frete Grátis',  icon: <Truck size={16} />,       papeis: ['master'] },
+              { id: 'carrinhos',  label: 'Carrinhos',    icon: <ShoppingBag size={16} />, papeis: ['master','vendas'] },
               { id: 'usuarios',   label: 'Usuários',   icon: <Users size={16} />,        papeis: ['master'] },
               { id: 'auditoria',  label: 'Auditoria',  icon: <BarChart3 size={16} />,    papeis: ['master'] },
             ].filter(a => meuPapel === 'master' ? true : a.papeis.includes(meuPapel))),
@@ -808,6 +810,7 @@ export default function AdminPage() {
         {aba === 'categorias' && <CategoriasTab />}
         {aba === 'importar' && <ImportarTab meuEmail={meuEmail} />}
         {aba === 'frete' && <FreteGratisTab />}
+        {aba === 'carrinhos' && <CarrinhosAbandonadosTab />}
       </main>
 
       {modal && (
