@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import BannersTab from '@/components/admin/BannersTab'
 import ProdutosTab from '@/components/admin/ProdutosTab'
+import PedidosTab from '@/components/admin/PedidosTab'
 import DashboardTab from '@/components/admin/DashboardTab'
 import TopBarTab from '@/components/admin/TopBarTab'
 import CategoriasTab from '@/components/admin/CategoriasTab'
@@ -793,42 +794,7 @@ export default function AdminPage() {
 
         {aba === 'produtos' && <ProdutosTab meuPapel={meuPapel} meuEmail={meuEmail} />}
 
-        {aba === 'pedidos' && (
-          <div>
-            <h1 className="text-2xl font-black text-gray-800 mb-6">Pedidos</h1>
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              {pedidos.length === 0 ? (
-                <div className="text-center py-16 text-gray-400">
-                  <ShoppingBag size={40} className="mx-auto mb-3 opacity-30" />
-                  <p>Nenhum pedido ainda.</p>
-                </div>
-              ) : (
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Pedido</th>
-                      <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Data</th>
-                      <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
-                      <th className="text-right px-5 py-3 text-xs font-black text-gray-500 uppercase">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pedidos.map((p: any) => (
-                      <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="px-5 py-4 font-bold text-sm text-gray-800">{p.order_number}</td>
-                        <td className="px-5 py-4 text-sm text-gray-500">{new Date(p.created_at).toLocaleDateString('pt-BR')}</td>
-                        <td className="px-5 py-4 text-center">
-                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${p.status === 'confirmed' ? 'bg-green-100 text-green-700' : p.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>{p.status}</span>
-                        </td>
-                        <td className="px-5 py-4 text-right font-black text-green-700">R$ {Number(p.total).toFixed(2).replace('.', ',')}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
-        )}
+        {aba === 'pedidos' && <PedidosTab meuEmail={meuEmail} />}
 
         {aba === 'cupons' && <CuponsTab />}
         {aba === 'usuarios' && <UsuariosTab />}
