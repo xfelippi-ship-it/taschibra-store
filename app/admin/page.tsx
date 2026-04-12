@@ -10,6 +10,7 @@ import TopBarTab from '@/components/admin/TopBarTab'
 import CategoriasTab from '@/components/admin/CategoriasTab'
 import FreteGratisTab from '@/components/admin/FreteGratisTab'
 import CarrinhosAbandonadosTab from '@/components/admin/CarrinhosAbandonadosTab'
+import CarrinhosAbandonadosTab from '@/components/admin/CarrinhosAbandonadosTab'
 import { useState, useEffect } from 'react'
 import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -810,6 +811,7 @@ export default function AdminPage() {
         {aba === 'categorias' && <CategoriasTab />}
         {aba === 'importar' && <ImportarTab meuEmail={meuEmail} />}
         {aba === 'frete' && <FreteGratisTab />}
+        {aba === 'carrinhos' && <CarrinhosAbandonadosTab />}
         {aba === 'carrinhos' && <CarrinhosAbandonadosTab />}
       </main>
 
