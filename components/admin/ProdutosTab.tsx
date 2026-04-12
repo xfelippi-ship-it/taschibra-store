@@ -19,12 +19,24 @@ type Variacao = {
 }
 
 const TIPOS_VARIACAO = [
-  'temperatura', 'cor', 'voltagem', 'potencia', 'tamanho',
-  'angulo', 'ip', 'modelo', 'material', 'acabamento', 'tensao', 'outro'
+  { value: 'angulo_abertura',     label: 'Ângulo de Abertura'           },
+  { value: 'aplicacao',           label: 'Aplicação'                    },
+  { value: 'comprimento',         label: 'Comprimento'                  },
+  { value: 'cor',                 label: 'Cor'                          },
+  { value: 'cor_peca',            label: 'Cor da Peça'                  },
+  { value: 'face',                label: 'Face'                         },
+  { value: 'formato',             label: 'Formato'                      },
+  { value: 'indice_protecao',     label: 'Índice de Proteção'           },
+  { value: 'modelo',              label: 'Modelo'                       },
+  { value: 'temperatura_cor',     label: 'Temperatura de Cor'           },
+  { value: 'temperatura_frontal', label: 'Temperatura de Cor (Frontal)' },
+  { value: 'tensao',              label: 'Tensão'                       },
 ]
 
+const tipoLabel = (tipo: string) => TIPOS_VARIACAO.find(t => t.value === tipo)?.label || tipo
+
 const variacaoVazia = (productId: string): Variacao => ({
-  product_id: productId, name: '', type: 'temperatura', value: '',
+  product_id: productId, name: '', type: 'temperatura_cor', value: '',
   sku: '', ean: '', price: 0, promo_price: 0, stock_qty: 0, active: true
 })
 
@@ -313,7 +325,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                                 <span className="text-gray-400 text-xs">↳</span>
                                 <div className="flex-1 min-w-0">
                                   <span className="font-bold text-gray-700">{v.value}</span>
-                                  <span className="text-gray-400 text-xs ml-2 capitalize">{v.type}</span>
+                                  <span className="text-gray-400 text-xs ml-2 ">{tipoLabel(v.type)}</span>
                                 </div>
                                 <span className="font-mono text-xs text-gray-500 w-28 truncate">{v.sku}</span>
                                 <span className="font-mono text-xs text-gray-400 w-36 truncate">{v.ean}</span>
@@ -493,7 +505,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-gray-800 text-sm">{v.value}</span>
-                              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full capitalize">{v.type}</span>
+                              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{tipoLabel(v.type)}</span>
                               {!v.active && <span className="text-xs bg-red-100 text-red-500 px-2 py-0.5 rounded-full">Inativo</span>}
                             </div>
                             <div className="flex gap-4 mt-1">
@@ -591,7 +603,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                   <label className="text-sm font-bold text-gray-700 mb-1 block">Tipo *</label>
                   <select value={varEdit.type} onChange={e => setVarEdit({ ...varEdit, type: e.target.value })}
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white capitalize">
-                    {TIPOS_VARIACAO.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
+                    {TIPOS_VARIACAO.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
                 </div>
                 <div>
