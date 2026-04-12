@@ -17,6 +17,9 @@ import VendedoresTab from '@/components/admin/VendedoresTab'
 import FAQTab from '@/components/admin/FAQTab'
 import NewsletterTab from '@/components/admin/NewsletterTab'
 import FaleConoscoTab from '@/components/admin/FaleConoscoTab'
+import FAQTab from '@/components/admin/FAQTab'
+import NewsletterTab from '@/components/admin/NewsletterTab'
+import FaleConoscoTab from '@/components/admin/FaleConoscoTab'
 import { useState, useEffect } from 'react'
 import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -829,6 +832,9 @@ export default function AdminPage() {
         {aba === 'clientes' && <ClientesTab />}
         {aba === 'midias' && <MidiasSociaisTab />}
         {aba === 'vendedores' && <VendedoresTab />}
+        {aba === 'faq' && <FAQTab />}
+        {aba === 'newsletter' && <NewsletterTab />}
+        {aba === 'faleconosco' && <FaleConoscoTab />}
         {aba === 'faq' && <FAQTab />}
         {aba === 'newsletter' && <NewsletterTab />}
         {aba === 'faleconosco' && <FaleConoscoTab />}
