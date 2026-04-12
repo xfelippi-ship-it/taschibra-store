@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import { Package, ChevronRight, ArrowLeft } from 'lucide-react'
@@ -28,6 +29,7 @@ const statusColor: Record<string, string> = {
 }
 
 export default function PedidosPage() {
+  const router = useRouter()
   const [pedidos, setPedidos] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
 
