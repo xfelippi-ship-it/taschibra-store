@@ -233,7 +233,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                     </td>
                     <td className="px-5 py-4">
                       <p className="font-bold text-sm text-gray-800 max-w-xs truncate">{p.name}</p>
-                      {p.badge && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold capitalize">{p.badge}</span>}
+                      
                       {p.family && <span className="text-xs text-gray-400 ml-1">{p.family}</span>}
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500 font-mono">{p.sku}</td>
