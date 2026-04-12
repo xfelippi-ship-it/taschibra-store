@@ -14,8 +14,11 @@ import RelatoriosTab from '@/components/admin/RelatoriosTab'
 import ClientesTab from '@/components/admin/ClientesTab'
 import MidiasSociaisTab from '@/components/admin/MidiasSociaisTab'
 import VendedoresTab from '@/components/admin/VendedoresTab'
+import FAQTab from '@/components/admin/FAQTab'
+import NewsletterTab from '@/components/admin/NewsletterTab'
+import FaleConoscoTab from '@/components/admin/FaleConoscoTab'
 import { useState, useEffect } from 'react'
-import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck } from 'lucide-react'
+import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { registrarAuditoria } from '@/lib/auditLog'
 
@@ -651,7 +654,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'auditoria'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -782,7 +785,10 @@ export default function AdminPage() {
               { id: 'relatorios', label: 'Relatórios',   icon: <BarChart3 size={16} />,   papeis: ['master','vendas'] },
               { id: 'clientes',   label: 'Clientes',     icon: <Users size={16} />,       papeis: ['master','vendas'] },
               { id: 'midias',     label: 'Mídias Sociais', icon: <Megaphone size={16} />, papeis: ['master','marketing'] },
-              { id: 'vendedores', label: 'Vendedores',   icon: <Tag size={16} />,         papeis: ['master'] },
+              { id: 'vendedores',   label: 'Vendedores',     icon: <Tag size={16} />,         papeis: ['master'] },
+              { id: 'faq',          label: 'FAQ',            icon: <HelpCircle size={16} />,  papeis: ['master','marketing'] },
+              { id: 'newsletter',   label: 'Newsletter',     icon: <Mail size={16} />,        papeis: ['master','marketing'] },
+              { id: 'faleconosco',  label: 'Fale Conosco',   icon: <MessageSquare size={16} />, papeis: ['master','vendas'] },
               { id: 'usuarios',   label: 'Usuários',   icon: <Users size={16} />,        papeis: ['master'] },
               { id: 'auditoria',  label: 'Auditoria',  icon: <BarChart3 size={16} />,    papeis: ['master'] },
             ].filter(a => meuPapel === 'master' ? true : a.papeis.includes(meuPapel))),
@@ -823,6 +829,9 @@ export default function AdminPage() {
         {aba === 'clientes' && <ClientesTab />}
         {aba === 'midias' && <MidiasSociaisTab />}
         {aba === 'vendedores' && <VendedoresTab />}
+        {aba === 'faq' && <FAQTab />}
+        {aba === 'newsletter' && <NewsletterTab />}
+        {aba === 'faleconosco' && <FaleConoscoTab />}
         {aba === 'carrinhos' && <CarrinhosAbandonadosTab />}
       </main>
 
