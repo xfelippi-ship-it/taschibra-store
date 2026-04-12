@@ -71,7 +71,7 @@ export default function ProductGrid({ title, categorySlug, limit = 8 }: { title:
         .from('products')
         .select('id, name, slug, price, promo_price, category_slug, main_image')
       if (categorySlug) {
-        q = q.eq('category_slug', categorySlug)
+        q = categorySlug === 'lancamentos' ? q.eq('is_lancamento', true) : q.eq('category_slug', categorySlug)
       }
       const { data } = await q.limit(limit)
       setProdutos(data || [])

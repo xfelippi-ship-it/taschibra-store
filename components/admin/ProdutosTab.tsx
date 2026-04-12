@@ -399,6 +399,15 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                     </div>
                   </div>}
+                  <div className="flex items-center gap-3 py-2">
+                    <input type="checkbox" id="is_lancamento"
+                      checked={produtoEdit.is_lancamento || false}
+                      onChange={e => setProdutoEdit({ ...produtoEdit, is_lancamento: e.target.checked })}
+                      className="w-4 h-4 accent-green-600 cursor-pointer" />
+                    <label htmlFor="is_lancamento" className="text-sm font-bold text-gray-700 cursor-pointer">
+                      É lançamento? <span className="text-xs text-gray-400 font-normal">(aparece também na categoria Lançamentos)</span>
+                    </label>
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-bold text-gray-700 mb-1 block">Peso (kg)</label>
