@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
+import React from 'react'
 import Image from 'next/image'
 import BannersTab from '@/components/admin/BannersTab'
 import ProdutosTab from '@/components/admin/ProdutosTab'
@@ -762,6 +763,104 @@ export default function AdminPage() {
   }
 
 
+
+  // ── Menu com grupos colapsáveis ──────────────────────────────────────
+  function NavGrupos({ aba, setAba, meuPapel }: { aba: string; setAba: (a: any) => void; meuPapel: string }) {
+    const [abertos, setAbertos] = React.useState<Record<string, boolean>>({
+      catalogo: true, vendas: true, loja: false, clientes: false, admin: false
+    })
+
+    function toggle(g: string) {
+      setAbertos(prev => ({ ...prev, [g]: !prev[g] }))
+    }
+
+    function tem(papeis: string[]) {
+      return meuPapel === 'master' ? true : papeis.includes(meuPapel)
+    }
+
+    function BtnItem({ id, label, icon }: { id: string; label: string; icon: React.ReactNode }) {
+      return (
+        <button onClick={() => setAba(id)}
+          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+            aba === id ? 'bg-green-700 text-white' : 'text-green-300 hover:bg-green-800 hover:text-white'
+          }`}>
+          {icon} {label}
+        </button>
+      )
+    }
+
+    function Grupo({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
+      const open = abertos[id] ?? true
+      return (
+        <div className="mb-1">
+          <button onClick={() => toggle(id)}
+            className="w-full flex items-center justify-between px-3 py-1.5 text-xs font-black text-green-500 uppercase tracking-widest hover:text-green-300 transition-colors">
+            <span>{label}</span>
+            <span className={`transition-transform ${open ? 'rotate-90' : ''}`}>›</span>
+          </button>
+          {open && <div className="space-y-0.5 mt-0.5">{children}</div>}
+        </div>
+      )
+    }
+
+    return (
+      <div className="space-y-1 pt-2">
+        {/* Dashboard sempre visível */}
+        {tem(['master','marketing','vendas']) && (
+          <BtnItem id="dashboard" label="Dashboard" icon={<BarChart3 size={16} />} />
+        )}
+
+        {/* CATÁLOGO */}
+        {tem(['master','marketing']) && (
+          <Grupo id="catalogo" label="Catálogo">
+            {tem(['master','marketing']) && <BtnItem id="produtos"   label="Produtos"     icon={<Package size={15} />} />}
+            {tem(['master'])            && <BtnItem id="categorias" label="Categorias"   icon={<Tag size={15} />} />}
+            {tem(['master'])            && <BtnItem id="importar"   label="Importar CSV" icon={<Upload size={15} />} />}
+          </Grupo>
+        )}
+
+        {/* VENDAS */}
+        {tem(['master','vendas']) && (
+          <Grupo id="vendas" label="Vendas">
+            {tem(['master','vendas']) && <BtnItem id="pedidos"    label="Pedidos"    icon={<ShoppingBag size={15} />} />}
+            {tem(['master','vendas']) && <BtnItem id="cupons"     label="Cupons"     icon={<Tag size={15} />} />}
+            {tem(['master','vendas']) && <BtnItem id="carrinhos"  label="Carrinhos"  icon={<ShoppingBag size={15} />} />}
+            {tem(['master','vendas']) && <BtnItem id="relatorios" label="Relatórios" icon={<BarChart3 size={15} />} />}
+          </Grupo>
+        )}
+
+        {/* LOJA */}
+        {tem(['master','marketing']) && (
+          <Grupo id="loja" label="Loja">
+            {tem(['master','marketing']) && <BtnItem id="banners"  label="Banners"       icon={<ImageIcon size={15} />} />}
+            {tem(['master','marketing']) && <BtnItem id="topbar"   label="Top Bar"       icon={<Megaphone size={15} />} />}
+            {tem(['master'])            && <BtnItem id="frete"    label="Frete Grátis"  icon={<Truck size={15} />} />}
+            {tem(['master','marketing']) && <BtnItem id="midias"   label="Mídias Sociais" icon={<Megaphone size={15} />} />}
+          </Grupo>
+        )}
+
+        {/* CLIENTES */}
+        {tem(['master','vendas','marketing']) && (
+          <Grupo id="clientes" label="Clientes">
+            {tem(['master','vendas'])    && <BtnItem id="clientes"    label="Clientes"     icon={<Users size={15} />} />}
+            {tem(['master','marketing']) && <BtnItem id="newsletter"  label="Newsletter"   icon={<Mail size={15} />} />}
+            {tem(['master','vendas'])    && <BtnItem id="faleconosco" label="Fale Conosco" icon={<MessageSquare size={15} />} />}
+            {tem(['master','marketing']) && <BtnItem id="faq"         label="FAQ"          icon={<HelpCircle size={15} />} />}
+          </Grupo>
+        )}
+
+        {/* ADMINISTRAÇÃO */}
+        {tem(['master']) && (
+          <Grupo id="admin" label="Administração">
+            <BtnItem id="vendedores" label="Vendedores" icon={<Tag size={15} />} />
+            <BtnItem id="usuarios"   label="Usuários"   icon={<Users size={15} />} />
+            <BtnItem id="auditoria"  label="Auditoria"  icon={<BarChart3 size={15} />} />
+          </Grupo>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 flex">
       <aside className="w-60 bg-green-900 text-white flex flex-col flex-shrink-0">
@@ -769,37 +868,8 @@ export default function AdminPage() {
           <Image src="/images/logo.png" alt="Taschibra Store" width={160} height={40} className="w-auto h-9 mb-2" priority />
           <div className="text-xs font-bold text-green-400 tracking-widest uppercase">Backoffice</div>
         </div>
-        <nav className="flex-1 p-4 space-y-1">
-          {[
-            ...([
-              { id: 'dashboard',  label: 'Dashboard',  icon: <BarChart3 size={16} />,    papeis: ['master','marketing','vendas'] },
-              { id: 'produtos',   label: 'Produtos',   icon: <Package size={16} />,      papeis: ['master','marketing'] },
-              { id: 'pedidos',    label: 'Pedidos',    icon: <ShoppingBag size={16} />,  papeis: ['master','vendas'] },
-              { id: 'cupons',     label: 'Cupons',     icon: <Tag size={16} />,          papeis: ['master','vendas'] },
-              { id: 'banners',    label: 'Banners',    icon: <ImageIcon size={16} />,    papeis: ['master','marketing'] },
-              { id: 'topbar',     label: 'Top Bar',    icon: <Megaphone size={16} />,    papeis: ['master','marketing'] },
-              { id: 'categorias', label: 'Categorias', icon: <Tag size={16} />,          papeis: ['master'] },
-              { id: 'importar',   label: 'Importar CSV', icon: <Upload size={16} />,    papeis: ['master'] },
-              { id: 'frete',      label: 'Frete Grátis',  icon: <Truck size={16} />,       papeis: ['master'] },
-              { id: 'carrinhos',  label: 'Carrinhos',    icon: <ShoppingBag size={16} />, papeis: ['master','vendas'] },
-              { id: 'relatorios', label: 'Relatórios',   icon: <BarChart3 size={16} />,   papeis: ['master','vendas'] },
-              { id: 'clientes',   label: 'Clientes',     icon: <Users size={16} />,       papeis: ['master','vendas'] },
-              { id: 'midias',     label: 'Mídias Sociais', icon: <Megaphone size={16} />, papeis: ['master','marketing'] },
-              { id: 'vendedores',   label: 'Vendedores',     icon: <Tag size={16} />,         papeis: ['master'] },
-              { id: 'faq',          label: 'FAQ',            icon: <HelpCircle size={16} />,  papeis: ['master','marketing'] },
-              { id: 'newsletter',   label: 'Newsletter',     icon: <Mail size={16} />,        papeis: ['master','marketing'] },
-              { id: 'faleconosco',  label: 'Fale Conosco',   icon: <MessageSquare size={16} />, papeis: ['master','vendas'] },
-              { id: 'usuarios',   label: 'Usuários',   icon: <Users size={16} />,        papeis: ['master'] },
-              { id: 'auditoria',  label: 'Auditoria',  icon: <BarChart3 size={16} />,    papeis: ['master'] },
-            ].filter(a => meuPapel === 'master' ? true : a.papeis.includes(meuPapel))),
-          ].map(item => (
-            <button key={item.id} onClick={() => setAba(item.id as any)}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
-                aba === item.id ? 'bg-green-700 text-white' : 'text-green-300 hover:bg-green-800 hover:text-white'
-              }`}>
-              {item.icon} {item.label}
-            </button>
-          ))}
+        <nav className="flex-1 p-2 overflow-y-auto">
+          <NavGrupos aba={aba} setAba={setAba} meuPapel={meuPapel} />
         </nav>
         <div className="p-4 border-t border-green-800">
           <a href="/" className="flex items-center gap-2 text-xs text-green-400 hover:text-white transition-colors">← Ver loja</a>
