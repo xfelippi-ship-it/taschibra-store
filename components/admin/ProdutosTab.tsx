@@ -673,8 +673,8 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                 return (
                   <button key={b} onClick={() => {
                     if (sel) setBadgesTemp(badgesTemp.filter(x => x !== b))
-                    else if (badgesTemp.length < 3) setBadgesTemp([...badgesTemp, b])
-                    else alert('Máximo 3 badges por produto')
+                    else if (badgesTemp.length < 2) setBadgesTemp([...badgesTemp, b])
+                    else alert('Máximo 2 badges por produto')
                   }} className={['text-sm font-bold px-4 py-2 rounded-full border-2 transition-all', sel ? colors[b] : 'bg-gray-50 text-gray-400 border-gray-200 hover:border-gray-300'].join(' ')}>
                     {labels[b]}
                   </button>
