@@ -34,6 +34,8 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
   const [busca, setBusca] = useState('')
+  const [badgeModalProduto, setBadgeModalProduto] = useState<any>(null)
+  const [badgesTemp, setBadgesTemp] = useState<string[]>([])
   const [ordem, setOrdem] = useState<'asc' | 'desc'>('asc')
   const [expandidos, setExpandidos] = useState<Set<string>>(new Set())
   const [variacoesPorProduto, setVariacoesPorProduto] = useState<Record<string, Variacao[]>>({})
@@ -242,17 +244,17 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                     <td className="px-5 py-4 text-center">
                       <span className={`font-bold text-sm ${p.stock_qty < 10 ? 'text-red-500' : 'text-gray-700'}`}>{p.stock_qty}</span>
                     </td>
-                    <td className="px-5 py-4 text-center">
+                    <td className="px-5 py-4 text-center cursor-pointer" onClick={() => { const bs = (p.badges && p.badges.length > 0) ? p.badges : (p.badge ? [p.badge] : []); setBadgesTemp(bs); setBadgeModalProduto(p) }} title="Clique para editar badges">
                       {(() => {
                         const bs = (p.badges && p.badges.length > 0) ? p.badges : (p.badge ? [p.badge] : [])
                         const bColors: Record<string,string> = {novo:'bg-green-100 text-green-700',oferta:'bg-red-100 text-red-700',smart:'bg-blue-100 text-blue-700',exclusivo:'bg-purple-100 text-purple-700'}
                         return bs.length > 0
                           ? <div className="flex flex-wrap gap-1 justify-center">{bs.map(b => <span key={b} className={`text-xs font-bold px-2 py-0.5 rounded-full ${bColors[b]||'bg-gray-100 text-gray-600'}`}>{b}</span>)}</div>
-                          : <span className="text-gray-300 text-xs">—</span>
+                          : <span className="text-gray-400 text-xs hover:text-green-600">+ badge</span>
                       })()}
                     </td>
-                    <td className="px-5 py-4 text-center">
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${p.is_lancamento ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-400'}`}>
+                    <td className="px-5 py-4 text-center cursor-pointer" onClick={() => toggleLancamentoProduto(p)} title="Clique para alternar">
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full transition-colors ${p.is_lancamento ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-gray-100 text-gray-400 hover:bg-purple-50 hover:text-purple-600'}`}>
                         {p.is_lancamento ? 'sim' : '—'}
                       </span>
                     </td>
