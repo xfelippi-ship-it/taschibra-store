@@ -12,6 +12,8 @@ type Produto = {
   promo_price: number
   category_slug: string
   main_image?: string
+  badge?: string
+  badges?: string[]
 }
 
 const badgeMap: Record<string, string> = {
@@ -80,7 +82,7 @@ export default function ProductGrid({ title, categorySlug, limit = 8 }: { title:
     async function load() {
       let q = supabase
         .from('products')
-        .select('id, name, slug, price, promo_price, category_slug, main_image')
+        .select('id, name, slug, price, promo_price, category_slug, main_image, badge, badges')
       if (categorySlug) {
         q = categorySlug === 'lancamentos' ? q.eq('is_lancamento', true) : q.eq('category_slug', categorySlug)
       }
