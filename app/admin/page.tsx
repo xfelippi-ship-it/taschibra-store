@@ -18,8 +18,9 @@ import VendedoresTab from '@/components/admin/VendedoresTab'
 import FAQTab from '@/components/admin/FAQTab'
 import NewsletterTab from '@/components/admin/NewsletterTab'
 import FaleConoscoTab from '@/components/admin/FaleConoscoTab'
+import ConfiguracoesLojaTab from '@/components/admin/ConfiguracoesLojaTab'
 import { useState, useEffect } from 'react'
-import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare } from 'lucide-react'
+import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { registrarAuditoria } from '@/lib/auditLog'
 
@@ -283,6 +284,7 @@ function CuponsTab() {
   const [cupons, setCupons] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(false)
+  const [abertos, setAbertos] = useState<Record<string, boolean>>({ catalogo: true, vendas: true, loja: true, clientes: true, admin: true })
   const [editando, setEditando] = useState<any>({})
 
   useEffect(() => { carregarCupons() }, [])
@@ -655,13 +657,14 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [busca, setBusca] = useState("")
   const [ordem, setOrdem] = useState<"asc"|"desc">("asc")
   const [modal, setModal] = useState(false)
+  const [abertos, setAbertos] = useState<Record<string, boolean>>({ catalogo: true, vendas: true, loja: true, clientes: true, admin: true })
   const [produtoEdit, setProdutoEdit] = useState<Partial<Produto>>({})
 
   async function handleLogin() {
@@ -765,10 +768,7 @@ export default function AdminPage() {
 
 
   // ── Menu com grupos colapsáveis ──────────────────────────────────────
-  function NavGrupos({ aba, setAba, meuPapel }: { aba: string; setAba: (a: any) => void; meuPapel: string }) {
-    const [abertos, setAbertos] = React.useState<Record<string, boolean>>({
-      catalogo: true, vendas: true, loja: false, clientes: false, admin: false
-    })
+  function NavGrupos({ aba, setAba, meuPapel, abertos, setAbertos }: { aba: string; setAba: (a: any) => void; meuPapel: string; abertos: Record<string, boolean>; setAbertos: (v: Record<string, boolean>) => void }) {
 
     function toggle(g: string) {
       setAbertos(prev => ({ ...prev, [g]: !prev[g] }))
@@ -855,6 +855,7 @@ export default function AdminPage() {
             <BtnItem id="vendedores" label="Vendedores" icon={<Tag size={15} />} />
             <BtnItem id="usuarios"   label="Usuários"   icon={<Users size={15} />} />
             <BtnItem id="auditoria"  label="Auditoria"  icon={<BarChart3 size={15} />} />
+            <BtnItem id="configuracoes" label="Configurações da Loja" icon={<Settings2 size={15} />} />
           </Grupo>
         )}
       </div>
@@ -869,7 +870,7 @@ export default function AdminPage() {
           <div className="text-xs font-bold text-green-400 tracking-widest uppercase">Backoffice</div>
         </div>
         <nav className="flex-1 p-2 overflow-y-auto">
-          <NavGrupos aba={aba} setAba={setAba} meuPapel={meuPapel} />
+          <NavGrupos aba={aba} setAba={setAba} meuPapel={meuPapel} abertos={abertos} setAbertos={setAbertos} />
         </nav>
         <div className="p-4 border-t border-green-800">
           <a href="/" className="flex items-center gap-2 text-xs text-green-400 hover:text-white transition-colors">← Ver loja</a>
@@ -889,6 +890,7 @@ export default function AdminPage() {
         {aba === 'cupons' && <CuponsTab />}
         {aba === 'usuarios' && <UsuariosTab />}
         {aba === 'auditoria' && <AuditoriaTab />}
+        {aba === 'configuracoes' && <ConfiguracoesLojaTab />}
         {aba === 'banners' && <BannersTab meuEmail={meuEmail} />}
         {aba === 'topbar' && <TopBarTab />}
         {aba === 'categorias' && <CategoriasTab />}
