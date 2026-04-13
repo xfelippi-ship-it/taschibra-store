@@ -122,7 +122,9 @@ function UsuariosTab() {
     if (!res.ok) {
       setMsg({ tipo: 'erro', texto: 'Erro ao enviar convite: ' + (json.error || 'tente novamente') })
     } else {
-      setMsg({ tipo: 'ok', texto: `Convite enviado para ${email.trim()}!` })
+      const senhaTemp = json.senhaTemporaria || ''
+      const emailOk = json.emailEnviado ? ' (e-mail enviado)' : ' (envie as credenciais manualmente)'
+      setMsg({ tipo: 'ok', texto: `Convite criado para ${email.trim()}${emailOk}. Senha temporaria: ${senhaTemp} — O usuario devera trocar no primeiro acesso.` })
       setEmail('')
       setModulosSelecionados(['dashboard','pedidos','relatorios'])
       carregarUsuarios()
