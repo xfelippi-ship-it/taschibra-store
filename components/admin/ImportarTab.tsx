@@ -72,28 +72,6 @@ async function parseFile(file: File, sheetName?: string): Promise<Record<string,
 }
 
 
-async function parseXLSX(file: File, sheetName?: string): Promise<Record<string, string>[]> {
-  const buffer = await file.arrayBuffer()
-  const wb = XLSX.read(buffer, { type: 'array' })
-  const target = sheetName
-    ? wb.SheetNames.find((s: string) => s.toLowerCase().trim() === sheetName.toLowerCase().trim())
-    : wb.SheetNames[0]
-  if (!target) return []
-  const ws = wb.Sheets[target]
-  const rows: any[] = XLSX.utils.sheet_to_json(ws, { defval: '' })
-  return rows.map((row: any) => {
-    const obj: Record<string, string> = {}
-    Object.keys(row).forEach(k => { obj[k.trim().toLowerCase()] = String(row[k]).trim() })
-    return obj
-  })
-}
-
-async function parseFile(file: File, sheetName?: string): Promise<Record<string, string>[]> {
-  const ext = file.name.split('.').pop()?.toLowerCase()
-  if (ext === 'xlsx' || ext === 'xls') return parseXLSX(file, sheetName)
-  const text = await file.text()
-  return parseCSV(text)
-}
 
 // Mapa de colunas em PT-BR para inglês
 const PT_MAP: Record<string, string> = {
