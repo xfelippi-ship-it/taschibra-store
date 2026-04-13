@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Save, FileText, ChevronDown, ChevronUp } from 'lucide-react'
 
@@ -17,6 +17,60 @@ const PAGINAS_PADRAO = [
   { slug: 'seguranca',         titulo: 'Segurança' },
 ]
 
+// Editor WYSIWYG simples sem dependência externa
+function EditorWYSIWYG({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (ref.current && ref.current.innerHTML !== value) {
+      ref.current.innerHTML = value
+    }
+  }, [])
+
+  function exec(cmd: string, val?: string) {
+    document.execCommand(cmd, false, val)
+    ref.current?.focus()
+    if (ref.current) onChange(ref.current.innerHTML)
+  }
+
+  const btnClass = "px-2 py-1 text-xs font-bold border border-gray-200 rounded hover:bg-gray-100 transition-colors"
+
+  return (
+    <div className="border border-gray-200 rounded-lg overflow-hidden">
+      {/* Toolbar */}
+      <div className="flex flex-wrap gap-1 p-2 bg-gray-50 border-b border-gray-200">
+        <button type="button" onMouseDown={e => { e.preventDefault(); exec('bold') }} className={btnClass}><strong>N</strong></button>
+        <button type="button" onMouseDown={e => { e.preventDefault(); exec('italic') }} className={btnClass}><em>I</em></button>
+        <button type="button" onMouseDown={e => { e.preventDefault(); exec('underline') }} className={btnClass}><u>S</u></button>
+        <div className="w-px bg-gray-300 mx-1" />
+        <button type="button" onMouseDown={e => { e.preventDefault(); exec('formatBlock', 'h2') }} className={btnClass}>H2</button>
+        <button type="button" onMouseDown={e => { e.preventDefault(); exec('formatBlock', 'h3') }} className={btnClass}>H3</button>
+        <button type="button" onMouseDown={e => { e.preventDefault(); exec('formatBlock', 'p') }} className={btnClass}>¶</button>
+        <div className="w-px bg-gray-300 mx-1" />
+        <button type="button" onMouseDown={e => { e.preventDefault(); exec('insertUnorderedList') }} className={btnClass}>• Lista</button>
+        <button type="button" onMouseDown={e => { e.preventDefault(); exec('insertOrderedList') }} className={btnClass}>1. Lista</button>
+        <div className="w-px bg-gray-300 mx-1" />
+        <button type="button" onMouseDown={e => { e.preventDefault(); exec('justifyLeft') }} className={btnClass}>⬅</button>
+        <button type="button" onMouseDown={e => { e.preventDefault(); exec('justifyCenter') }} className={btnClass}>↔</button>
+        <button type="button" onMouseDown={e => { e.preventDefault(); exec('removeFormat') }} className={`${btnClass} text-red-500`}>✕ Limpar</button>
+      </div>
+      {/* Área editável */}
+      <div
+        ref={ref}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={() => { if (ref.current) onChange(ref.current.innerHTML) }}
+        className="min-h-[200px] p-4 text-sm text-gray-800 outline-none prose prose-sm max-w-none
+          [&>h2]:text-lg [&>h2]:font-black [&>h2]:text-gray-800 [&>h2]:mt-4 [&>h2]:mb-2
+          [&>h3]:text-base [&>h3]:font-bold [&>h3]:text-gray-700 [&>h3]:mt-3 [&>h3]:mb-1
+          [&>p]:mb-2 [&>p]:leading-relaxed
+          [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-2
+          [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-2"
+      />
+    </div>
+  )
+}
+
 function PaginaEditor({ pagina, onSave }: { pagina: CmsPage; onSave: (p: CmsPage) => void }) {
   const [open, setOpen] = useState(false)
   const [data, setData] = useState(pagina)
@@ -25,7 +79,11 @@ function PaginaEditor({ pagina, onSave }: { pagina: CmsPage; onSave: (p: CmsPage
 
   async function salvar() {
     setSaving(true)
-    const payload = { slug: data.slug, titulo: data.titulo, conteudo: data.conteudo, publicado: data.publicado, updated_at: new Date().toISOString() }
+    const payload = {
+      slug: data.slug, titulo: data.titulo,
+      conteudo: data.conteudo, publicado: data.publicado,
+      updated_at: new Date().toISOString()
+    }
     let error
     if (data.id) {
       ({ error } = await supabase.from('cms_pages').update(payload).eq('id', data.id))
@@ -60,18 +118,17 @@ function PaginaEditor({ pagina, onSave }: { pagina: CmsPage; onSave: (p: CmsPage
         <div className="px-6 pb-6 border-t border-gray-100 space-y-4 mt-4">
           <div>
             <label className="text-xs font-bold text-gray-600 mb-1 block">Título da página</label>
-            <input className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
-              value={data.titulo} onChange={e => setData({ ...data, titulo: e.target.value })} />
+            <input
+              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
+              value={data.titulo}
+              onChange={e => setData({ ...data, titulo: e.target.value })}
+            />
           </div>
           <div>
-            <label className="text-xs font-bold text-gray-600 mb-1 block">Conteúdo</label>
-            <p className="text-xs text-gray-400 mb-2">Aceita HTML básico: &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;strong&gt;, &lt;a&gt;</p>
-            <textarea
-              rows={12}
-              className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500 font-mono resize-y"
+            <label className="text-xs font-bold text-gray-600 mb-2 block">Conteúdo</label>
+            <EditorWYSIWYG
               value={data.conteudo}
-              onChange={e => setData({ ...data, conteudo: e.target.value })}
-              placeholder="<h2>Título</h2><p>Conteúdo da página...</p>"
+              onChange={conteudo => setData(prev => ({ ...prev, conteudo }))}
             />
           </div>
           <div className="flex items-center justify-between">
@@ -90,13 +147,6 @@ function PaginaEditor({ pagina, onSave }: { pagina: CmsPage; onSave: (p: CmsPage
               </button>
             </div>
           </div>
-          {data.conteudo && (
-            <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Preview</p>
-              <div className="border border-gray-200 rounded-lg p-4 prose prose-sm max-w-none text-gray-700"
-                dangerouslySetInnerHTML={{ __html: data.conteudo }} />
-            </div>
-          )}
         </div>
       )}
     </div>
