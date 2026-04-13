@@ -887,8 +887,8 @@ export default function AdminPage() {
           <Grupo id="catalogo" label="Catálogo">
             {tem([], 'catalogo') && <BtnItem id="produtos"   label="Produtos"     icon={<Package size={15} />} />}
             {tem([], 'categorias') && <BtnItem id="categorias" label="Categorias"   icon={<Tag size={15} />} />}
-            {tem([], 'importar') && <BtnItem id="importar"   label="Importar CSV" icon={<Upload size={15} />} />
-            <BtnItem id="marcas"     label="Marcas"       icon={<Tag size={15} />} />}
+            {tem([], 'importar') && <BtnItem id="importar"   label="Importar CSV" icon={<Upload size={15} />} />}
+            {tem([], 'marcas') && <BtnItem id="marcas"     label="Marcas"       icon={<Tag size={15} />} />}
           </Grupo>
         )}
 
@@ -917,8 +917,8 @@ export default function AdminPage() {
           <Grupo id="clientes" label="Clientes">
             {tem([], 'clientes') && <BtnItem id="clientes"    label="Clientes"     icon={<Users size={15} />} />}
             {tem([], 'newsletter') && <BtnItem id="newsletter"  label="Newsletter"   icon={<Mail size={15} />} />}
-            {tem([], 'faleconosco') && <BtnItem id="faleconosco" label="Fale Conosco" icon={<MessageSquare size={15} />} />
-            <BtnItem id="avaliacoes"  label="Avaliações"   icon={<Star size={15} />} />}
+            {tem([], 'faleconosco') && <BtnItem id="faleconosco" label="Fale Conosco" icon={<MessageSquare size={15} />} />}
+            {tem([], 'avaliacoes') && <BtnItem id="avaliacoes"  label="Avaliações"   icon={<Star size={15} />} />}
             {tem([], 'faq') && <BtnItem id="faq"         label="FAQ"          icon={<HelpCircle size={15} />} />}
           </Grupo>
         )}
