@@ -32,7 +32,8 @@ function ProdCard({ p }: { p: Produto }) {
   const { addItem } = useCart()
   const badge = badgeMap[p.category_slug]
   const badges = (p.badges && p.badges.length > 0) ? p.badges : (badge ? [badge] : [])
-  const desconto = Math.round((1 - p.promo_price / p.price) * 100)
+  const precoFinal = p.promo_price && p.promo_price > 0 ? p.promo_price : p.price
+  const desconto = p.promo_price && p.promo_price > 0 ? Math.round((1 - p.promo_price / p.price) * 100) : 0
 
   function handleAdd(e: React.MouseEvent) {
     e.preventDefault()
@@ -59,12 +60,12 @@ function ProdCard({ p }: { p: Produto }) {
         <p className="text-sm font-bold text-gray-800 leading-snug mb-2 line-clamp-2 min-h-[2.5rem]">{p.name.toLowerCase().replace(/(?:^|\s|\/|-)\S/g, l => l.toUpperCase())}</p>
         <div className="flex items-center gap-2 mb-1">
           <span className="bg-teal-500 text-white text-xs font-black px-1.5 py-0.5 rounded">PIX</span>
-          <span className="text-lg font-black text-green-700">R$ {p.promo_price.toFixed(2).replace('.', ',')}</span>
+          <span className="text-lg font-black text-green-700">R$ {precoFinal.toFixed(2).replace('.', ',')}</span>
           {desconto > 0 && (
             <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">-{desconto}%</span>
           )}
         </div>
-        <p className="text-xs text-gray-500 mb-3">ou <strong>R$ {p.price.toFixed(2).replace('.', ',')}</strong> no cartão</p>
+        <p className="text-xs text-gray-500 mb-3">ou <strong>R$ {(p.price || precoFinal).toFixed(2).replace('.', ',')}</strong> no cartão</p>
         <button onClick={handleAdd}
           className="w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-black text-xs py-2.5 rounded-md transition-colors mt-auto">
           COMPRAR
