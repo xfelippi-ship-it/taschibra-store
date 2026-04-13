@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { Eye, EyeOff, Save, Trash2, Plus, Palette } from 'lucide-react'
+import { Eye, EyeOff, Save, Trash2, Plus, Palette, Pencil } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,6 +23,7 @@ const CORES_PRESET = [
   { label: 'Vermelho',        cor: '#b91c1c' },
   { label: 'Laranja',         cor: '#c2410c' },
   { label: 'Preto',           cor: '#18181b' },
+  { label: 'Amarelo',         cor: '#ca8a04' },
 ]
 
 export default function PopupTab() {
@@ -66,13 +67,14 @@ export default function PopupTab() {
       bg_color: editando.bg_color,
       active: editando.active,
     }
-    if (editando.id) {
-      await supabase.from('popup_promos').update(payload).eq('id', editando.id)
-      showMsg('Popup atualizado')
-    } else {
-      await supabase.from('popup_promos').insert(payload)
-      showMsg('Popup criado')
-    }
+    const res = await fetch('/api/admin/popup-save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: editando.id || null, ...payload }),
+    })
+    const data = await res.json()
+    if (data.ok) showMsg(editando.id ? 'Popup atualizado' : 'Popup criado')
+    else showMsg(data.error || 'Erro ao salvar', 'erro')
     setSalvando(false)
     setEditando(null)
     carregar()
@@ -80,14 +82,23 @@ export default function PopupTab() {
 
   async function deletar(id: string) {
     if (!confirm('Excluir este popup?')) return
-    await supabase.from('popup_promos').delete().eq('id', id)
+    await fetch('/api/admin/popup-delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
     showMsg('Popup excluido')
     carregar()
   }
 
   async function toggleAtivo(popup: Popup) {
-    await supabase.from('popup_promos').update({ active: !popup.active }).eq('id', popup.id)
-    carregar()
+    const res = await fetch('/api/admin/popup-toggle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: popup.id, active: !popup.active }),
+    })
+    const data = await res.json()
+    if (data.ok) carregar()
   }
 
   const inputCls = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500'
@@ -245,7 +256,7 @@ export default function PopupTab() {
                     <div className="flex items-center justify-center gap-2">
                       <button onClick={() => setEditando({...p})}
                         className="text-blue-500 hover:text-blue-700 transition-colors" title="Editar">
-                        <Palette size={15} />
+                        <Pencil size={15} />
                       </button>
                       <button onClick={() => deletar(p.id)}
                         className="text-red-400 hover:text-red-600 transition-colors" title="Excluir">
