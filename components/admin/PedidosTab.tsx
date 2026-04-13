@@ -6,7 +6,7 @@ import { registrarAuditoria } from '@/lib/auditLog'
 import {
   ChevronDown, ChevronRight, Package, XCircle,
   CreditCard, RefreshCw, AlertTriangle, Filter, X,
-  Bell, Plus, Trash2, Loader2,
+  Bell, Plus, Trash2, Loader2, Download,
 } from 'lucide-react'
 
 const supabase = createClient(
@@ -308,6 +308,13 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
             <Filter size={14} />
             Filtros {filtrosAtivos && '•'}
           </button>
+          <a
+            href={`/api/admin/pedidos/exportar${filtroStatus !== "todos" ? "?status=" + filtroStatus : ""}`}
+            download
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm font-bold text-gray-500 hover:bg-gray-50">
+            <Download size={14} />
+            Exportar CSV
+          </a>
           <button
             onClick={carregar}
             className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm font-bold text-gray-500 hover:bg-gray-50">
