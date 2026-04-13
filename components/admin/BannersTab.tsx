@@ -173,9 +173,9 @@ export default function BannersTab({ meuEmail = 'admin' }: { meuEmail?: string }
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={5} className="text-center py-8 text-gray-400">Carregando...</td></tr>
+              <tr><td colSpan={6} className="text-center py-8 text-gray-400">Carregando...</td></tr>
             ) : banners.length === 0 ? (
-              <tr><td colSpan={5} className="text-center py-8 text-gray-400">Nenhum banner cadastrado.</td></tr>
+              <tr><td colSpan={6} className="text-center py-8 text-gray-400">Nenhum banner cadastrado.</td></tr>
             ) : banners.map((b) => {
               const st = calcStatus(b)
                   const tipo = b.banner_type || 'principal'
@@ -200,6 +200,11 @@ export default function BannersTab({ meuEmail = 'admin' }: { meuEmail?: string }
                       <span className={`w-2 h-2 rounded-full ${st.dot}`} />
                       {st.label}
                     </button>
+                  </td>
+                  <td className="px-5 py-4">
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${tipo === 'carrinho' ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'}`}>
+                      {tipo === 'carrinho' ? 'Carrinho' : 'Principal'}
+                    </span>
                   </td>
                   <td className="px-5 py-4 text-center">
                     <div className="flex items-center justify-center gap-2">
