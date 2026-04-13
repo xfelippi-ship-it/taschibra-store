@@ -524,10 +524,6 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
       </div>
 
       {/* PLANILHA MODELO */}
-      
-      </div>
-
-      {/* PLANILHA MODELO */}
       <div className="bg-gray-50 rounded-xl p-4 mb-4 flex items-center gap-3">
         <Download size={16} className="text-blue-500 flex-shrink-0" />
         <div>
