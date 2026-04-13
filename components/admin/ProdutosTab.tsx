@@ -7,7 +7,7 @@ import { registrarAuditoria } from '@/lib/auditLog'
 
 type Produto = {
   id: string; name: string; sku: string; price: number; promo_price: number
-  stock_qty: number; active: boolean; badge: string; badges?: string[]; is_lancamento?: boolean; family?: string
+  stock_qty: number; active: boolean; badge: string; badges?: string[]; is_lancamento?: boolean; family?: string; brand_id?: string
   category_slug?: string; description?: string; main_image?: string
   weight_kg?: number; warranty?: string; ean?: string
 }
@@ -47,6 +47,8 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
   const [loading, setLoading] = useState(true)
   const [busca, setBusca] = useState('')
   const [badgeModalProduto, setBadgeModalProduto] = useState<any>(null)
+  const [marcas, setMarcas] = useState<{id:string;nome:string}[]>([])
+  useEffect(() => { supabase.from('brands').select('id,nome').eq('ativo',true).order('nome').then(({data}) => setMarcas(data||[])) }, [])
   const [badgesTemp, setBadgesTemp] = useState<string[]>([])
 
   async function toggleLancamentoProduto(produto: any) {
@@ -422,6 +424,16 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                       <input value={produtoEdit.category_slug || ''} onChange={e => setProdutoEdit({ ...produtoEdit, category_slug: e.target.value })}
                         placeholder="Ex: lampadas"
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-bold text-gray-700 mb-1 block">Marca</label>
+                      <select value={produtoEdit.brand_id || ''} onChange={e => setProdutoEdit({ ...produtoEdit, brand_id: e.target.value })}
+                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
+                        <option value="">Sem marca</option>
+                        {marcas.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+                      </select>
                     </div>
                   </div>
                   {meuPapel !== 'marketing' && <div className="grid grid-cols-3 gap-4">
