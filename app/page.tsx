@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import Header from '@/components/store/Header'
 import HeroBanner from '@/components/store/HeroBanner'
 import TrustBar from '@/components/store/TrustBar'
@@ -11,9 +12,13 @@ export default function Home() {
       <Header />
       <HeroBanner />
       <TrustBar />
-      <ProductGrid title="Lançamentos" categorySlug="lancamentos" limit={8} />
+      <Suspense fallback={<div className="h-96" />}>
+        <ProductGrid title="Lançamentos" categorySlug="lancamentos" limit={8} />
+      </Suspense>
       <PromoBanner />
-      <ProductGrid title="Mais Vendidos" categorySlug="outlet" limit={8} />
+      <Suspense fallback={<div className="h-96" />}>
+        <ProductGrid title="Mais Vendidos" categorySlug="outlet" limit={8} />
+      </Suspense>
       <Footer />
     </main>
   )
