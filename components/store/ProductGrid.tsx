@@ -75,6 +75,10 @@ function ProdCard({ p }: { p: Produto }) {
   )
 }
 
+function SafeProdCard({ p }: { p: Produto }) {
+  try { return <ProdCard p={p} />  } catch { return null }
+}
+
 export default function ProductGrid({ title, categorySlug, limit = 8 }: { title: string; categorySlug?: string; limit?: number }) {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
@@ -111,7 +115,7 @@ export default function ProductGrid({ title, categorySlug, limit = 8 }: { title:
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {produtos.map(p => <ProdCard key={p.id} p={p} />)}
+          {produtos.map(p => <SafeProdCard key={p.id} p={p} />)}
         </div>
       )}
     </section>
