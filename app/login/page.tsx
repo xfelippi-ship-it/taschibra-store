@@ -124,7 +124,7 @@ export default function LoginPage() {
 
             <button
               onClick={modo === 'login' ? handleLogin : handleCadastro}
-              disabled={loading || !email || !senha}
+              disabled={loading}
               className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-black py-3.5 rounded-lg transition-colors mt-2">
               {loading ? 'Aguarde...' : modo === 'login' ? 'Entrar na conta' : 'Criar minha conta'}
             </button>
