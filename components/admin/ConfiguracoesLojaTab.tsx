@@ -367,7 +367,6 @@ export default function ConfiguracoesLojaTab() {
               onChange={e => setCard(prev => ({ ...prev, valor_minimo_parcela: parseFloat(e.target.value) || 0 }))}
             />
           </div>
-        </div>
           <div>
             <label className="text-xs font-bold text-gray-600 mb-1 block">Juros por parcela (%)</label>
             <input
