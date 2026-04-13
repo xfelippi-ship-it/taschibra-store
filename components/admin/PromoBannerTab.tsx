@@ -1,7 +1,7 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { Plus, Trash2, Save, Image, Tag, ToggleLeft, ToggleRight } from 'lucide-react'
+import { Plus, Trash2, Save, Image, Tag, ToggleLeft, ToggleRight, Upload } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,6 +39,21 @@ export default function PromoBannerTab() {
   function showToast(msg: string) {
     setToast(msg)
     setTimeout(() => setToast(null), 3000)
+  }
+
+  async function uploadImagem(file: File) {
+    setUploading(true)
+    const ext = file.name.split('.').pop()
+    const path = `promo-banner/${Date.now()}.${ext}`
+    const { error } = await supabase.storage.from('banners').upload(path, file, { upsert: true })
+    if (!error) {
+      const { data } = supabase.storage.from('banners').getPublicUrl(path)
+      setBanner(prev => prev ? { ...prev, imagem_url: data.publicUrl } : prev)
+      showToast('Imagem enviada!')
+    } else {
+      showToast('Erro ao enviar imagem: ' + error.message)
+    }
+    setUploading(false)
   }
 
   async function carregar() {
@@ -154,6 +169,13 @@ export default function PromoBannerTab() {
             placeholder="https://..."
             className={inputCls}
           />
+          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+            onChange={e => e.target.files?.[0] && uploadImagem(e.target.files[0])} />
+          <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
+            className="w-full border-2 border-dashed border-gray-300 hover:border-green-500 rounded-xl py-3 text-sm text-gray-500 flex items-center justify-center gap-2 transition-colors disabled:opacity-50">
+            <Upload size={16} />
+            {uploading ? 'Enviando...' : 'Upload JPG/PNG/WebP — recomendado 1200×400px, máx 500KB'}
+          </button>
           {banner.imagem_url && (
             <img src={banner.imagem_url} alt="Preview" className="w-full rounded-lg object-cover max-h-40" />
           )}
