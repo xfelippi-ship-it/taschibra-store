@@ -25,6 +25,10 @@ const CAMPOS = [
   { id: 'weight_kg',         label: 'Peso (kg)',               col: 'weight_kg' },
   { id: 'warranty',          label: 'Garantia',                col: 'warranty' },
   { id: 'ean',               label: 'EAN / Código de barras',  col: 'ean' },
+  { id: 'main_image',        label: 'Imagem principal (URL)',   col: 'main_image' },
+  { id: 'brand',             label: 'Marca',                    col: 'brand' },
+  { id: 'sort_order',        label: 'Ordem de exibição',        col: 'sort_order' },
+  { id: 'ncm',               label: 'NCM fiscal',               col: 'ncm' },
 ]
 
 type Resultado = { sku: string; status: 'criado' | 'atualizado' | 'erro'; msg?: string }
@@ -77,6 +81,8 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
   const [resultados, setResultados] = useState<Resultado[]>([])
   const [mostrarPreview, setMostrarPreview] = useState(false)
   const [mostrarResultados, setMostrarResultados] = useState(false)
+  const [arquivoVar, setArquivoVar] = useState<File | null>(null)
+  const inputVarRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   function toggleCampo(id: string) {
@@ -129,6 +135,58 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
     setExportando(false)
   }
 
+
+  async function processarVariacoes(rows: Record<string, string>[]) {
+    const res: Resultado[] = []
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i]
+      const skuPai = (row['sku_pai'] || row['sku pai'] || '').trim()
+      const skuVar = (row['sku variacao'] || row['sku_variacao'] || row['sku'] || '').trim()
+      const tipo   = (row['tipo'] || row['type'] || '').trim()
+      const valor  = (row['valor'] || row['value'] || '').trim()
+
+      if (!skuPai || !tipo || !valor) {
+        res.push({ sku: `var linha ${i+2}`, status: 'erro', msg: 'SKU Pai, Tipo ou Valor ausente' })
+        continue
+      }
+
+      try {
+        const { data: produto } = await supabase.from('products').select('id').eq('sku', skuPai).maybeSingle()
+        if (!produto) {
+          res.push({ sku: skuPai, status: 'erro', msg: `Produto pai SKU ${skuPai} não encontrado` })
+          continue
+        }
+
+        const payload: Record<string, any> = {
+          product_id: produto.id,
+          type: tipo,
+          value: valor,
+          name: (row['nome'] || row['name'] || `${skuPai} ${valor}`).trim(),
+          sku: skuVar || `${skuPai}-${valor.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+          ean: (row['ean'] || '').trim(),
+          price: parseFloat((row['preco normal'] || row['price'] || row['preco'] || '0').replace(',', '.')) || 0,
+          promo_price: parseFloat((row['preco pix'] || row['promo_price'] || '0').replace(',', '.')) || 0,
+          stock_qty: parseInt(row['estoque'] || row['stock_qty'] || '0') || 0,
+          active: !['nao','false','0'].includes((row['ativo'] || 'sim').toLowerCase()),
+          technical_description: (row['descricao tecnica'] || row['technical_description'] || '').trim(),
+          sort_order: parseInt(row['ordem'] || row['sort_order'] || '0') || 0,
+        }
+
+        const { data: existe } = await supabase.from('product_variants').select('id').eq('product_id', produto.id).eq('type', tipo).eq('value', valor).maybeSingle()
+        if (existe) {
+          await supabase.from('product_variants').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', existe.id)
+          res.push({ sku: `${skuPai}/${valor}`, status: 'atualizado' })
+        } else {
+          await supabase.from('product_variants').insert(payload)
+          res.push({ sku: `${skuPai}/${valor}`, status: 'criado' })
+        }
+      } catch (e: any) {
+        res.push({ sku: `${skuPai}/${valor}`, status: 'erro', msg: e.message })
+      }
+    }
+    return res
+  }
+
   async function processar() {
     if (!arquivo) return
     setProcessando(true)
@@ -155,7 +213,7 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
           if (val === '') continue
           if (['price','promo_price','weight_kg'].includes(campo.id)) {
             payload[campo.col] = parseFloat(val.replace(',', '.')) || 0
-          } else if (campo.id === 'stock_qty') {
+          } else if (['stock_qty', 'sort_order'].includes(campo.id)) {
             payload[campo.col] = parseInt(val) || 0
           } else if (['active','is_lancamento'].includes(campo.id)) {
             payload[campo.col] = val.toLowerCase() === 'true' || val === '1' || val.toLowerCase() === 'sim'
@@ -351,6 +409,40 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
           )}
         </div>
       )}
+
+      {/* IMPORTAR VARIAÇÕES */}
+      <div className="bg-white rounded-xl border border-blue-100 p-6 mb-4">
+        <h2 className="font-black text-blue-700 mb-1 text-sm uppercase tracking-wide">↑ Importar Variações (opcional)</h2>
+        <p className="text-xs text-gray-400 mb-4">Selecione um CSV de variações. Colunas: sku_pai, tipo, valor, sku, ean, preco, preco_pix, estoque, ativo, descricao_tecnica, ordem.</p>
+        <input ref={inputVarRef} type="file" accept=".csv,.txt" className="hidden"
+          onChange={async e => {
+            const file = e.target.files?.[0]
+            if (!file) return
+            setArquivoVar(file)
+          }} />
+        <div className="flex gap-3 items-center flex-wrap">
+          <button onClick={() => inputVarRef.current?.click()}
+            className="border border-blue-300 text-blue-700 font-bold px-4 py-2 rounded-lg hover:bg-blue-50 text-sm transition-colors">
+            {arquivoVar ? `📄 ${arquivoVar.name}` : '📎 Selecionar CSV de Variações'}
+          </button>
+          {arquivoVar && (
+            <button onClick={async () => {
+              if (!arquivoVar) return
+              setProcessando(true)
+              setMostrarResultados(true)
+              const text = await arquivoVar.text()
+              const rows = parseCSV(text)
+              const res = await processarVariacoes(rows)
+              setResultados(prev => [...prev, ...res])
+              setProcessando(false)
+            }} disabled={processando}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-black px-5 py-2 rounded-lg text-sm transition-colors">
+              <Upload size={14} />
+              {processando ? 'Processando...' : `Importar ${arquivoVar.name}`}
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* RESULTADOS */}
       {resultados.length > 0 && (
