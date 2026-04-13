@@ -35,13 +35,39 @@ type Produto = {
   width_cm_packed?: number; depth_cm_packed?: number; tags?: string[]
 }
 
+
+const TODOS_MODULOS = [
+  { id: 'dashboard',     label: 'Dashboard',           grupo: 'Geral' },
+  { id: 'produtos',      label: 'Produtos',             grupo: 'Catálogo' },
+  { id: 'categorias',    label: 'Categorias',           grupo: 'Catálogo' },
+  { id: 'importar',      label: 'Importar CSV',         grupo: 'Catálogo' },
+  { id: 'pedidos',       label: 'Pedidos',              grupo: 'Vendas' },
+  { id: 'cupons',        label: 'Cupons',               grupo: 'Vendas' },
+  { id: 'carrinhos',     label: 'Carrinhos',            grupo: 'Vendas' },
+  { id: 'frete',         label: 'Frete Grátis',         grupo: 'Vendas' },
+  { id: 'relatorios',    label: 'Relatórios',           grupo: 'Vendas' },
+  { id: 'banners',       label: 'Banners',              grupo: 'Loja' },
+  { id: 'topbar',        label: 'Top Bar',              grupo: 'Loja' },
+  { id: 'midias',        label: 'Mídias Sociais',       grupo: 'Loja' },
+  { id: 'clientes',      label: 'Clientes',             grupo: 'Clientes' },
+  { id: 'newsletter',    label: 'Newsletter',           grupo: 'Clientes' },
+  { id: 'faleconosco',   label: 'Fale Conosco',         grupo: 'Clientes' },
+  { id: 'faq',           label: 'FAQ',                  grupo: 'Clientes' },
+  { id: 'vendedores',    label: 'Vendedores',           grupo: 'Administração' },
+  { id: 'usuarios',      label: 'Usuários',             grupo: 'Administração' },
+  { id: 'auditoria',     label: 'Auditoria',            grupo: 'Administração' },
+  { id: 'configuracoes', label: 'Configurações da Loja',grupo: 'Administração' },
+]
+
 function UsuariosTab() {
   const [usuarios, setUsuarios] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
-  const [papeisSelecionados, setPapeisSelecionados] = useState<string[]>(['marketing'])
+  const [modulosSelecionados, setModulosSelecionados] = useState<string[]>(['dashboard','pedidos','relatorios'])
   const [enviando, setEnviando] = useState(false)
   const [msg, setMsg] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null)
+  const [editandoId, setEditandoId] = useState<string | null>(null)
+  const [modulosEdicao, setModulosEdicao] = useState<string[]>([])
 
   useEffect(() => { carregarUsuarios() }, [])
 
@@ -52,19 +78,20 @@ function UsuariosTab() {
     setLoading(false)
   }
 
-  function togglePapel(papel: string) {
-    if (papel === 'master') {
-      setPapeisSelecionados(['master'])
-      return
+  function toggleModulo(lista: string[], setLista: (v: string[]) => void, id: string) {
+    if (lista.includes(id)) {
+      setLista(lista.filter(m => m !== id))
+    } else {
+      setLista([...lista, id])
     }
-    setPapeisSelecionados(prev => {
-      const semMaster = prev.filter(p => p !== 'master')
-      if (semMaster.includes(papel)) {
-        const novo = semMaster.filter(p => p !== papel)
-        return novo.length === 0 ? ['marketing'] : novo
-      }
-      return [...semMaster, papel]
-    })
+  }
+
+  function selecionarTodos(setLista: (v: string[]) => void) {
+    setLista(TODOS_MODULOS.map(m => m.id))
+  }
+
+  function limparTodos(setLista: (v: string[]) => void) {
+    setLista([])
   }
 
   async function convidar() {
@@ -74,7 +101,7 @@ function UsuariosTab() {
     const res = await fetch('/api/admin-invite', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.trim(), papeis: papeisSelecionados })
+      body: JSON.stringify({ email: email.trim(), papeis: ['custom'], modulos: modulosSelecionados })
     })
     const json = await res.json()
     if (!res.ok) {
@@ -82,20 +109,21 @@ function UsuariosTab() {
     } else {
       setMsg({ tipo: 'ok', texto: `Convite enviado para ${email.trim()}!` })
       setEmail('')
-      setPapeisSelecionados(['marketing'])
+      setModulosSelecionados(['dashboard','pedidos','relatorios'])
       carregarUsuarios()
     }
     setEnviando(false)
   }
 
-  async function alterarPapeis(id: string, emailUsuario: string, novosPapeis: string[]) {
-    await supabase.from('admin_users').update({ papeis: novosPapeis }).eq('id', id)
+  async function salvarModulos(id: string, emailUsuario: string) {
+    await supabase.from('admin_users').update({ modulos: modulosEdicao }).eq('id', id)
     await supabase.from('audit_log').insert({
       user_email: emailUsuario,
-      acao: 'papeis_alterados',
+      acao: 'modulos_alterados',
       entidade: 'admin_users',
-      detalhe: `Usuário: ${emailUsuario} | Novos papéis: ${novosPapeis.join(', ')}`
+      detalhe: `Módulos: ${modulosEdicao.join(', ')}`
     })
+    setEditandoId(null)
     carregarUsuarios()
   }
 
@@ -104,10 +132,8 @@ function UsuariosTab() {
     if (!confirm(`${acao === 'desabilitar' ? 'Desabilitar' : 'Reabilitar'} acesso de ${emailUsuario}?`)) return
     await supabase.from('admin_users').update({ ativo: !ativo }).eq('id', id)
     await supabase.from('audit_log').insert({
-      user_email: emailUsuario,
-      acao: acao,
-      entidade: 'admin_users',
-      detalhe: `Usuário: ${emailUsuario} | ${acao === 'desabilitar' ? 'Desabilitado' : 'Reabilitado'}`
+      user_email: emailUsuario, acao, entidade: 'admin_users',
+      detalhe: `Usuário: ${emailUsuario}`
     })
     carregarUsuarios()
   }
@@ -115,24 +141,55 @@ function UsuariosTab() {
   async function resetarSenha(emailUsuario: string) {
     if (!confirm(`Enviar e-mail de redefinição de senha para ${emailUsuario}?`)) return
     const { error } = await supabase.auth.resetPasswordForEmail(emailUsuario)
-    if (error) {
-      alert('Erro ao enviar e-mail: ' + error.message)
-    } else {
-      await supabase.from('audit_log').insert({
-        user_email: emailUsuario,
-        acao: 'reset_senha',
-        entidade: 'admin_users',
-        detalhe: `Usuário: ${emailUsuario} | E-mail de redefinição enviado`
-      })
-      alert(`E-mail de redefinição enviado para ${emailUsuario}`)
-    }
+    if (error) { alert('Erro: ' + error.message); return }
+    await supabase.from('audit_log').insert({
+      user_email: emailUsuario, acao: 'reset_senha', entidade: 'admin_users',
+      detalhe: `E-mail de redefinição enviado`
+    })
+    alert(`E-mail enviado para ${emailUsuario}`)
   }
 
-  const papelLabel: Record<string, string> = { master: 'Master', marketing: 'Marketing', vendas: 'Vendas' }
-  const papelCor: Record<string, string> = {
-    master: 'bg-purple-100 text-purple-700',
-    marketing: 'bg-blue-100 text-blue-700',
-    vendas: 'bg-green-100 text-green-700'
+  // Agrupa módulos por grupo
+  const grupos = TODOS_MODULOS.reduce((acc, m) => {
+    if (!acc[m.grupo]) acc[m.grupo] = []
+    acc[m.grupo].push(m)
+    return acc
+  }, {} as Record<string, typeof TODOS_MODULOS>)
+
+  function CheckboxModulos({ lista, setLista }: { lista: string[]; setLista: (v: string[]) => void }) {
+    return (
+      <div className="space-y-3">
+        <div className="flex gap-3 mb-2">
+          <button type="button" onClick={() => selecionarTodos(setLista)}
+            className="text-xs font-bold text-green-600 hover:text-green-800 underline">
+            Selecionar todos
+          </button>
+          <button type="button" onClick={() => limparTodos(setLista)}
+            className="text-xs font-bold text-red-400 hover:text-red-600 underline">
+            Limpar todos
+          </button>
+        </div>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+          {Object.entries(grupos).map(([grupo, mods]) => (
+            <div key={grupo}>
+              <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1.5">{grupo}</p>
+              <div className="space-y-1">
+                {mods.map(m => (
+                  <label key={m.id} className="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox"
+                      checked={lista.includes(m.id)}
+                      onChange={() => toggleModulo(lista, setLista, m.id)}
+                      className="w-4 h-4 accent-green-600 cursor-pointer"
+                    />
+                    <span className="text-sm text-gray-700">{m.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -144,39 +201,29 @@ function UsuariosTab() {
       {/* Convidar */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
         <h2 className="font-black text-gray-800 mb-1">Convidar novo usuário</h2>
-        <p className="text-sm text-gray-500 mb-4">O usuário receberá um e-mail com link para criar a própria senha.</p>
-        <div className="flex gap-3 mb-4">
+        <p className="text-sm text-gray-500 mb-4">Defina o e-mail e selecione quais módulos ele poderá acessar.</p>
+        <div className="flex gap-3 mb-5">
           <input
-            type="email"
-            value={email}
+            type="email" value={email}
             onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && convidar()}
             placeholder="email@exemplo.com"
             className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
           />
-          <button
-            onClick={convidar}
-            disabled={enviando || !email.trim() || papeisSelecionados.length === 0}
+          <button onClick={convidar}
+            disabled={enviando || !email.trim() || modulosSelecionados.length === 0}
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold text-sm px-6 py-2.5 rounded-lg transition-colors">
             <Plus size={16} /> {enviando ? 'Enviando...' : 'Convidar'}
           </button>
         </div>
-        {/* Checkboxes de papéis */}
-        <div className="flex gap-4">
-          <p className="text-sm font-bold text-gray-600 mr-2 self-center">Acesso:</p>
-          {(['master', 'marketing', 'vendas'] as const).map(p => (
-            <label key={p} className="flex items-center gap-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={papeisSelecionados.includes(p)}
-                onChange={() => togglePapel(p)}
-                className="w-4 h-4 accent-green-600 cursor-pointer"
-              />
-              <span className={`text-xs font-bold px-2 py-1 rounded-full ${papelCor[p]}`}>{papelLabel[p]}</span>
-              {p === 'master' && <span className="text-xs text-gray-400">(acesso total)</span>}
-            </label>
-          ))}
+
+        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+          <p className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">
+            Módulos com acesso ({modulosSelecionados.length}/{TODOS_MODULOS.length})
+          </p>
+          <CheckboxModulos lista={modulosSelecionados} setLista={setModulosSelecionados} />
         </div>
+
         {msg && (
           <p className={`mt-3 text-sm font-bold px-4 py-2 rounded-lg ${msg.tipo === 'ok' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
             {msg.tipo === 'ok' ? '✅' : '❌'} {msg.texto}
@@ -190,7 +237,7 @@ function UsuariosTab() {
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">E-mail</th>
-              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Acesso</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Módulos</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Adicionado em</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Ações</th>
@@ -198,49 +245,56 @@ function UsuariosTab() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={4} className="text-center py-8 text-gray-400">Carregando...</td></tr>
+              <tr><td colSpan={5} className="text-center py-8 text-gray-400">Carregando...</td></tr>
             ) : usuarios.length === 0 ? (
               <tr><td colSpan={5} className="text-center py-8 text-gray-400">Nenhum usuário cadastrado.</td></tr>
             ) : usuarios.map(u => {
-              const papeis: string[] = u.papeis || [u.papel || 'master']
               const ativo: boolean = u.ativo !== false
+              const isMaster = (u.papeis || [u.papel || '']).includes('master')
+              const modulos: string[] = u.modulos || []
+              const isEditando = editandoId === u.id
               return (
                 <tr key={u.id} className={`border-b border-gray-100 hover:bg-gray-50 ${!ativo ? 'opacity-50' : ''}`}>
                   <td className="px-5 py-4">
                     <p className="font-bold text-sm text-gray-800">{u.email}</p>
+                    {isMaster && <span className="text-xs bg-purple-100 text-purple-700 font-bold px-2 py-0.5 rounded-full">Master</span>}
                   </td>
-                  <td className="px-5 py-4">
-                    <div className="flex gap-1 flex-wrap">
-                      {(['master', 'marketing', 'vendas'] as const).map(p => (
-                        <button
-                          key={p}
-                          onClick={() => {
-                            if (!ativo) return
-                            const atual = papeis.includes(p)
-                            let novos: string[]
-                            if (p === 'master') {
-                              novos = atual ? ['marketing'] : ['master']
-                            } else {
-                              const semMaster = papeis.filter(x => x !== 'master')
-                              if (atual) {
-                                novos = semMaster.filter(x => x !== p)
-                                if (novos.length === 0) novos = ['marketing']
-                              } else {
-                                novos = [...semMaster.filter(x => x !== 'master'), p]
-                              }
-                            }
-                            alterarPapeis(u.id, u.email, novos)
-                          }}
-                          className={`text-xs font-bold px-2 py-1 rounded-full border transition-all ${
-                            papeis.includes(p)
-                              ? papelCor[p] + ' border-transparent'
-                              : 'bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-200'
-                          } ${!ativo ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                        >
-                          {papelLabel[p]}
-                        </button>
-                      ))}
-                    </div>
+                  <td className="px-5 py-4 max-w-xs">
+                    {isEditando ? (
+                      <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                        <CheckboxModulos lista={modulosEdicao} setLista={setModulosEdicao} />
+                        <div className="flex gap-2 mt-3">
+                          <button onClick={() => salvarModulos(u.id, u.email)}
+                            className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg">
+                            ✓ Salvar
+                          </button>
+                          <button onClick={() => setEditandoId(null)}
+                            className="text-xs text-gray-500 hover:text-gray-700 font-bold px-3 py-1.5 border border-gray-200 rounded-lg">
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : isMaster ? (
+                      <span className="text-xs text-purple-600 font-bold">Acesso total</span>
+                    ) : modulos.length === 0 ? (
+                      <span className="text-xs text-red-400 font-bold">Nenhum módulo</span>
+                    ) : (
+                      <div className="flex flex-wrap gap-1">
+                        {modulos.slice(0,4).map(id => {
+                          const m = TODOS_MODULOS.find(x => x.id === id)
+                          return m ? (
+                            <span key={id} className="text-xs bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full">
+                              {m.label}
+                            </span>
+                          ) : null
+                        })}
+                        {modulos.length > 4 && (
+                          <span className="text-xs bg-gray-100 text-gray-500 font-bold px-2 py-0.5 rounded-full">
+                            +{modulos.length - 4}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </td>
                   <td className="px-5 py-4">
                     <span className={`text-xs font-bold px-2 py-1 rounded-full ${
@@ -256,14 +310,19 @@ function UsuariosTab() {
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center justify-center gap-3">
-                      <button
-                        onClick={() => resetarSenha(u.email)}
+                      {!isMaster && (
+                        <button onClick={() => { setEditandoId(u.id); setModulosEdicao(modulos) }}
+                          title="Editar módulos"
+                          className="text-blue-400 hover:text-blue-600 transition-colors text-xs font-bold">
+                          <Pencil size={14} />
+                        </button>
+                      )}
+                      <button onClick={() => resetarSenha(u.email)}
                         title="Resetar senha"
                         className="text-blue-400 hover:text-blue-600 transition-colors text-xs font-bold">
                         🔑
                       </button>
-                      <button
-                        onClick={() => desabilitarUsuario(u.id, u.email, ativo)}
+                      <button onClick={() => desabilitarUsuario(u.id, u.email, ativo)}
                         title={ativo ? 'Desabilitar' : 'Reabilitar'}
                         className={`transition-colors text-xs font-bold ${ativo ? 'text-orange-400 hover:text-orange-600' : 'text-green-400 hover:text-green-600'}`}>
                         {ativo ? '🚫' : '✅'}
@@ -651,6 +710,7 @@ function AuditoriaTab() {
 export default function AdminPage() {
   const [autenticado, setAutenticado] = useState(false)
   const [meuPapel, setMeuPapel] = useState<string>('master')
+  const [meusModulos, setMeusModulos] = useState<string[]>([])
   const [meuEmail, setMeuEmail] = useState<string>('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
@@ -682,6 +742,8 @@ export default function AdminPage() {
       } else {
         const papeis = (adminData as any).papeis || [(adminData as any).papel || 'master']
         setMeuPapel(papeis.includes('master') ? 'master' : papeis[0] || 'master')
+        const modulos = (adminData as any).modulos || []
+        setMeusModulos(papeis.includes('master') ? ['todos'] : modulos)
         setMeuEmail(data.user.email || '')
         setLoadingLogin(false)
         setAutenticado(true)
@@ -774,8 +836,10 @@ export default function AdminPage() {
       setAbertos(prev => ({ ...prev, [g]: !prev[g] }))
     }
 
-    function tem(papeis: string[]) {
-      return meuPapel === 'master' ? true : papeis.includes(meuPapel)
+    function tem(_: string[], id_modulo: string) {
+      if (meuPapel === 'master') return true
+      if (meusModulos.includes('todos')) return true
+      return meusModulos.includes(id_modulo)
     }
 
     function BtnItem({ id, label, icon }: { id: string; label: string; icon: React.ReactNode }) {
@@ -806,51 +870,51 @@ export default function AdminPage() {
     return (
       <div className="space-y-1 pt-2">
         {/* Dashboard sempre visível */}
-        {tem(['master','marketing','vendas']) && (
+        {tem([], 'dashboard') && (
           <BtnItem id="dashboard" label="Dashboard" icon={<BarChart3 size={16} />} />
         )}
 
         {/* CATÁLOGO */}
-        {tem(['master','marketing']) && (
+        {tem([], 'catalogo') && (
           <Grupo id="catalogo" label="Catálogo">
-            {tem(['master','marketing']) && <BtnItem id="produtos"   label="Produtos"     icon={<Package size={15} />} />}
-            {tem(['master'])            && <BtnItem id="categorias" label="Categorias"   icon={<Tag size={15} />} />}
-            {tem(['master'])            && <BtnItem id="importar"   label="Importar CSV" icon={<Upload size={15} />} />}
+            {tem([], 'catalogo') && <BtnItem id="produtos"   label="Produtos"     icon={<Package size={15} />} />}
+            {tem([], 'categorias') && <BtnItem id="categorias" label="Categorias"   icon={<Tag size={15} />} />}
+            {tem([], 'importar') && <BtnItem id="importar"   label="Importar CSV" icon={<Upload size={15} />} />}
           </Grupo>
         )}
 
         {/* VENDAS */}
-        {tem(['master','vendas']) && (
+        {tem([], 'vendas') && (
           <Grupo id="vendas" label="Vendas">
-            {tem(['master','vendas']) && <BtnItem id="pedidos"    label="Pedidos"    icon={<ShoppingBag size={15} />} />}
-            {tem(['master','vendas']) && <BtnItem id="cupons"     label="Cupons"     icon={<Tag size={15} />} />}
-            {tem(['master','vendas']) && <BtnItem id="carrinhos"  label="Carrinhos"  icon={<ShoppingBag size={15} />} />}
-            {tem(['master'])          && <BtnItem id="frete"      label="Frete Grátis" icon={<Truck size={15} />} />}
-            {tem(['master','vendas']) && <BtnItem id="relatorios" label="Relatórios" icon={<BarChart3 size={15} />} />}
+            {tem([], 'pedidos') && <BtnItem id="pedidos"    label="Pedidos"    icon={<ShoppingBag size={15} />} />}
+            {tem([], 'cupons') && <BtnItem id="cupons"     label="Cupons"     icon={<Tag size={15} />} />}
+            {tem([], 'carrinhos') && <BtnItem id="carrinhos"  label="Carrinhos"  icon={<ShoppingBag size={15} />} />}
+            {tem([], 'frete') && <BtnItem id="frete"      label="Frete Grátis" icon={<Truck size={15} />} />}
+            {tem([], 'relatorios') && <BtnItem id="relatorios" label="Relatórios" icon={<BarChart3 size={15} />} />}
           </Grupo>
         )}
 
         {/* LOJA */}
-        {tem(['master','marketing']) && (
+        {tem([], 'loja') && (
           <Grupo id="loja" label="Loja">
-            {tem(['master','marketing']) && <BtnItem id="banners"  label="Banners"       icon={<ImageIcon size={15} />} />}
-            {tem(['master','marketing']) && <BtnItem id="topbar"   label="Top Bar"       icon={<Megaphone size={15} />} />}
-            {tem(['master','marketing']) && <BtnItem id="midias"   label="Mídias Sociais" icon={<Megaphone size={15} />} />}
+            {tem([], 'banners') && <BtnItem id="banners"  label="Banners"       icon={<ImageIcon size={15} />} />}
+            {tem([], 'topbar') && <BtnItem id="topbar"   label="Top Bar"       icon={<Megaphone size={15} />} />}
+            {tem([], 'midias') && <BtnItem id="midias"   label="Mídias Sociais" icon={<Megaphone size={15} />} />}
           </Grupo>
         )}
 
         {/* CLIENTES */}
-        {tem(['master','vendas','marketing']) && (
+        {tem([], 'clientes_grupo') && (
           <Grupo id="clientes" label="Clientes">
-            {tem(['master','vendas'])    && <BtnItem id="clientes"    label="Clientes"     icon={<Users size={15} />} />}
-            {tem(['master','marketing']) && <BtnItem id="newsletter"  label="Newsletter"   icon={<Mail size={15} />} />}
-            {tem(['master','vendas'])    && <BtnItem id="faleconosco" label="Fale Conosco" icon={<MessageSquare size={15} />} />}
-            {tem(['master','marketing']) && <BtnItem id="faq"         label="FAQ"          icon={<HelpCircle size={15} />} />}
+            {tem([], 'clientes') && <BtnItem id="clientes"    label="Clientes"     icon={<Users size={15} />} />}
+            {tem([], 'newsletter') && <BtnItem id="newsletter"  label="Newsletter"   icon={<Mail size={15} />} />}
+            {tem([], 'faleconosco') && <BtnItem id="faleconosco" label="Fale Conosco" icon={<MessageSquare size={15} />} />}
+            {tem([], 'faq') && <BtnItem id="faq"         label="FAQ"          icon={<HelpCircle size={15} />} />}
           </Grupo>
         )}
 
         {/* ADMINISTRAÇÃO */}
-        {tem(['master']) && (
+        {tem([], 'admin') && (
           <Grupo id="admin" label="Administração">
             <BtnItem id="vendedores" label="Vendedores" icon={<Tag size={15} />} />
             <BtnItem id="usuarios"   label="Usuários"   icon={<Users size={15} />} />
