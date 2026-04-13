@@ -6,66 +6,83 @@ import { supabase } from '@/lib/supabase'
 
 type Produto = {
   id: string
-  name: string
-  slug: string
-  price: number
-  promo_price: number
-  category_slug: string
-  main_image?: string
-  badge?: string
-  badges?: string[]
+  name: string | null
+  slug: string | null
+  price: number | null
+  promo_price: number | null
+  category_slug: string | null
+  main_image?: string | null
+  badge?: string | null
+  badges?: string[] | null
 }
 
-const badgeMap: Record<string, string> = {
-  lancamentos: 'novo', smart: 'smart', outlet: 'oferta', exclusivos: 'exclusivo',
-}
 const badgeColors: Record<string, string> = {
-  novo: 'bg-green-600', smart: 'bg-blue-500', oferta: 'bg-red-500', exclusivo: 'bg-purple-600',
-  lancamento: 'bg-purple-600', promocao: 'bg-orange-500', kit: 'bg-teal-500',
+  novo: 'bg-green-600', smart: 'bg-blue-500', oferta: 'bg-red-500',
+  exclusivo: 'bg-purple-600', lancamento: 'bg-purple-600',
+  promocao: 'bg-orange-500', kit: 'bg-teal-500',
 }
 const badgeLabels: Record<string, string> = {
   lancamento: 'Lançamento', exclusivo: 'Exclusivo', oferta: 'Oferta',
   promocao: 'Promoção', smart: 'Smart', kit: 'Kit', novo: 'Novo',
 }
+const badgeMap: Record<string, string> = {
+  lancamentos: 'novo', smart: 'smart', outlet: 'oferta', exclusivos: 'exclusivo',
+}
+
+function capitalize(str: string | null): string {
+  if (!str) return ''
+  return str.toLowerCase().replace(/(?:^|\s|\/|-)\S/g, l => l.toUpperCase())
+}
+
+function formatPrice(val: number | null | undefined): string {
+  return (val ?? 0).toFixed(2).replace('.', ',')
+}
 
 function ProdCard({ p }: { p: Produto }) {
   const { addItem } = useCart()
-  const badge = badgeMap[p.category_slug]
-  const badges = (p.badges && p.badges.length > 0) ? p.badges : (badge ? [badge] : [])
-  const precoFinal = (p.promo_price && p.promo_price > 0 ? p.promo_price : p.price) || 0
-  const desconto = p.promo_price && p.promo_price > 0 ? Math.round((1 - p.promo_price / p.price) * 100) : 0
+  const nome = p.name || ''
+  const slug = p.slug || ''
+  const preco = p.price ?? 0
+  const precoFinal = (p.promo_price && p.promo_price > 0) ? p.promo_price : preco
+  const desconto = (p.promo_price && p.promo_price > 0 && preco > 0)
+    ? Math.round((1 - p.promo_price / preco) * 100)
+    : 0
+
+  const badgeCat = p.category_slug ? badgeMap[p.category_slug] : null
+  const badges = (p.badges && p.badges.length > 0) ? p.badges : (badgeCat ? [badgeCat] : [])
+  const badge = badges[0] || null
 
   function handleAdd(e: React.MouseEvent) {
     e.preventDefault()
-    addItem({ id: p.id, slug: p.slug, name: p.name, price: p.price, promo_price: p.promo_price, emoji: '💡' })
+    addItem({ id: p.id, slug, name: nome, price: preco, promo_price: p.promo_price ?? 0, emoji: '💡' })
   }
 
   return (
-    <Link href={`/produto/${p.slug}`}
+    <Link href={`/produto/${slug}`}
       className="border border-gray-200 rounded-xl overflow-hidden hover:border-green-500 hover:shadow-md hover:-translate-y-1 transition-all relative group block bg-white">
-      {badge && (
-        <span className={`absolute top-2 left-2 z-10 ${badgeColors[badge]} text-white text-xs font-bold px-3 py-1 rounded-full capitalize`}>
-          {badge}
-        </span>
-      )}
-      <div className="bg-gray-50 flex items-center justify-center h-44 text-7xl group-hover:scale-105 transition-transform">
-        {badges.length > 0 && badges.slice(0,1).map((b: string) => badgeColors[b] ? (
-          <span key={b} className={"absolute top-2 left-2 z-10 text-white text-xs font-black px-2 py-0.5 rounded " + badgeColors[b]}>
-            {badgeLabels[b] || b}
+      <div className="bg-gray-50 flex items-center justify-center h-44 group-hover:scale-105 transition-transform relative">
+        {badge && badgeColors[badge] && (
+          <span className={`absolute top-2 left-2 z-10 text-white text-xs font-black px-2 py-0.5 rounded ${badgeColors[badge]}`}>
+            {badgeLabels[badge] || badge}
           </span>
-        ) : null)}
-        {p.main_image ? <img src={p.main_image} alt={p.name} className="h-40 object-contain" /> : '💡'}
+        )}
+        {p.main_image
+          ? <img src={p.main_image} alt={nome} className="h-40 object-contain" />
+          : <span className="text-7xl">💡</span>
+        }
       </div>
       <div className="p-4 flex flex-col">
-        <p className="text-sm font-bold text-gray-800 leading-snug mb-2 line-clamp-2 min-h-[2.5rem]">{(p.name || '').toLowerCase().replace(/(?:^|\s|\/|-)\S/g, l => l.toUpperCase())}</p>
+        <p className="text-sm font-bold text-gray-800 leading-snug mb-2 line-clamp-2 min-h-[2.5rem]">
+          {capitalize(nome)}
+        </p>
         <div className="flex items-center gap-2 mb-1">
           <span className="bg-teal-500 text-white text-xs font-black px-1.5 py-0.5 rounded">PIX</span>
-          <span className="text-lg font-black text-green-700">R$ {precoFinal.toFixed(2).replace('.', ',')}</span>
+          <span className="text-lg font-black text-green-700">R$ {formatPrice(precoFinal)}</span>
           {desconto > 0 && (
             <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">-{desconto}%</span>
           )}
         </div>
-        <p className="text-xs text-gray-500 mb-3">ou <strong>R$ {(p.price || precoFinal).toFixed(2).replace('.', ',')}</strong> no cartão</p>
+        <p className="text-xs text-gray-500 mb-3">ou <strong>R$ {formatPrice(preco)}</strong> no cartão</p>
         <button onClick={handleAdd}
           className="w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-black text-xs py-2.5 rounded-md transition-colors mt-auto">
           COMPRAR
@@ -75,28 +92,32 @@ function ProdCard({ p }: { p: Produto }) {
   )
 }
 
-function SafeProdCard({ p }: { p: Produto }) {
-  try { return <ProdCard p={p} />  } catch { return null }
-}
-
 export default function ProductGrid({ title, categorySlug, limit = 8 }: { title: string; categorySlug?: string; limit?: number }) {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
-      let q = supabase
-        .from('products')
-        .select('id, name, slug, price, promo_price, category_slug, main_image, badge, badges')
-      if (categorySlug) {
-        q = categorySlug === 'lancamentos' ? q.eq('is_lancamento', true) : q.eq('category_slug', categorySlug)
+      try {
+        let q = supabase
+          .from('products')
+          .select('id, name, slug, price, promo_price, category_slug, main_image, badge, badges')
+        if (categorySlug) {
+          q = categorySlug === 'lancamentos'
+            ? q.eq('is_lancamento', true)
+            : q.eq('category_slug', categorySlug)
+        }
+        const { data } = await q.limit(limit)
+        setProdutos((data || []) as Produto[])
+      } catch (err) {
+        console.error('ProductGrid error:', err)
+        setProdutos([])
+      } finally {
+        setLoading(false)
       }
-      const { data } = await q.limit(limit)
-      setProdutos((data || []) as any)
-      setLoading(false)
     }
     load()
-  }, [title, categorySlug, limit])
+  }, [categorySlug, limit])
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-10">
@@ -105,7 +126,9 @@ export default function ProductGrid({ title, categorySlug, limit = 8 }: { title:
           <h2 className="text-xl font-black text-gray-800">{title}</h2>
           <div className="w-9 h-0.5 bg-green-600 mt-1.5 rounded" />
         </div>
-        <Link href={categorySlug ? `/produtos/${categorySlug}` : "/produtos"} className="text-sm font-bold text-green-600">Ver todos →</Link>
+        <Link href={categorySlug ? `/produtos/${categorySlug}` : '/produtos'} className="text-sm font-bold text-green-600">
+          Ver todos →
+        </Link>
       </div>
       {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -115,7 +138,13 @@ export default function ProductGrid({ title, categorySlug, limit = 8 }: { title:
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {produtos.map(p => <SafeProdCard key={p.id} p={p} />)}
+          {produtos.map(p => {
+            try {
+              return <ProdCard key={p.id} p={p} />
+            } catch {
+              return null
+            }
+          })}
         </div>
       )}
     </section>
