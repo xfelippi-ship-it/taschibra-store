@@ -27,6 +27,7 @@ import MarcasTab from '@/components/admin/MarcasTab'
 import SEOTab from '@/components/admin/SEOTab'
 import ConfiguracoesLojaTab from '@/components/admin/ConfiguracoesLojaTab'
 import PopupTab from '@/components/admin/PopupTab'
+import BlogTab from '@/components/admin/BlogTab'
 import PromoBannerTab from '@/components/admin/PromoBannerTab'
 import { useState, useEffect } from 'react'
 import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2, FileText, Search, Star, MapPin, CreditCard } from 'lucide-react'
@@ -742,7 +743,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup' | 'blog'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -999,6 +1000,7 @@ export default function AdminPage() {
             {tem([], 'topbar') && <BtnItem id="topbar"   label="Top Bar"       icon={<Megaphone size={15} />} />}
             <BtnItem id="promo-banner" label="Banner Promo" icon={<Megaphone size={15} />} />
             <BtnItem id="popup" label="Popup Promocional" icon={<Megaphone size={15} />} />
+            <BtnItem id="blog" label="Blog e Guias" icon={<Megaphone size={15} />} />
             {tem([], 'midias') && <BtnItem id="midias"   label="Mídias Sociais" icon={<Megaphone size={15} />} />}
             <BtnItem id="retirada" label="Retirada na Loja" icon={<MapPin size={15} />} />
             <BtnItem id="faturamento" label="Faturamento Direto" icon={<CreditCard size={15} />} />
@@ -1071,6 +1073,7 @@ export default function AdminPage() {
         {aba === 'banners' && <BannersTab meuEmail={meuEmail} />}
         {aba === 'promo-banner' && <PromoBannerTab />}
         {aba === 'popup' && <PopupTab />}
+        {aba === 'blog' && <BlogTab />}
         {aba === 'topbar' && <TopBarTab />}
         {aba === 'categorias' && <CategoriasTab />}
         {aba === 'importar' && <ImportarTab meuEmail={meuEmail} />}
