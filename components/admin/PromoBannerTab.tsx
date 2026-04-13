@@ -36,6 +36,9 @@ export default function PromoBannerTab() {
   const [salvando, setSalvando] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+
   function showToast(msg: string) {
     setToast(msg)
     setTimeout(() => setToast(null), 3000)
