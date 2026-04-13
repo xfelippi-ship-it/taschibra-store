@@ -343,7 +343,7 @@ function CuponsTab() {
   const [cupons, setCupons] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(false)
-  const [abertos, setAbertos] = useState<Record<string, boolean>>({ catalogo: true, vendas: true, loja: true, clientes: true, admin: true })
+  const [abertos, setAbertos] = useState<Record<string, boolean>>({ catalogo: true, vendas: true, loja: false, clientes: false, admin: false })
   const [editando, setEditando] = useState<any>({})
 
   useEffect(() => { carregarCupons() }, [])
@@ -724,7 +724,7 @@ export default function AdminPage() {
   const [busca, setBusca] = useState("")
   const [ordem, setOrdem] = useState<"asc"|"desc">("asc")
   const [modal, setModal] = useState(false)
-  const [abertos, setAbertos] = useState<Record<string, boolean>>({ catalogo: true, vendas: true, loja: true, clientes: true, admin: true })
+  const [abertos, setAbertos] = useState<Record<string, boolean>>({ catalogo: true, vendas: true, loja: false, clientes: false, admin: false })
   const [produtoEdit, setProdutoEdit] = useState<Partial<Produto>>({})
 
   async function handleLogin() {
