@@ -91,7 +91,7 @@ export async function POST(req: Request) {
     let emailEnviado = false
     try {
       await resend.emails.send({
-        from: 'Taschibra Store <xfelippi@gmail.com>',
+        from: 'Taschibra Store <onboarding@resend.dev>',
         to: email,
         subject: 'Seu acesso ao Backoffice LightSales - Taschibra',
         html: `
