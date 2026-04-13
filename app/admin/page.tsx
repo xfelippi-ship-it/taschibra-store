@@ -21,12 +21,13 @@ import FaleConoscoTab from '@/components/admin/FaleConoscoTab'
 import CMSTab from '@/components/admin/CMSTab'
 import GaleriaTab from '@/components/admin/GaleriaTab'
 import RetiradaLojaTab from '@/components/admin/RetiradaLojaTab'
+import FaturamentoDiretoTab from '@/components/admin/FaturamentoDiretoTab'
 import AvaliacoesTab from '@/components/admin/AvaliacoesTab'
 import MarcasTab from '@/components/admin/MarcasTab'
 import SEOTab from '@/components/admin/SEOTab'
 import ConfiguracoesLojaTab from '@/components/admin/ConfiguracoesLojaTab'
 import { useState, useEffect } from 'react'
-import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2, FileText, Search, Star, MapPin } from 'lucide-react'
+import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2, FileText, Search, Star, MapPin, CreditCard } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { registrarAuditoria } from '@/lib/auditLog'
 
@@ -66,6 +67,7 @@ const TODOS_MODULOS = [
   { id: 'cms',           label: 'Páginas e Blocos',    grupo: 'Administração' },
   { id: 'galeria',       label: 'Galeria de Imagens',  grupo: 'Administração' },
   { id: 'retirada',      label: 'Retirada na Loja',    grupo: 'Loja' },
+  { id: 'faturamento',   label: 'Faturamento Direto',  grupo: 'Loja' },
   { id: 'seo',           label: 'SEO',                  grupo: 'Administração' },
   { id: 'marcas',        label: 'Marcas',               grupo: 'Catálogo' },
   { id: 'avaliacoes',    label: 'Avaliações',           grupo: 'Clientes' },
@@ -729,7 +731,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'galeria' | 'retirada'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'galeria' | 'retirada' | 'faturamento'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -937,6 +939,7 @@ export default function AdminPage() {
             <BtnItem id="cms" label="Páginas e Blocos" icon={<FileText size={15} />} />
             <BtnItem id="galeria" label="Galeria de Imagens" icon={<ImageIcon size={15} />} />
             <BtnItem id="retirada" label="Retirada na Loja" icon={<MapPin size={15} />} />
+            <BtnItem id="faturamento" label="Faturamento Direto" icon={<CreditCard size={15} />} />
             <BtnItem id="seo" label="SEO" icon={<Search size={15} />} />
           </Grupo>
         )}
@@ -976,6 +979,7 @@ export default function AdminPage() {
         {aba === 'cms' && <CMSTab />}
         {aba === 'galeria' && <GaleriaTab />}
         {aba === 'retirada' && <RetiradaLojaTab />}
+        {aba === 'faturamento' && <FaturamentoDiretoTab />}
         {aba === 'avaliacoes' && <AvaliacoesTab />}
         {aba === 'marcas' && <MarcasTab />}
         {aba === 'seo' && <SEOTab />}
