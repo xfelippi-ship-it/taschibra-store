@@ -725,6 +725,12 @@ function AuditoriaTab() {
 export default function AdminPage() {
   const [autenticado, setAutenticado] = useState(false)
   const [meuPapel, setMeuPapel] = useState<string>('master')
+  const [trocarSenha, setTrocarSenha] = useState(false)
+  const [meuUserId, setMeuUserId] = useState<string>('')
+  const [novaSenha, setNovaSenha] = useState('')
+  const [confirmarSenha, setConfirmarSenha] = useState('')
+  const [erroSenha, setErroSenha] = useState('')
+  const [salvandoSenha, setSalvandoSenha] = useState(false)
   const [meusModulos, setMeusModulos] = useState<string[]>([])
   const [meuEmail, setMeuEmail] = useState<string>('')
   const [email, setEmail] = useState('')
@@ -760,8 +766,13 @@ export default function AdminPage() {
         const modulos = (adminData as any).modulos || []
         setMeusModulos(papeis.includes('master') ? ['todos'] : modulos)
         setMeuEmail(data.user.email || '')
+        setMeuUserId(data.user.id)
         setLoadingLogin(false)
-        setAutenticado(true)
+        if ((adminData as any).trocar_senha) {
+          setTrocarSenha(true)
+        } else {
+          setAutenticado(true)
+        }
       }
     }
   }
@@ -802,6 +813,72 @@ export default function AdminPage() {
     if (!confirm('Tem certeza que deseja excluir este produto?')) return
     await supabase.from('products').delete().eq('id', id)
     carregarProdutos()
+  }
+
+  async function handleTrocarSenha() {
+    setErroSenha("")
+    if (novaSenha.length < 8) { setErroSenha("Senha deve ter no mínimo 8 caracteres"); return }
+    if (!/[A-Z]/.test(novaSenha)) { setErroSenha("Senha deve conter letra maiúscula"); return }
+    if (!/[a-z]/.test(novaSenha)) { setErroSenha("Senha deve conter letra minúscula"); return }
+    if (!/[0-9]/.test(novaSenha)) { setErroSenha("Senha deve conter número"); return }
+    if (!/[^A-Za-z0-9]/.test(novaSenha)) { setErroSenha("Senha deve conter símbolo"); return }
+    if (novaSenha !== confirmarSenha) { setErroSenha("Senhas não conferem"); return }
+    setSalvandoSenha(true)
+    const res = await fetch("/api/admin-change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: meuUserId, novaSenha }),
+    })
+    const data = await res.json()
+    setSalvandoSenha(false)
+    if (data.ok) {
+      setTrocarSenha(false)
+      setAutenticado(true)
+      setNovaSenha("")
+      setConfirmarSenha("")
+    } else {
+      setErroSenha(data.error || "Erro ao trocar senha")
+    }
+  }
+
+  if (trocarSenha) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-900 to-green-800 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+          <div className="text-center mb-6">
+            <h1 className="text-xl font-black text-gray-800">Definir nova senha</h1>
+            <p className="text-sm text-gray-500 mt-1">Sua senha é temporária. Crie uma nova senha segura para continuar.</p>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-bold text-gray-600 block mb-1">Nova senha</label>
+              <input type="password" value={novaSenha} onChange={e => setNovaSenha(e.target.value)}
+                placeholder="Mínimo 8 caracteres"
+                className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500" />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-600 block mb-1">Confirmar senha</label>
+              <input type="password" value={confirmarSenha} onChange={e => setConfirmarSenha(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleTrocarSenha()}
+                placeholder="Repita a nova senha"
+                className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500" />
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-500 space-y-1">
+              <p className={novaSenha.length >= 8 ? "text-green-600 font-bold" : ""}>\u2713 Mínimo 8 caracteres</p>
+              <p className={/[A-Z]/.test(novaSenha) ? "text-green-600 font-bold" : ""}>\u2713 Letra maiúscula</p>
+              <p className={/[a-z]/.test(novaSenha) ? "text-green-600 font-bold" : ""}>\u2713 Letra minúscula</p>
+              <p className={/[0-9]/.test(novaSenha) ? "text-green-600 font-bold" : ""}>\u2713 Número</p>
+              <p className={/[^A-Za-z0-9]/.test(novaSenha) ? "text-green-600 font-bold" : ""}>\u2713 Símbolo (@#$%&*!)</p>
+            </div>
+            {erroSenha && <p className="text-sm text-red-600 font-bold">{erroSenha}</p>}
+            <button onClick={handleTrocarSenha} disabled={salvandoSenha}
+              className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-black py-3 rounded-lg transition-colors">
+              {salvandoSenha ? "Salvando..." : "Salvar nova senha"}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (!autenticado) {
