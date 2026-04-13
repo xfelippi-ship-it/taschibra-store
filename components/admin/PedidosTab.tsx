@@ -5,7 +5,8 @@ import { createClient } from '@supabase/supabase-js'
 import { registrarAuditoria } from '@/lib/auditLog'
 import {
   ChevronDown, ChevronRight, Package, XCircle,
-  CreditCard, RefreshCw, AlertTriangle, Filter, X
+  CreditCard, RefreshCw, AlertTriangle, Filter, X,
+  Bell, Plus, Trash2, Loader2,
 } from 'lucide-react'
 
 const supabase = createClient(
@@ -41,6 +42,10 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
 
 const STATUS_FLOW = ['pending', 'confirmed', 'processing', 'shipped', 'delivered']
 
+const NOTIF_STATUS = ['confirmed', 'processing', 'shipped', 'delivered']
+
+type Note = { id: string; note: string; created_by: string; created_at: string }
+
 function Badge({ cfg }: { cfg: { label: string; bg: string; text: string } }) {
   return (
     <span className={`text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${cfg.bg} ${cfg.text}`}>
@@ -67,7 +72,13 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
   const [expandido, setExpandido]       = useState<string | null>(null)
   const [acao, setAcao]                 = useState<Record<string, boolean>>({})
   const [trackingEdit, setTrackingEdit] = useState<Record<string, string>>({})
+  const [motivoEstorno, setMotivoEstorno] = useState<Record<string, string>>({})
   const [filtrosAbertos, setFiltrosAbertos] = useState(false)
+  const [toast, setToast]               = useState<{ msg: string; tipo: 'ok' | 'erro' } | null>(null)
+
+  // Anotações
+  const [notes, setNotes]       = useState<Record<string, Note[]>>({})
+  const [novaNota, setNovaNota] = useState<Record<string, string>>({})
 
   // ── Filtros ──────────────────────────────────────────────────────────────
   const [busca,          setBusca]          = useState('')
@@ -91,6 +102,11 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
     setFiltroDataAte(''); setFiltroERP('todos'); setBusca('')
   }
 
+  function showToast(msg: string, tipo: 'ok' | 'erro' = 'ok') {
+    setToast({ msg, tipo })
+    setTimeout(() => setToast(null), 3500)
+  }
+
   async function carregar() {
     setLoading(true)
     let q = supabase
@@ -108,7 +124,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
 
   useEffect(() => { carregar() }, [filtroStatus, filtroPgto, filtroMetodo])
 
-  // ── Filtros client-side (busca, cupom, cpf, data, erp) ───────────────────
+  // ── Filtros client-side ───────────────────────────────────────────────────
   const pedidosFiltrados = pedidos.filter(p => {
     if (busca) {
       const b = busca.toLowerCase()
@@ -121,129 +137,199 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
     }
     if (filtroCupom && !p.coupon_code?.toLowerCase().includes(filtroCupom.toLowerCase())) return false
     if (filtroCPF   && !p.customers?.cpf?.includes(filtroCPF)) return false
-    if (filtroDataDe) {
-      const de = new Date(filtroDataDe); de.setHours(0,0,0,0)
-      if (new Date(p.created_at) < de) return false
-    }
-    if (filtroDataAte) {
-      const ate = new Date(filtroDataAte); ate.setHours(23,59,59,999)
-      if (new Date(p.created_at) > ate) return false
-    }
-    if (filtroERP === 'integrado'     && !p.sapiens_order_id && !p.erp_integrated) return false
-    if (filtroERP === 'nao_integrado' && (p.sapiens_order_id || p.erp_integrated))  return false
+    if (filtroDataDe && p.created_at < filtroDataDe) return false
+    if (filtroDataAte && p.created_at.slice(0, 10) > filtroDataAte) return false
+    if (filtroERP === 'integrado'    && !p.erp_integrated && !p.sapiens_order_id) return false
+    if (filtroERP === 'nao_integrado' && (p.erp_integrated || p.sapiens_order_id)) return false
     return true
   })
 
-  const totalFiltrado = pedidosFiltrados.reduce((s, p) => s + (Number(p.total) || 0), 0)
+  const totalFiltrado = pedidosFiltrados.reduce((s: number, p: any) => s + (Number(p.total) || 0), 0)
 
-  // ── Ações ────────────────────────────────────────────────────────────────
+  // ── Ações ─────────────────────────────────────────────────────────────────
   async function atualizarStatus(pedido: any, novoStatus: string) {
+    if (!confirm(`Alterar status para "${STATUS_LABELS[novoStatus]?.label}"?`)) return
     setAcao(a => ({ ...a, [pedido.id + '_status']: true }))
-    await supabase.from('orders').update({ status: novoStatus, updated_at: new Date().toISOString() }).eq('id', pedido.id)
-    await registrarAuditoria({ executedBy: meuEmail, acao: 'pedido_status_alterado', entidade: 'orders', detalhe: `Pedido: ${pedido.order_number} | ${pedido.status} → ${novoStatus}` })
+    const res = await fetch(`/api/admin/pedidos/${pedido.id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: novoStatus, executedBy: meuEmail }),
+    })
+    const data = await res.json()
     setAcao(a => ({ ...a, [pedido.id + '_status']: false }))
-    carregar()
+    if (data.ok) { showToast(`Status: ${STATUS_LABELS[novoStatus]?.label}`); carregar() }
+    else showToast(data.error || 'Erro ao alterar status', 'erro')
   }
 
   async function capturarPagamento(pedido: any) {
+    if (!confirm(`Capturar pagamento do pedido ${pedido.order_number}?`)) return
     setAcao(a => ({ ...a, [pedido.id + '_capturar']: true }))
-    await supabase.from('orders').update({ payment_status: 'captured', updated_at: new Date().toISOString() }).eq('id', pedido.id)
-    await registrarAuditoria({ executedBy: meuEmail, acao: 'pagamento_capturado', entidade: 'orders', detalhe: `Pedido: ${pedido.order_number}` })
+    const res = await fetch(`/api/admin/pedidos/${pedido.id}/capturar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ executedBy: meuEmail }),
+    })
+    const data = await res.json()
     setAcao(a => ({ ...a, [pedido.id + '_capturar']: false }))
-    carregar()
-  }
-
-  async function estornarPedido(pedido: any) {
-    if (!confirm(`Confirma o estorno do pedido ${pedido.order_number}? Esta ação não pode ser desfeita.`)) return
-    setAcao(a => ({ ...a, [pedido.id + '_estorno']: true }))
-    await supabase.from('orders').update({ status: 'refunded', payment_status: 'refunded', updated_at: new Date().toISOString() }).eq('id', pedido.id)
-    await registrarAuditoria({ executedBy: meuEmail, acao: 'pedido_estornado', entidade: 'orders', detalhe: `Pedido: ${pedido.order_number}` })
-    setAcao(a => ({ ...a, [pedido.id + '_estorno']: false }))
-    carregar()
+    if (data.ok) { showToast('Pagamento capturado!'); carregar() }
+    else showToast(data.error || 'Erro ao capturar', 'erro')
   }
 
   async function enviarClearSales(pedido: any) {
     setAcao(a => ({ ...a, [pedido.id + '_clearsale']: true }))
-    await registrarAuditoria({ executedBy: meuEmail, acao: 'enviado_clearsales', entidade: 'orders', detalhe: `Pedido: ${pedido.order_number}` })
-    alert(`Pedido ${pedido.order_number} enviado para análise ClearSales.`)
+    const res = await fetch(`/api/admin/pedidos/${pedido.id}/clearsales`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ executedBy: meuEmail }),
+    })
+    const data = await res.json()
     setAcao(a => ({ ...a, [pedido.id + '_clearsale']: false }))
+    if (data.ok) { showToast(`ClearSales: ${data.status} (score ${data.score ?? 'n/d'})`); carregar() }
+    else showToast(data.error || 'Erro no ClearSales', 'erro')
+  }
+
+  async function estornarPedido(pedido: any) {
+    const motivo = motivoEstorno[pedido.id]?.trim()
+    if (!motivo) { showToast('Informe o motivo do estorno', 'erro'); return }
+    if (!confirm(`Estornar pedido ${pedido.order_number}? Esta ação não pode ser desfeita.`)) return
+    setAcao(a => ({ ...a, [pedido.id + '_estorno']: true }))
+    const res = await fetch(`/api/admin/pedidos/${pedido.id}/estornar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ motivo, executedBy: meuEmail }),
+    })
+    const data = await res.json()
+    setAcao(a => ({ ...a, [pedido.id + '_estorno']: false }))
+    if (data.ok) {
+      showToast('Estorno realizado!')
+      setMotivoEstorno(m => ({ ...m, [pedido.id]: '' }))
+      carregar()
+    } else showToast(data.error || 'Erro ao estornar', 'erro')
+  }
+
+  async function notificarCliente(pedido: any, status: string) {
+    setAcao(a => ({ ...a, [pedido.id + '_notif']: true }))
+    const res = await fetch(`/api/admin/pedidos/${pedido.id}/notificar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, executedBy: meuEmail }),
+    })
+    const data = await res.json()
+    setAcao(a => ({ ...a, [pedido.id + '_notif']: false }))
+    if (data.ok) showToast(`E-mail enviado para ${data.email}`)
+    else showToast(data.error || 'Erro ao notificar', 'erro')
   }
 
   async function salvarTracking(pedido: any) {
-    const codigo = trackingEdit[pedido.id] ?? pedido.tracking_code ?? ''
-    await supabase.from('orders').update({ tracking_code: codigo, updated_at: new Date().toISOString() }).eq('id', pedido.id)
-    await registrarAuditoria({ executedBy: meuEmail, acao: 'tracking_atualizado', entidade: 'orders', detalhe: `Pedido: ${pedido.order_number} | Código: ${codigo}` })
+    const codigo = trackingEdit[pedido.id] ?? ''
+    if (!codigo.trim()) return
+    await supabase.from('orders').update({
+      tracking_code: codigo.trim(),
+      updated_at: new Date().toISOString(),
+    }).eq('id', pedido.id)
+    await registrarAuditoria({ executedBy: meuEmail, acao: 'tracking_salvo', entidade: 'orders', detalhe: `Pedido ${pedido.order_number}: ${codigo}` })
+    showToast('Rastreio salvo!')
     carregar()
   }
 
-  const selectCls = "border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500 bg-white"
-  const inputCls  = "border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500"
+  // ── Anotações ─────────────────────────────────────────────────────────────
+  async function carregarNotas(pedidoId: string) {
+    const res = await fetch(`/api/admin/pedidos/${pedidoId}/anotacao`)
+    const data = await res.json()
+    setNotes(n => ({ ...n, [pedidoId]: data.notes || [] }))
+  }
+
+  async function salvarNota(pedidoId: string) {
+    const nota = novaNota[pedidoId]?.trim()
+    if (!nota) return
+    setAcao(a => ({ ...a, [pedidoId + '_nota']: true }))
+    const res = await fetch(`/api/admin/pedidos/${pedidoId}/anotacao`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ note: nota, createdBy: meuEmail }),
+    })
+    const data = await res.json()
+    setAcao(a => ({ ...a, [pedidoId + '_nota']: false }))
+    if (data.ok) {
+      setNovaNota(n => ({ ...n, [pedidoId]: '' }))
+      carregarNotas(pedidoId)
+    }
+  }
+
+  async function deletarNota(pedidoId: string, noteId: string) {
+    await fetch(`/api/admin/pedidos/${pedidoId}/anotacao`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ noteId }),
+    })
+    carregarNotas(pedidoId)
+  }
+
+  function toggleExpandir(id: string) {
+    if (expandido === id) {
+      setExpandido(null)
+    } else {
+      setExpandido(id)
+      carregarNotas(id)
+    }
+  }
+
+  // ── Estilos ───────────────────────────────────────────────────────────────
+  const inputCls  = 'border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500'
+  const selectCls = 'border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500 bg-white'
 
   return (
-    <div>
-      {/* ── Cabeçalho ────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-5">
-        <div>
-          <h1 className="text-2xl font-black text-gray-800">Pedidos</h1>
-          {!loading && (
-            <p className="text-xs text-gray-400 mt-0.5">
-              {pedidosFiltrados.length} pedido{pedidosFiltrados.length !== 1 ? 's' : ''}
-              {filtrosAtivos || busca ? ` encontrado${pedidosFiltrados.length !== 1 ? 's' : ''}` : ' no total'}
-              {pedidosFiltrados.length > 0 && (
-                <span className="ml-2 text-green-700 font-bold">
-                  · R$ {totalFiltrado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </span>
-              )}
-            </p>
-          )}
+    <div className="space-y-4">
+
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-bold transition-all ${
+          toast.tipo === 'ok' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+        }`}>
+          {toast.msg}
         </div>
-        <div className="flex items-center gap-2">
+      )}
+
+      {/* ── Header ───────────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-black text-gray-800">Pedidos</h2>
+          <p className="text-xs text-gray-400 mt-0.5">
+            {pedidosFiltrados.length} pedido{pedidosFiltrados.length !== 1 ? 's' : ''} —
+            Total: R$ {totalFiltrado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </p>
+        </div>
+        <div className="flex gap-2">
           <button
-            onClick={() => setFiltrosAbertos(!filtrosAbertos)}
-            className={`flex items-center gap-2 text-sm font-bold px-3 py-2 rounded-lg border transition-colors ${
-              filtrosAtivos
-                ? 'bg-green-600 text-white border-green-600'
-                : 'text-gray-500 border-gray-200 hover:border-green-300 hover:text-green-600'
+            onClick={() => setFiltrosAbertos(f => !f)}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-bold transition-colors ${
+              filtrosAtivos ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
             }`}>
             <Filter size={14} />
-            Filtros
-            {filtrosAtivos && (
-              <span className="bg-white text-green-700 text-xs font-black w-4 h-4 rounded-full flex items-center justify-center">
-                !
-              </span>
-            )}
+            Filtros {filtrosAtivos && '•'}
           </button>
           <button
             onClick={carregar}
-            className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-green-600 border border-gray-200 px-3 py-2 rounded-lg hover:border-green-300 transition-colors">
-            <RefreshCw size={14} /> Atualizar
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-sm font-bold text-gray-500 hover:bg-gray-50">
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            Atualizar
           </button>
         </div>
       </div>
 
-      {/* ── Barra de busca rápida ─────────────────────────────────────────── */}
-      <div className="flex gap-2 mb-3">
-        <input
-          value={busca}
-          onChange={e => setBusca(e.target.value)}
-          placeholder="Buscar por número do pedido, nome, e-mail ou CPF..."
-          className={`flex-1 ${inputCls}`}
-        />
-        {(busca || filtrosAtivos) && (
-          <button
-            onClick={limparFiltros}
-            className="flex items-center gap-1 text-xs font-bold text-red-500 hover:text-red-700 border border-red-200 px-3 rounded-lg hover:bg-red-50 transition-colors">
-            <X size={13} /> Limpar
-          </button>
-        )}
-      </div>
+      {/* ── Busca ────────────────────────────────────────────────────────── */}
+      <input
+        value={busca}
+        onChange={e => setBusca(e.target.value)}
+        placeholder="Buscar por pedido, nome, e-mail ou CPF..."
+        className={`w-full ${inputCls}`}
+      />
 
-      {/* ── Painel de filtros avançados ───────────────────────────────────── */}
+      {/* ── Filtros avançados ─────────────────────────────────────────────── */}
       {filtrosAbertos && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4 grid grid-cols-2 md:grid-cols-4 gap-3">
-          {/* Status do pedido */}
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <label className="text-xs font-black text-gray-500 uppercase mb-1 block">Status do Pedido</label>
+            <label className="text-xs font-black text-gray-500 uppercase mb-1 block">Status</label>
             <select value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)} className={`w-full ${selectCls}`}>
               <option value="todos">Todos</option>
               {Object.entries(STATUS_LABELS).map(([k, v]) => (
@@ -251,10 +337,8 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
               ))}
             </select>
           </div>
-
-          {/* Status do pagamento */}
           <div>
-            <label className="text-xs font-black text-gray-500 uppercase mb-1 block">Status do Pagamento</label>
+            <label className="text-xs font-black text-gray-500 uppercase mb-1 block">Pagamento</label>
             <select value={filtroPgto} onChange={e => setFiltroPgto(e.target.value)} className={`w-full ${selectCls}`}>
               <option value="todos">Todos</option>
               {Object.entries(PAYMENT_LABELS).map(([k, v]) => (
@@ -262,19 +346,15 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
               ))}
             </select>
           </div>
-
-          {/* Forma de pagamento */}
           <div>
-            <label className="text-xs font-black text-gray-500 uppercase mb-1 block">Forma de Pagamento</label>
+            <label className="text-xs font-black text-gray-500 uppercase mb-1 block">Método</label>
             <select value={filtroMetodo} onChange={e => setFiltroMetodo(e.target.value)} className={`w-full ${selectCls}`}>
-              <option value="todos">Todas</option>
+              <option value="todos">Todos</option>
               {Object.entries(PAYMENT_METHOD_LABELS).map(([k, v]) => (
                 <option key={k} value={k}>{v}</option>
               ))}
             </select>
           </div>
-
-          {/* ERP */}
           <div>
             <label className="text-xs font-black text-gray-500 uppercase mb-1 block">ERP / Sapiens</label>
             <select value={filtroERP} onChange={e => setFiltroERP(e.target.value)} className={`w-full ${selectCls}`}>
@@ -283,50 +363,29 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
               <option value="nao_integrado">Não integrado</option>
             </select>
           </div>
-
-          {/* Cupom */}
           <div>
-            <label className="text-xs font-black text-gray-500 uppercase mb-1 block">Cupom de Desconto</label>
-            <input
-              value={filtroCupom}
-              onChange={e => setFiltroCupom(e.target.value)}
-              placeholder="Ex: PASCOA20"
-              className={`w-full ${inputCls} font-mono uppercase`}
-            />
+            <label className="text-xs font-black text-gray-500 uppercase mb-1 block">Cupom</label>
+            <input value={filtroCupom} onChange={e => setFiltroCupom(e.target.value)} placeholder="Ex: PASCOA20" className={`w-full ${inputCls} font-mono uppercase`} />
           </div>
-
-          {/* CPF */}
           <div>
             <label className="text-xs font-black text-gray-500 uppercase mb-1 block">CPF / CNPJ</label>
-            <input
-              value={filtroCPF}
-              onChange={e => setFiltroCPF(e.target.value)}
-              placeholder="Ex: 000.000.000-00"
-              className={`w-full ${inputCls}`}
-            />
+            <input value={filtroCPF} onChange={e => setFiltroCPF(e.target.value)} placeholder="000.000.000-00" className={`w-full ${inputCls}`} />
           </div>
-
-          {/* Data de */}
           <div>
-            <label className="text-xs font-black text-gray-500 uppercase mb-1 block">Pedidos a partir de</label>
-            <input
-              type="date"
-              value={filtroDataDe}
-              onChange={e => setFiltroDataDe(e.target.value)}
-              className={`w-full ${inputCls}`}
-            />
+            <label className="text-xs font-black text-gray-500 uppercase mb-1 block">De</label>
+            <input type="date" value={filtroDataDe} onChange={e => setFiltroDataDe(e.target.value)} className={`w-full ${inputCls}`} />
           </div>
-
-          {/* Data até */}
           <div>
-            <label className="text-xs font-black text-gray-500 uppercase mb-1 block">Pedidos até</label>
-            <input
-              type="date"
-              value={filtroDataAte}
-              onChange={e => setFiltroDataAte(e.target.value)}
-              className={`w-full ${inputCls}`}
-            />
+            <label className="text-xs font-black text-gray-500 uppercase mb-1 block">Até</label>
+            <input type="date" value={filtroDataAte} onChange={e => setFiltroDataAte(e.target.value)} className={`w-full ${inputCls}`} />
           </div>
+          {filtrosAtivos && (
+            <div className="col-span-2 md:col-span-4 flex justify-end">
+              <button onClick={limparFiltros} className="flex items-center gap-1 text-xs font-bold text-red-500 hover:underline">
+                <X size={12} /> Limpar filtros
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -360,16 +419,14 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
               </tr>
             </thead>
             <tbody>
-              {pedidosFiltrados.map(p => (
+              {pedidosFiltrados.map((p: any) => (
                 <>
                   <tr
                     key={p.id}
                     className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                    onClick={() => setExpandido(expandido === p.id ? null : p.id)}>
+                    onClick={() => toggleExpandir(p.id)}>
                     <td className="px-3 py-4 text-gray-400">
-                      {expandido === p.id
-                        ? <ChevronDown size={16} />
-                        : <ChevronRight size={16} />}
+                      {expandido === p.id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                     </td>
                     <td className="px-4 py-4">
                       <p className="font-black text-sm text-gray-800">{p.order_number}</p>
@@ -382,9 +439,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                     <td className="px-4 py-4">
                       <p className="font-bold text-sm text-gray-800">{p.customers?.name || '—'}</p>
                       <p className="text-xs text-gray-400">{p.customers?.email || ''}</p>
-                      {p.customers?.cpf && (
-                        <p className="text-xs text-gray-300 font-mono">{p.customers.cpf}</p>
-                      )}
+                      {p.customers?.cpf && <p className="text-xs text-gray-300 font-mono">{p.customers.cpf}</p>}
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-500 whitespace-nowrap">
                       {new Date(p.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
@@ -413,9 +468,9 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                   {expandido === p.id && (
                     <tr key={p.id + '_detail'} className="bg-gray-50 border-b border-gray-200">
                       <td colSpan={9} className="px-6 py-5">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
-                          {/* Endereço */}
+                          {/* Col 1: Endereço + Valores */}
                           <div>
                             <p className="text-xs font-black text-gray-500 uppercase mb-2">Endereço de Entrega</p>
                             {p.shipping_address ? (
@@ -428,25 +483,16 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                               </div>
                             ) : <p className="text-sm text-gray-400">Não informado</p>}
                             {p.shipping_method && (
-                              <p className="mt-2 text-xs text-gray-500">
-                                Frete: <span className="font-bold text-gray-700">{p.shipping_method}</span>
-                              </p>
+                              <p className="mt-2 text-xs text-gray-500">Frete: <span className="font-bold text-gray-700">{p.shipping_method}</span></p>
                             )}
                             {p.coupon_code && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                Cupom: <span className="font-bold text-green-700">{p.coupon_code}</span>
-                              </p>
+                              <p className="text-xs text-gray-500 mt-1">Cupom: <span className="font-bold text-green-700">{p.coupon_code}</span></p>
                             )}
                             {p.sapiens_order_id && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                Sapiens ID: <span className="font-mono font-bold text-gray-700">{p.sapiens_order_id}</span>
-                              </p>
+                              <p className="text-xs text-gray-500 mt-1">Sapiens ID: <span className="font-mono font-bold text-gray-700">{p.sapiens_order_id}</span></p>
                             )}
-                          </div>
 
-                          {/* Valores */}
-                          <div>
-                            <p className="text-xs font-black text-gray-500 uppercase mb-2">Valores</p>
+                            <p className="text-xs font-black text-gray-500 uppercase mt-4 mb-2">Valores</p>
                             <div className="text-sm space-y-1">
                               <div className="flex justify-between">
                                 <span className="text-gray-500">Subtotal</span>
@@ -467,6 +513,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                                 <span className="font-black text-green-700">R$ {Number(p.total).toFixed(2).replace('.', ',')}</span>
                               </div>
                             </div>
+
                             {/* Tracking */}
                             <div className="mt-3">
                               <p className="text-xs font-black text-gray-500 uppercase mb-1">Código de Rastreio</p>
@@ -477,71 +524,138 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                                   placeholder="Ex: BR123456789BR"
                                   className="flex-1 border border-gray-200 rounded px-2 py-1 text-xs font-mono outline-none focus:border-green-500"
                                 />
-                                <button
-                                  onClick={() => salvarTracking(p)}
-                                  className="text-xs font-bold bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700">
+                                <button onClick={() => salvarTracking(p)} className="text-xs font-bold bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700">
                                   Salvar
                                 </button>
                               </div>
                             </div>
                           </div>
 
-                          {/* Ações */}
+                          {/* Col 2: Ações de status */}
                           <div>
-                            <p className="text-xs font-black text-gray-500 uppercase mb-2">Ações</p>
-                            <div className="space-y-2">
-                              <div>
-                                <p className="text-xs text-gray-500 mb-1">Alterar status:</p>
-                                <div className="flex flex-wrap gap-1">
-                                  {STATUS_FLOW.filter(s => s !== p.status).map(s => (
-                                    <button
-                                      key={s}
-                                      disabled={acao[p.id + '_status']}
-                                      onClick={e => { e.stopPropagation(); atualizarStatus(p, s) }}
-                                      className={`text-xs font-bold px-2 py-1 rounded border transition-colors ${STATUS_LABELS[s].bg} ${STATUS_LABELS[s].text} border-current hover:opacity-80 disabled:opacity-50`}>
-                                      → {STATUS_LABELS[s].label}
-                                    </button>
-                                  ))}
-                                  <button
-                                    disabled={acao[p.id + '_status']}
-                                    onClick={e => { e.stopPropagation(); atualizarStatus(p, 'cancelled') }}
-                                    className="text-xs font-bold px-2 py-1 rounded border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50">
-                                    Cancelar
-                                  </button>
-                                </div>
-                              </div>
-
-                              {p.payment_status === 'paid' && (
+                            <p className="text-xs font-black text-gray-500 uppercase mb-2">Alterar Status</p>
+                            <div className="flex flex-wrap gap-1 mb-3">
+                              {STATUS_FLOW.filter(s => s !== p.status).map(s => (
                                 <button
-                                  disabled={acao[p.id + '_capturar']}
-                                  onClick={e => { e.stopPropagation(); capturarPagamento(p) }}
-                                  className="w-full flex items-center gap-2 text-xs font-bold bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50">
-                                  <CreditCard size={13} />
-                                  {acao[p.id + '_capturar'] ? 'Capturando...' : 'Capturar Pagamento'}
+                                  key={s}
+                                  disabled={acao[p.id + '_status']}
+                                  onClick={e => { e.stopPropagation(); atualizarStatus(p, s) }}
+                                  className={`text-xs font-bold px-2 py-1 rounded border transition-colors ${STATUS_LABELS[s].bg} ${STATUS_LABELS[s].text} border-current hover:opacity-80 disabled:opacity-50`}>
+                                  → {STATUS_LABELS[s].label}
                                 </button>
-                              )}
+                              ))}
+                              <button
+                                disabled={acao[p.id + '_status']}
+                                onClick={e => { e.stopPropagation(); atualizarStatus(p, 'cancelled') }}
+                                className="text-xs font-bold px-2 py-1 rounded border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50">
+                                Cancelar
+                              </button>
+                            </div>
 
-                              {(p.status === 'confirmed' || p.status === 'pending') && (
-                                <button
-                                  disabled={acao[p.id + '_clearsale']}
-                                  onClick={e => { e.stopPropagation(); enviarClearSales(p) }}
-                                  className="w-full flex items-center gap-2 text-xs font-bold bg-orange-500 text-white px-3 py-2 rounded-lg hover:bg-orange-600 disabled:opacity-50">
-                                  <AlertTriangle size={13} />
-                                  {acao[p.id + '_clearsale'] ? 'Enviando...' : 'Enviar p/ ClearSales'}
-                                </button>
-                              )}
+                            {/* Capturar */}
+                            {p.payment_status === 'paid' && (
+                              <button
+                                disabled={acao[p.id + '_capturar']}
+                                onClick={e => { e.stopPropagation(); capturarPagamento(p) }}
+                                className="w-full flex items-center gap-2 text-xs font-bold bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 mb-2">
+                                <CreditCard size={13} />
+                                {acao[p.id + '_capturar'] ? 'Capturando...' : 'Capturar Pagamento'}
+                              </button>
+                            )}
 
-                              {['confirmed', 'processing', 'paid'].includes(p.status) && (
+                            {/* ClearSales */}
+                            {(p.status === 'confirmed' || p.status === 'pending') && !p.clearsales_status && (
+                              <button
+                                disabled={acao[p.id + '_clearsale']}
+                                onClick={e => { e.stopPropagation(); enviarClearSales(p) }}
+                                className="w-full flex items-center gap-2 text-xs font-bold bg-orange-500 text-white px-3 py-2 rounded-lg hover:bg-orange-600 disabled:opacity-50 mb-2">
+                                <AlertTriangle size={13} />
+                                {acao[p.id + '_clearsale'] ? 'Enviando...' : 'Enviar p/ ClearSales'}
+                              </button>
+                            )}
+                            {p.clearsales_status && (
+                              <p className="text-xs text-gray-500 mb-2">
+                                ClearSales: <span className="font-bold text-gray-700">{p.clearsales_status} {p.clearsales_score ? `(${p.clearsales_score})` : ''}</span>
+                              </p>
+                            )}
+
+                            {/* Estorno com motivo */}
+                            {!['cancelled', 'refunded'].includes(p.status) && p.payment_status !== 'refunded' && (
+                              <div className="mt-2">
+                                <p className="text-xs font-black text-gray-500 uppercase mb-1">Estorno</p>
+                                <input
+                                  value={motivoEstorno[p.id] || ''}
+                                  onChange={e => setMotivoEstorno(m => ({ ...m, [p.id]: e.target.value }))}
+                                  placeholder="Motivo obrigatório..."
+                                  className="w-full border border-gray-200 rounded px-2 py-1 text-xs outline-none focus:border-red-400 mb-1"
+                                />
                                 <button
                                   disabled={acao[p.id + '_estorno']}
                                   onClick={e => { e.stopPropagation(); estornarPedido(p) }}
-                                  className="w-full flex items-center gap-2 text-xs font-bold bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50">
+                                  className="w-full flex items-center justify-center gap-2 text-xs font-bold bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50">
                                   <XCircle size={13} />
                                   {acao[p.id + '_estorno'] ? 'Estornando...' : 'Estornar Pedido'}
                                 </button>
-                              )}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Col 3: Notificar cliente */}
+                          <div>
+                            <p className="text-xs font-black text-gray-500 uppercase mb-2">Notificar Cliente</p>
+                            <p className="text-xs text-gray-400 mb-2">Envia e-mail ao cliente com o status selecionado:</p>
+                            <div className="flex flex-col gap-1.5">
+                              {NOTIF_STATUS.map(s => (
+                                <button
+                                  key={s}
+                                  disabled={!!acao[p.id + '_notif']}
+                                  onClick={e => { e.stopPropagation(); notificarCliente(p, s) }}
+                                  className="flex items-center gap-2 text-xs font-bold px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                                  {acao[p.id + '_notif']
+                                    ? <Loader2 size={12} className="animate-spin" />
+                                    : <Bell size={12} />}
+                                  {STATUS_LABELS[s]?.label}
+                                </button>
+                              ))}
                             </div>
                           </div>
+
+                          {/* Col 4: Anotações internas */}
+                          <div>
+                            <p className="text-xs font-black text-gray-500 uppercase mb-2">Anotações Internas</p>
+                            <div className="space-y-2 mb-3 max-h-48 overflow-y-auto">
+                              {(notes[p.id] || []).length === 0 && (
+                                <p className="text-xs text-gray-400 italic">Nenhuma anotação ainda.</p>
+                              )}
+                              {(notes[p.id] || []).map((n: Note) => (
+                                <div key={n.id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 text-xs relative group">
+                                  <p className="text-gray-800 leading-relaxed">{n.note}</p>
+                                  <p className="text-gray-400 mt-1">{n.created_by} · {new Date(n.created_at).toLocaleString('pt-BR')}</p>
+                                  <button
+                                    onClick={() => deletarNota(p.id, n.id)}
+                                    className="absolute top-2 right-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Trash2 size={11} />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="flex gap-2">
+                              <textarea
+                                rows={2}
+                                placeholder="Nova anotação interna..."
+                                value={novaNota[p.id] || ''}
+                                onChange={e => setNovaNota(n => ({ ...n, [p.id]: e.target.value }))}
+                                className="flex-1 border border-gray-200 rounded px-2 py-1 text-xs outline-none focus:border-blue-400 resize-none"
+                              />
+                              <button
+                                disabled={!!acao[p.id + '_nota']}
+                                onClick={() => salvarNota(p.id)}
+                                className="shrink-0 self-end flex items-center gap-1 text-xs font-bold bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                                {acao[p.id + '_nota'] ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+                              </button>
+                            </div>
+                          </div>
+
                         </div>
                       </td>
                     </tr>
@@ -550,7 +664,6 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
               ))}
             </tbody>
 
-            {/* Rodapé com total */}
             {pedidosFiltrados.length > 0 && (
               <tfoot className="bg-gray-50 border-t border-gray-200">
                 <tr>
