@@ -18,6 +18,15 @@ const ROTAS_PADRAO = [
   { rota: '/quem-somos',        label: 'Quem Somos' },
   { rota: '/trocas-devolucoes', label: 'Trocas e Devoluções' },
   { rota: '/seguranca',         label: 'Segurança' },
+  { rota: '/produtos/lampadas',       label: 'Lâmpadas' },
+  { rota: '/produtos/refletores',     label: 'Refletores' },
+  { rota: '/produtos/smart',          label: 'SMART' },
+  { rota: '/produtos/decorativo',     label: 'Decorativo' },
+  { rota: '/produtos/trilhos-perfis', label: 'Trilhos e Perfis' },
+  { rota: '/produtos/pilhas',         label: 'Pilhas' },
+  { rota: '/produtos/fechaduras',     label: 'Fechaduras' },
+  { rota: '/produtos/profissional',   label: 'Profissional' },
+  { rota: '/produtos/outlet',         label: 'Outlet' },
 ]
 
 export default function SEOTab() {
@@ -93,23 +102,23 @@ export default function SEOTab() {
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-xs font-bold text-gray-600">Meta Title</label>
-                    <span className={`text-xs font-mono ${p.titulo.length > 60 ? 'text-red-500' : 'text-gray-400'}`}>
-                      {p.titulo.length}/60
+                    <span className={`text-xs font-mono ${(p.titulo || '').length > 60 ? 'text-red-500' : 'text-gray-400'}`}>
+                      {(p.titulo || '').length}/60
                     </span>
                   </div>
                   <input className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
-                    value={p.titulo} onChange={e => update(p.rota, 'titulo', e.target.value)}
+                    value={p.titulo || ''} onChange={e => update(p.rota, 'titulo', e.target.value)}
                     placeholder="Ex: Taschibra Store — Iluminação LED" />
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-xs font-bold text-gray-600">Meta Description</label>
-                    <span className={`text-xs font-mono ${p.descricao.length > 160 ? 'text-red-500' : 'text-gray-400'}`}>
-                      {p.descricao.length}/160
+                    <span className={`text-xs font-mono ${(p.descricao || '').length > 160 ? 'text-red-500' : 'text-gray-400'}`}>
+                      {(p.descricao || '').length}/160
                     </span>
                   </div>
                   <textarea rows={2} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 resize-none"
-                    value={p.descricao} onChange={e => update(p.rota, 'descricao', e.target.value)}
+                    value={p.descricao || ''} onChange={e => update(p.rota, 'descricao', e.target.value)}
                     placeholder="Ex: Loja oficial Taschibra. Lâmpadas, refletores, fitas LED e mais." />
                 </div>
                 <div className="flex items-center justify-end gap-3">
