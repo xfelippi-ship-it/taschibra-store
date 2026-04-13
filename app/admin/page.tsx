@@ -59,6 +59,8 @@ const TODOS_MODULOS = [
   { id: 'usuarios',      label: 'Usuários',             grupo: 'Administração' },
   { id: 'auditoria',     label: 'Auditoria',            grupo: 'Administração' },
   { id: 'configuracoes', label: 'Configurações da Loja',grupo: 'Administração' },
+  { id: 'cms',           label: 'Páginas e Blocos',    grupo: 'Administração' },
+  { id: 'seo',           label: 'SEO',                  grupo: 'Administração' },
 ]
 
 function UsuariosTab() {
