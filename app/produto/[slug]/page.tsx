@@ -171,7 +171,7 @@ function ProdutosRelacionados({ categorySlug, produtoAtualId }: {
     if (!categorySlug) return
     supabase.from('products').select('id,name,slug,price,promo_price,main_image')
       .eq('category_slug', categorySlug).neq('id', produtoAtualId).eq('active', true).limit(4)
-      .then(({ data }) => setSimilares(data || []))
+      .then(({ data }) => setSimilares((data || []) as any))
     supabase.from('complement_rules').select('target_slug').eq('source_slug', categorySlug).order('sort_order')
       .then(async ({ data: rules }) => {
         if (!rules?.length) return
@@ -229,7 +229,7 @@ export default function ProdutoPage() {
   useEffect(() => {
     async function load() {
       const { data } = await supabase.from('products').select('*').eq('slug', slug).single()
-      setProduto(data)
+      setProduto(data as any)
       if (data?.id) {
         const [{ data: feats }, { data: revs }] = await Promise.all([
           supabase.from('product_features').select('id,title,description,image_url,sort_order')
@@ -237,8 +237,8 @@ export default function ProdutoPage() {
           supabase.from('product_reviews').select('id,author_name,rating,comment,verified,created_at')
             .eq('product_id', data.id).order('created_at', { ascending: false })
         ])
-        setFeatures(feats || [])
-        setReviews(revs || [])
+        setFeatures((feats || []) as any)
+        setReviews((revs || []) as any)
       }
       setLoading(false)
     }
