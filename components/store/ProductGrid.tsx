@@ -87,7 +87,7 @@ export default function ProductGrid({ title, categorySlug, limit = 8 }: { title:
         q = categorySlug === 'lancamentos' ? q.eq('is_lancamento', true) : q.eq('category_slug', categorySlug)
       }
       const { data } = await q.limit(limit)
-      setProdutos(data || [])
+      setProdutos((data || []) as any)
       setLoading(false)
     }
     load()

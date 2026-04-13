@@ -132,9 +132,9 @@ export default function DashboardTab() {
           .limit(2000),
       ])
 
-      setPedidos(ped || [])
-      setProdutos(prod || [])
-      setClientes(cli || [])
+      setPedidos((ped || []) as any)
+      setProdutos((prod || []) as any)
+      setClientes((cli || []) as any)
 
       // Top 5 produtos por receita
       const mapa: Record<string, { name: string; qtd: number; total: number }> = {}

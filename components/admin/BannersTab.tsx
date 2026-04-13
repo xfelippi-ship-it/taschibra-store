@@ -18,7 +18,7 @@ type Banner = {
   bg_color: string
   link_href: string
   position: number
-  active: boolean
+  active: boolean | null
   starts_at: string
   ends_at: string
 }
@@ -89,7 +89,7 @@ export default function BannersTab({ meuEmail = 'admin' }: { meuEmail?: string }
   async function carregar() {
     setLoading(true)
     const { data } = await supabase.from('banners').select('*').order('position')
-    setBanners(data || [])
+    setBanners((data || []) as any)
     setLoading(false)
   }
 

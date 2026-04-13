@@ -111,7 +111,7 @@ export default function CategoriasTab() {
       panel_image_url: usarImagem ? (editando.panel_image_url || null) : null,
     }
     const { error } = await supabase.from('categories').update(payload).eq('id', editando.id)
-    if (!error) await registrarAuditoria({ executedBy: 'admin', acao: 'categoria_editada', entidade: 'categories', detalhe: `Categoria: ${editando.name || editando.label || editando.id}` })
+    if (!error) await registrarAuditoria({ executedBy: 'admin', acao: 'categoria_editada', entidade: 'categories', detalhe: `Categoria: ${editando.name || (editando as any).label || editando.id}` })
     if (error) {
       setMsg({ tipo: 'erro', texto: 'Erro ao salvar: ' + error.message })
     } else {

@@ -8,27 +8,27 @@ import { Save, Plus, Trash2, Edit2, X, Check, Building2, FileText, CreditCard, T
 
 interface CompanySettings {
   id?: string
-  razao_social: string
-  cnpj: string
-  endereco: string
-  nome_fantasia: string
-  inscricao_estadual: string
-  telefone: string
-  email_contato: string
+  razao_social: string | null
+  cnpj: string | null
+  endereco: string | null
+  nome_fantasia: string | null
+  inscricao_estadual: string | null
+  telefone: string | null
+  email_contato: string | null
 }
 
 interface BoletoSettings {
   id?: string
-  desconto_percentual: number
-  dias_vencimento: number
-  valor_minimo: number
+  desconto_percentual: number | null
+  dias_vencimento: number | null
+  valor_minimo: number | null
   aplicar_desconto_em: 'itens' | 'total'
 }
 
 interface CardSettings {
   id?: string
-  max_parcelas: number
-  valor_minimo_parcela: number
+  max_parcelas: number | null
+  valor_minimo_parcela: number | null
 }
 
 interface ExtraDay {
@@ -36,7 +36,7 @@ interface ExtraDay {
   data_inicial: string
   data_final: string
   dias_adicionais: number
-  ativo: boolean
+  ativo: boolean | null
 }
 
 // ─── Seção colapsável ──────────────────────────────────────────────────────────
@@ -108,10 +108,10 @@ export default function ConfiguracoesLojaTab() {
         supabase.from('payment_card_settings').select('*').single(),
         supabase.from('shipping_extra_days').select('*').order('data_inicial'),
       ])
-      if (c.data) setCompany(c.data)
-      if (b.data) setBoleto(b.data)
-      if (k.data) setCard(k.data)
-      if (d.data) setExtraDays(d.data)
+      if (c.data) setCompany(c.data as any)
+      if (b.data) setBoleto(b.data as any)
+      if (k.data) setCard(k.data as any)
+      if (d.data) setExtraDays(d.data as any)
       setLoading(false)
     }
     load()

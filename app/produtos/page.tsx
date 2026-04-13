@@ -190,7 +190,7 @@ function ProdutosContent() {
                     </Link>
                     <div className="p-4">
                       <Link href={"/produto/" + p.slug}>
-                        <p className="text-sm font-semibold text-gray-800 leading-snug mb-2 line-clamp-2 min-h-[2.5rem] hover:text-green-700" style={{textTransform:"capitalize",textTransformOrigin:"initial"}}>{p.name.toLowerCase().replace(/(?:^|\s|\/|-)\S/g, l => l.toUpperCase())}</p>
+                        <p className="text-sm font-semibold text-gray-800 leading-snug mb-2 line-clamp-2 min-h-[2.5rem] hover:text-green-700" style={{textTransform:"capitalize",transformOrigin:"initial"}}>{p.name.toLowerCase().replace(/(?:^|\s|\/|-)\S/g, l => l.toUpperCase())}</p>
                       </Link>
                       {preco > 0 && (
                         <div className="mb-3">

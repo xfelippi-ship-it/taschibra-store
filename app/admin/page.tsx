@@ -777,9 +777,9 @@ export default function AdminPage() {
 
   async function salvarProduto() {
     if (produtoEdit.id) {
-      await supabase.from('products').update(produtoEdit).eq('id', produtoEdit.id)
+      await supabase.from('products').update(produtoEdit as any).eq('id', produtoEdit.id)
     } else {
-      await supabase.from('products').insert({ ...produtoEdit, slug: produtoEdit.name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') })
+      await supabase.from('products').insert({ ...produtoEdit, slug: produtoEdit.name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') } as any)
     }
     setModal(false)
     setProdutoEdit({})
@@ -841,7 +841,7 @@ export default function AdminPage() {
   function NavGrupos({ aba, setAba, meuPapel, abertos, setAbertos }: { aba: string; setAba: (a: any) => void; meuPapel: string; abertos: Record<string, boolean>; setAbertos: (v: Record<string, boolean>) => void }) {
 
     function toggle(g: string) {
-      setAbertos(prev => ({ ...prev, [g]: !prev[g] }))
+      setAbertos({ ...abertos, [g]: !abertos[g] })
     }
 
     function tem(_: string[], id_modulo: string) {

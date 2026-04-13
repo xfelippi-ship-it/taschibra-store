@@ -30,7 +30,7 @@ const statusColor: Record<string, string> = {
 
 export default function PedidosPage() {
   const router = useRouter()
-  const [pedidos, setPedidos] = useState<Record<string, unknown>[]>([])
+  const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function PedidosPage() {
       .select('id, order_number, total, status, payment_status, shipping_method, created_at, order_items(id)')
       .eq('customer_id', clienteId)
       .order('created_at', { ascending: false })
-    setPedidos(data || [])
+    setPedidos((data as any) || [])
     setLoading(false)
   }
 
@@ -74,8 +74,8 @@ export default function PedidosPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {pedidos.map((p: Record<string, unknown>) => (
-            <Link key={p.id} href={`/minha-conta/pedido/${p.id}`}
+          {pedidos.map((p: any) => (
+            <Link key={p.id as string} href={`/minha-conta/pedido/${p.id as string}`}
               className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-colors">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">

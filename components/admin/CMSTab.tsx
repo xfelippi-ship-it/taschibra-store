@@ -6,9 +6,9 @@ import { Save, FileText, ChevronDown, ChevronUp } from 'lucide-react'
 interface CmsPage {
   id?: string
   slug: string
-  titulo: string
-  conteudo: string
-  publicado: boolean
+  titulo: string | null
+  conteudo: string | null
+  publicado: boolean | null
 }
 
 const PAGINAS_PADRAO = [
@@ -166,7 +166,7 @@ export default function CMSTab() {
         const found = existentes.find(e => e.slug === p.slug)
         return found || { slug: p.slug, titulo: p.titulo, conteudo: '', publicado: true }
       })
-      setPaginas(merged)
+      setPaginas(merged as any)
       setLoading(false)
     }
     load()

@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import { ArrowLeft, Package, MapPin, CreditCard, Truck } from 'lucide-react'
@@ -30,7 +30,8 @@ const statusColor: Record<string, string> = {
 
 export default function PedidoDetalhePage() {
   const params = useParams()
-  const [pedido, setPedido] = useState<Record<string, unknown> | null>(null)
+  const router = useRouter()
+  const [pedido, setPedido] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -49,9 +50,9 @@ export default function PedidoDetalhePage() {
         order_items (id, name_snapshot, quantity, unit_price, total_price),
         payments (method, status, gateway_id)
       `)
-      .eq('id', params.id)
+      .eq('id', params.id as string)
       .single()
-    setPedido(data)
+    setPedido(data as any)
     setLoading(false)
   }
 
@@ -102,7 +103,7 @@ export default function PedidoDetalhePage() {
           <Package size={16} className="text-green-600" /> Itens do pedido
         </h2>
         <div className="space-y-3">
-          {(pedido.order_items as Record<string, unknown>[])?.map((item: Record<string, unknown>) => (
+          {((pedido as any).order_items as any[])?.map((item: any) => (
             <div key={item.id} className="flex justify-between items-center">
               <div>
                 <p className="text-sm font-semibold text-gray-800">{item.name_snapshot}</p>
@@ -117,10 +118,10 @@ export default function PedidoDetalhePage() {
             <span>Subtotal</span>
             <span>R$ {parseFloat(pedido.subtotal || pedido.total).toFixed(2).replace('.', ',')}</span>
           </div>
-          {pedido.discount_total > 0 && (
+          {(pedido.discount_total as number) > 0 && (
             <div className="flex justify-between text-sm text-green-600">
               <span>Desconto</span>
-              <span>- R$ {parseFloat(pedido.discount_total).toFixed(2).replace('.', ',')}</span>
+              <span>- R$ {parseFloat(String(pedido.discount_total)).toFixed(2).replace('.', ',')}</span>
             </div>
           )}
           <div className="flex justify-between text-sm text-gray-500">

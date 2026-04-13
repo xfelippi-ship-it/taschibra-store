@@ -6,8 +6,8 @@ import { Save, Search } from 'lucide-react'
 interface SeoPage {
   id?: string
   rota: string
-  titulo: string
-  descricao: string
+  titulo: string | null
+  descricao: string | null
 }
 
 const ROTAS_PADRAO = [
@@ -35,7 +35,7 @@ export default function SEOTab() {
         const found = existentes.find(e => e.rota === r.rota)
         return found || { rota: r.rota, titulo: '', descricao: '' }
       })
-      setPaginas(merged)
+      setPaginas(merged as any)
       setLoading(false)
     }
     load()

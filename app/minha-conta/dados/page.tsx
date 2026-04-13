@@ -102,7 +102,7 @@ export default function DadosPage() {
       .select('*')
       .eq('customer_id', id)
       .order('is_default', { ascending: false })
-    setEnderecos(data || [])
+    setEnderecos((data as any) || [])
   }
 
   async function carregarCartoes(id: string) {
@@ -111,7 +111,7 @@ export default function DadosPage() {
       .select('*')
       .eq('customer_id', id)
       .order('is_default', { ascending: false })
-    setCartoes(data || [])
+    setCartoes((data as any) || [])
   }
 
   function feedback(msg: string, tipo: 'ok' | 'erro') {

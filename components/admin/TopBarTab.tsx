@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 
 type TopBarConfig = {
   id?: string
-  active: boolean
+  active: boolean | null
   texto: string
   subtexto: string
   link: string
@@ -42,7 +42,7 @@ export default function TopBarTab() {
         texto: r.texto || '',
         subtexto: r.subtexto || '',
         link: r.link || '',
-        tipo: r.tipo || 'cor',
+        tipo: (r.tipo as 'cor' | 'imagem') || 'cor',
         cor_fundo: r.cor_fundo || '#1a5c2a',
         cor_texto: r.cor_texto || '#ffffff',
         imagem_url: r.imagem_url || ''
@@ -66,10 +66,10 @@ export default function TopBarTab() {
     }
     if (config.id) {
       await supabase.from('top_bar').update(dados).eq('id', config.id)
-      await registrarAuditoria({ executedBy: 'admin', acao: 'topbar_editada', entidade: 'top_bar', detalhe: `Texto: ${dados.texto || dados.text || '-'}` })
+      await registrarAuditoria({ executedBy: 'admin', acao: 'topbar_editada', entidade: 'top_bar', detalhe: `Texto: ${dados.texto || '-'}` })
     } else {
       await supabase.from('top_bar').insert(dados)
-      await registrarAuditoria({ executedBy: 'admin', acao: 'topbar_criada', entidade: 'top_bar', detalhe: `Texto: ${dados.texto || dados.text || '-'}` })
+      await registrarAuditoria({ executedBy: 'admin', acao: 'topbar_criada', entidade: 'top_bar', detalhe: `Texto: ${dados.texto || '-'}` })
     }
     setSalvando(false)
     setMsg({ tipo: 'ok', texto: 'Top Bar salva com sucesso!' })

@@ -60,7 +60,7 @@ export default function FreteGratisTab() {
       updated_at:      new Date().toISOString(),
     }
     if (editando.id) {
-      await supabase.from('free_shipping_rules').update(dados).eq('id', editando.id)
+      await supabase.from('free_shipping_rules').update(dados).eq('id', editando.id!)
     } else {
       await supabase.from('free_shipping_rules').insert(dados)
     }

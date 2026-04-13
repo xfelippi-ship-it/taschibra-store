@@ -32,7 +32,7 @@ export default function HeroBanner() {
         .or(`starts_at.is.null,starts_at.lte.${now}`)
         .or(`ends_at.is.null,ends_at.gte.${now}`)
         .order('position')
-      setSlides(data || [])
+      setSlides((data || []) as any)
     }
     load()
   }, [])

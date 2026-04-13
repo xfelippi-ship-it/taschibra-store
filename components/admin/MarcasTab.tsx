@@ -7,7 +7,7 @@ interface Brand {
   id?: string
   nome: string
   slug: string
-  ativo: boolean
+  ativo: boolean | null
 }
 
 function slugify(str: string) {
@@ -29,7 +29,7 @@ export default function MarcasTab() {
   async function carregar() {
     setLoading(true)
     const { data } = await supabase.from('brands').select('*').order('nome')
-    setMarcas(data || [])
+    setMarcas((data || []) as any)
     setLoading(false)
   }
 

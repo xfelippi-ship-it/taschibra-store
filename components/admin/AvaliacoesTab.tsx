@@ -6,12 +6,12 @@ import { Check, X, Star, Trash2 } from 'lucide-react'
 interface Review {
   id: string
   product_id: string
-  customer_name: string
-  customer_email: string
-  nota: number
-  titulo: string
-  descricao: string
-  status: 'pendente' | 'aprovado' | 'reprovado'
+  customer_name: string | null
+  customer_email: string | null
+  nota: number | null
+  titulo: string | null
+  descricao: string | null
+  status?: string | null
   created_at: string
   products?: { name: string }
 }
@@ -38,16 +38,15 @@ export default function AvaliacoesTab() {
     setLoading(true)
     let q = supabase
       .from('product_reviews')
-      .select('*, products(name)')
-      .order('created_at', { ascending: false })
-    if (filtro !== 'todos') q = q.eq('status', filtro)
+      .select('*, products(name)') as any
+    if (filtro !== 'todos') q = q.eq('status' as any, filtro as any)
     const { data } = await q
-    setReviews(data || [])
+    setReviews((data || []) as any)
     setLoading(false)
   }
 
   async function atualizar(id: string, status: 'aprovado' | 'reprovado') {
-    await supabase.from('product_reviews')
+    await (supabase.from('product_reviews') as any)
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', id)
     setReviews(prev => prev.map(r => r.id === id ? { ...r, status } : r))

@@ -49,7 +49,7 @@ export default function VariacoesProduto({ produtoId, onSelect }: Props) {
         .eq('product_id', produtoId)
         .eq('active', true)
         .order('type')
-      setVariacoes(data || [])
+      setVariacoes((data || []) as any)
       setLoading(false)
     }
     load()

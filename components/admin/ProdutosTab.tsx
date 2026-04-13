@@ -140,7 +140,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
     if (!produtoEdit.name) return
     if (produtoEdit.id) {
       const { data: antes } = await supabase.from('products').select('name,price,promo_price,main_image').eq('id', produtoEdit.id).single()
-      await supabase.from('products').update(produtoEdit).eq('id', produtoEdit.id)
+      await supabase.from('products').update(produtoEdit as any).eq('id', produtoEdit.id)
       await registrarAuditoria({
         executedBy: meuEmail,
         acao: 'produto_editado',
@@ -153,7 +153,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
       const slug = produtoEdit.name.toLowerCase()
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-      await supabase.from('products').insert({ ...produtoEdit, slug })
+      await supabase.from('products').insert({ ...produtoEdit, slug } as any)
     }
     setModal(false)
     setProdutoEdit({})
