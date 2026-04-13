@@ -916,6 +916,8 @@ export default function AdminPage() {
             {tem([], 'banners') && <BtnItem id="banners"  label="Banners"       icon={<ImageIcon size={15} />} />}
             {tem([], 'topbar') && <BtnItem id="topbar"   label="Top Bar"       icon={<Megaphone size={15} />} />}
             {tem([], 'midias') && <BtnItem id="midias"   label="Mídias Sociais" icon={<Megaphone size={15} />} />}
+            <BtnItem id="retirada" label="Retirada na Loja" icon={<MapPin size={15} />} />
+            <BtnItem id="faturamento" label="Faturamento Direto" icon={<CreditCard size={15} />} />
           </Grupo>
         )}
 
@@ -938,8 +940,7 @@ export default function AdminPage() {
             <BtnItem id="auditoria"  label="Auditoria"  icon={<BarChart3 size={15} />} />
             <BtnItem id="configuracoes" label="Configurações da Loja" icon={<Settings2 size={15} />} />
             <BtnItem id="cms" label="Páginas e Blocos" icon={<FileText size={15} />} />
-            <BtnItem id="retirada" label="Retirada na Loja" icon={<MapPin size={15} />} />
-            <BtnItem id="faturamento" label="Faturamento Direto" icon={<CreditCard size={15} />} />
+
             <BtnItem id="seo" label="SEO" icon={<Search size={15} />} />
           </Grupo>
         )}
