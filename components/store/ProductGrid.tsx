@@ -57,7 +57,7 @@ function ProdCard({ p }: { p: Produto }) {
         {p.main_image ? <img src={p.main_image} alt={p.name} className="h-40 object-contain" /> : '💡'}
       </div>
       <div className="p-4 flex flex-col">
-        <p className="text-sm font-bold text-gray-800 leading-snug mb-2 line-clamp-2 min-h-[2.5rem]">{((p.name || '').toLowerCase().replace(/(?:^|\s|\/|-)\S/g, l => l.toUpperCase())}</p>
+        <p className="text-sm font-bold text-gray-800 leading-snug mb-2 line-clamp-2 min-h-[2.5rem]">{(p.name || '').toLowerCase().replace(/(?:^|\s|\/|-)\S/g, l => l.toUpperCase())}</p>
         <div className="flex items-center gap-2 mb-1">
           <span className="bg-teal-500 text-white text-xs font-black px-1.5 py-0.5 rounded">PIX</span>
           <span className="text-lg font-black text-green-700">R$ {precoFinal.toFixed(2).replace('.', ',')}</span>
