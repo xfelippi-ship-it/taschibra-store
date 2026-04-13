@@ -46,7 +46,7 @@ export default function PedidoDetalhePage() {
       .select(`
         id, order_number, total, subtotal, shipping_total, discount_total,
         status, payment_status, shipping_method, tracking_code,
-        shipping_address, created_at, sapiens_order_id,
+        shipping_address, created_at, sapiens_order_id, cte_key, cte_url,
         order_items (id, name_snapshot, quantity, unit_price, total_price),
         payments (method, status, gateway_id)
       `)
@@ -157,10 +157,34 @@ export default function PedidoDetalhePage() {
             <Truck size={16} className="text-blue-600" /> Rastreamento
           </h2>
           <p className="text-sm text-gray-700">Código: <strong>{pedido.tracking_code}</strong></p>
-          <a href={`https://rastreamento.correios.com.br/app/index.php`} target="_blank"
+          <a href={`https://rastreamento.correios.com.br/app/index.php?objetos=${pedido.tracking_code}`} target="_blank"
             className="text-xs text-blue-600 underline mt-1 block">
             Rastrear nos Correios →
           </a>
+        </div>
+      )}
+
+      {/* CTe - Conhecimento de Transporte */}
+      {(pedido.cte_key || pedido.cte_url) && (
+        <div className="bg-green-50 border border-green-100 rounded-xl p-5 mb-4">
+          <h2 className="font-black text-gray-800 text-sm mb-2 flex items-center gap-2">
+            <Truck size={16} className="text-green-600" /> Conhecimento de Transporte (CTe)
+          </h2>
+          {pedido.cte_key && (
+            <p className="text-sm text-gray-700 font-mono mb-2">Chave: {pedido.cte_key}</p>
+          )}
+          {pedido.cte_url ? (
+            <a href={pedido.cte_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-bold text-green-700 bg-green-100 hover:bg-green-200 px-3 py-2 rounded-lg transition-colors">
+              📄 Visualizar CTe
+            </a>
+          ) : pedido.cte_key && (
+            <a href={`https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx?tipoConsulta=resumo&chave=${pedido.cte_key}`}
+              target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-bold text-green-700 bg-green-100 hover:bg-green-200 px-3 py-2 rounded-lg transition-colors">
+              📄 Consultar na SEFAZ
+            </a>
+          )}
         </div>
       )}
 
