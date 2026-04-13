@@ -21,6 +21,7 @@ type Banner = {
   active: boolean | null
   starts_at: string
   ends_at: string
+  banner_type: string
 }
 
 const bgOpcoes = [
@@ -40,7 +41,7 @@ const bannerVazio: Banner = {
   btn1_label: '', btn1_href: '',
   btn2_label: '', btn2_href: '',
   image_url: '', bg_color: 'from-green-900 via-green-700 to-green-800',
-  link_href: '', position: 0, active: true, starts_at: '', ends_at: '',
+  link_href: '', position: 0, active: true, starts_at: '', ends_at: '', banner_type: 'principal',
 }
 
 function calcStatus(b: Banner) {
@@ -177,6 +178,7 @@ export default function BannersTab({ meuEmail = 'admin' }: { meuEmail?: string }
               <tr><td colSpan={5} className="text-center py-8 text-gray-400">Nenhum banner cadastrado.</td></tr>
             ) : banners.map((b) => {
               const st = calcStatus(b)
+                  const tipo = b.banner_type || 'principal'
               return (
                 <tr key={b.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                   <td className="px-5 py-4 text-center">
@@ -264,6 +266,14 @@ export default function BannersTab({ meuEmail = 'admin' }: { meuEmail?: string }
                   <label className="text-sm font-bold text-gray-700 mb-1 block">Ordem</label>
                   <input type="number" value={editando.position} onChange={e => setEditando({...editando, position: parseInt(e.target.value) || 0})}
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Tipo</label>
+                  <select value={editando.banner_type || 'principal'} onChange={e => setEditando({...editando, banner_type: e.target.value})}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
+                    <option value="principal">Principal (Carrossel home)</option>
+                    <option value="carrinho">Carrinho</option>
+                  </select>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
