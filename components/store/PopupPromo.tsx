@@ -18,7 +18,16 @@ export default function PopupPromo() {
     const dismissed = sessionStorage.getItem('popup_dismissed')
     if (dismissed) return
 
-    supabase.from('popup_promos').select('*').eq('active', true).limit(1).single()
+    supabase.from('popup_promos').select('*').eq('active', true).order('created_at', { ascending: false })
+      .then(({ data: all }) => {
+        const hoje = new Date().toISOString().slice(0, 10)
+        const valido = (all || []).find((p: any) => {
+          if (p.start_date && p.start_date > hoje) return false
+          if (p.end_date && p.end_date < hoje) return false
+          return true
+        })
+        return { data: valido || null }
+      })
       .then(({ data }) => {
         if (data) {
           setPopup(data as any)

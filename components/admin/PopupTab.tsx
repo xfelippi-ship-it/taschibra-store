@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Eye, EyeOff, Save, Trash2, Plus, Palette, Pencil } from 'lucide-react'
 
@@ -104,6 +104,24 @@ export default function PopupTab() {
     if (data.ok) carregar()
   }
 
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+
+  async function uploadImagem(file: File) {
+    setUploading(true)
+    const form = new FormData()
+    form.append('file', file)
+    const res = await fetch('/api/admin/popup-upload', { method: 'POST', body: form })
+    const data = await res.json()
+    setUploading(false)
+    if (data.ok && editando) {
+      setEditando({ ...editando, image_url: data.url })
+      showMsg('Imagem enviada')
+    } else {
+      showMsg(data.error || 'Erro no upload', 'erro')
+    }
+  }
+
   const inputCls = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500'
 
   return (
@@ -151,9 +169,20 @@ export default function PopupTab() {
                 className={inputCls} placeholder="Ex: /produtos ou /produtos?categoria=outlet" />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-600 block mb-1">URL da imagem (opcional)</label>
+              <label className="text-xs font-bold text-gray-600 block mb-1">Imagem do popup (opcional)</label>
+              <div className="flex gap-2 mb-2">
+                <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
+                  className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-50">
+                  {uploading ? 'Enviando...' : 'Enviar imagem'}
+                </button>
+                <input ref={fileRef} type="file" accept="image/*" className="hidden"
+                  onChange={e => e.target.files?.[0] && uploadImagem(e.target.files[0])} />
+                {editando.image_url && (
+                  <img src={editando.image_url} alt="" className="h-9 rounded border border-gray-200 object-cover" />
+                )}
+              </div>
               <input value={editando.image_url || ''} onChange={e => setEditando({...editando, image_url: e.target.value})}
-                className={inputCls} placeholder="https://... (imagem de topo do popup)" />
+                className={inputCls} placeholder="ou cole uma URL: https://..." />
             </div>
             <div>
               <label className="text-xs font-bold text-gray-600 block mb-1">Data inicio (opcional)</label>
