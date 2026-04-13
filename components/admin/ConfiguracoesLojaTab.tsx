@@ -29,6 +29,14 @@ interface CardSettings {
   id?: string
   max_parcelas: number | null
   valor_minimo_parcela: number | null
+  juros_por_parcela: number | null
+  parcelas_sem_juros: number | null
+}
+
+interface PixSettings {
+  id?: string
+  desconto_percentual: number | null
+  ativo: boolean
 }
 
 interface ExtraDay {
@@ -80,8 +88,9 @@ export default function ConfiguracoesLojaTab() {
   const [boleto, setBoleto] = useState<BoletoSettings>({
     desconto_percentual: 5, dias_vencimento: 2, valor_minimo: 0, aplicar_desconto_em: 'itens'
   })
+  const [pix, setPix] = useState<PixSettings>({ desconto_percentual: 5, ativo: true })
   const [card, setCard] = useState<CardSettings>({
-    max_parcelas: 10, valor_minimo_parcela: 50
+    max_parcelas: 10, valor_minimo_parcela: 50, juros_por_parcela: 0, parcelas_sem_juros: 1
   })
   const [extraDays, setExtraDays] = useState<ExtraDay[]>([])
   const [newDay, setNewDay] = useState<ExtraDay>({
@@ -144,6 +153,14 @@ export default function ConfiguracoesLojaTab() {
   }
 
   // ── Save Card ──
+  async function savePix() {
+    setSaving('pix')
+    if (pix.id) {
+      await supabase.from('payment_pix_settings').update({ desconto_percentual: pix.desconto_percentual, ativo: pix.ativo, updated_at: new Date().toISOString() }).eq('id', pix.id)
+    }
+    setSaving(null)
+  }
+
   async function saveCard() {
     setSaving('card')
     const { id, ...data } = card as any
@@ -297,6 +314,37 @@ export default function ConfiguracoesLojaTab() {
         </button>
       </Section>
 
+      {/* ── Configurações de PIX ── */}
+      <Section icon={CreditCard} title="Configurações de PIX" defaultOpen={false}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div>
+            <label className="text-xs font-bold text-gray-600 mb-1 block">Desconto PIX (%)</label>
+            <input
+              type="number" min={0} max={100} step={0.5}
+              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
+              value={pix.desconto_percentual ?? 5}
+              onChange={e => setPix(prev => ({ ...prev, desconto_percentual: parseFloat(e.target.value) || 0 }))}
+            />
+            <p className="text-xs text-gray-400 mt-1">Desconto aplicado ao pagar com PIX</p>
+          </div>
+          <div className="flex items-center gap-3 pt-6">
+            <button type="button" onClick={() => setPix(prev => ({ ...prev, ativo: !prev.ativo }))}
+              className={`relative w-11 h-6 rounded-full transition-colors ${pix.ativo ? 'bg-green-600' : 'bg-gray-300'}`}>
+              <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${pix.ativo ? 'translate-x-5' : ''}`} />
+            </button>
+            <span className="text-sm font-bold text-gray-700">{pix.ativo ? 'Desconto PIX ativo' : 'Desconto PIX inativo'}</span>
+          </div>
+        </div>
+        <button
+          onClick={savePix}
+          disabled={saving === 'pix'}
+          className="mt-5 flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-black text-sm px-5 py-2.5 rounded-lg transition-colors"
+        >
+          <Save size={14} />
+          {saving === 'pix' ? 'Salvando...' : 'Salvar Configurações de PIX'}
+        </button>
+      </Section>
+
       {/* ── Configurações de Cartão ── */}
       <Section icon={CreditCard} title="Configurações de Cartão de Crédito" defaultOpen={false}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -318,6 +366,27 @@ export default function ConfiguracoesLojaTab() {
               value={card.valor_minimo_parcela}
               onChange={e => setCard(prev => ({ ...prev, valor_minimo_parcela: parseFloat(e.target.value) || 0 }))}
             />
+          </div>
+        </div>
+          <div>
+            <label className="text-xs font-bold text-gray-600 mb-1 block">Juros por parcela (%)</label>
+            <input
+              type="number" min={0} step={0.1}
+              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
+              value={card.juros_por_parcela ?? 0}
+              onChange={e => setCard(prev => ({ ...prev, juros_por_parcela: parseFloat(e.target.value) || 0 }))}
+            />
+            <p className="text-xs text-gray-400 mt-1">0 = sem juros em todas as parcelas</p>
+          </div>
+          <div>
+            <label className="text-xs font-bold text-gray-600 mb-1 block">Parcelas sem juros</label>
+            <input
+              type="number" min={1} max={24}
+              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
+              value={card.parcelas_sem_juros ?? 1}
+              onChange={e => setCard(prev => ({ ...prev, parcelas_sem_juros: parseInt(e.target.value) || 1 }))}
+            />
+            <p className="text-xs text-gray-400 mt-1">Parcelas a partir desta terão juros</p>
           </div>
         </div>
         <button
