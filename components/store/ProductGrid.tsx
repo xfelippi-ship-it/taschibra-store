@@ -145,7 +145,7 @@ export default function ProductGrid({
           <div className="w-9 h-0.5 bg-green-600 mt-1.5 rounded" />
         </div>
         <Link
-          href={categorySlug ? `/produtos/${categorySlug}` : '/produtos'}
+          href={categorySlug ? `/produtos?categoria=${categorySlug}` : '/produtos'}
           className="text-sm font-bold text-green-600"
         >
           Ver todos
