@@ -19,10 +19,12 @@ import FAQTab from '@/components/admin/FAQTab'
 import NewsletterTab from '@/components/admin/NewsletterTab'
 import FaleConoscoTab from '@/components/admin/FaleConoscoTab'
 import CMSTab from '@/components/admin/CMSTab'
+import AvaliacoesTab from '@/components/admin/AvaliacoesTab'
+import MarcasTab from '@/components/admin/MarcasTab'
 import SEOTab from '@/components/admin/SEOTab'
 import ConfiguracoesLojaTab from '@/components/admin/ConfiguracoesLojaTab'
 import { useState, useEffect } from 'react'
-import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2, FileText, Search } from 'lucide-react'
+import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2, FileText, Search, Star } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { registrarAuditoria } from '@/lib/auditLog'
 
@@ -61,6 +63,8 @@ const TODOS_MODULOS = [
   { id: 'configuracoes', label: 'Configurações da Loja',grupo: 'Administração' },
   { id: 'cms',           label: 'Páginas e Blocos',    grupo: 'Administração' },
   { id: 'seo',           label: 'SEO',                  grupo: 'Administração' },
+  { id: 'marcas',        label: 'Marcas',               grupo: 'Catálogo' },
+  { id: 'avaliacoes',    label: 'Avaliações',           grupo: 'Clientes' },
 ]
 
 function UsuariosTab() {
@@ -721,7 +725,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -883,7 +887,8 @@ export default function AdminPage() {
           <Grupo id="catalogo" label="Catálogo">
             {tem([], 'catalogo') && <BtnItem id="produtos"   label="Produtos"     icon={<Package size={15} />} />}
             {tem([], 'categorias') && <BtnItem id="categorias" label="Categorias"   icon={<Tag size={15} />} />}
-            {tem([], 'importar') && <BtnItem id="importar"   label="Importar CSV" icon={<Upload size={15} />} />}
+            {tem([], 'importar') && <BtnItem id="importar"   label="Importar CSV" icon={<Upload size={15} />} />
+            <BtnItem id="marcas"     label="Marcas"       icon={<Tag size={15} />} />}
           </Grupo>
         )}
 
@@ -912,7 +917,8 @@ export default function AdminPage() {
           <Grupo id="clientes" label="Clientes">
             {tem([], 'clientes') && <BtnItem id="clientes"    label="Clientes"     icon={<Users size={15} />} />}
             {tem([], 'newsletter') && <BtnItem id="newsletter"  label="Newsletter"   icon={<Mail size={15} />} />}
-            {tem([], 'faleconosco') && <BtnItem id="faleconosco" label="Fale Conosco" icon={<MessageSquare size={15} />} />}
+            {tem([], 'faleconosco') && <BtnItem id="faleconosco" label="Fale Conosco" icon={<MessageSquare size={15} />} />
+            <BtnItem id="avaliacoes"  label="Avaliações"   icon={<Star size={15} />} />}
             {tem([], 'faq') && <BtnItem id="faq"         label="FAQ"          icon={<HelpCircle size={15} />} />}
           </Grupo>
         )}
@@ -962,6 +968,8 @@ export default function AdminPage() {
         {aba === 'auditoria' && <AuditoriaTab />}
         {aba === 'configuracoes' && <ConfiguracoesLojaTab />}
         {aba === 'cms' && <CMSTab />}
+        {aba === 'avaliacoes' && <AvaliacoesTab />}
+        {aba === 'marcas' && <MarcasTab />}
         {aba === 'seo' && <SEOTab />}
         {aba === 'banners' && <BannersTab meuEmail={meuEmail} />}
         {aba === 'topbar' && <TopBarTab />}
