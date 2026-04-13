@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Loja oficial Taschibra. Mais de 3.000 produtos de iluminação, automação e utilidades.",
 }
 
+const ChatWidget = dynamic(() => import('@/components/store/ChatWidget'), { ssr: false })
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
@@ -25,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </CartProvider>
         <CookieBanner />
+              <ChatWidget />
       </body>
     </html>
   )
