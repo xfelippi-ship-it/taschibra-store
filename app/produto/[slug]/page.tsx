@@ -38,13 +38,13 @@ type ProdCard = {
   price: number; promo_price: number; main_image?: string
 }
 
-function brl(v: number) { return v.toFixed(2).replace('.', ',') }
+function brl(v: number | null | undefined) { return (v ?? 0).toFixed(2).replace('.', ',') }
 
-function calcParcelas(preco: number): { n: number; valor: string } {
-  for (let n = 10; n >= 2; n--) {
-    if (preco / n >= 15) return { n, valor: brl(preco / n) }
+function calcParcelas(preco: number | null | undefined): { n: number; valor: string } {
+  const p = preco ?? 0; for (let n = 10; n >= 2; n--) {
+    if (p / n >= 15) return { n, valor: brl(p / n) }
   }
-  return { n: 1, valor: brl(preco) }
+  return { n: 1, valor: brl(p) }
 }
 
 // ─── Card produto ─────────────────────────────────────────────────────────────
