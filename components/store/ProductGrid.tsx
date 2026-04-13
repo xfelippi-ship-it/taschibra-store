@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useCart } from '@/contexts/CartContext'
+
 import { supabase } from '@/lib/supabase'
 
 type Produto = {
@@ -39,7 +39,7 @@ function formatPrice(val: number | null | undefined): string {
 }
 
 function ProdCard({ p }: { p: Produto }) {
-  const { addItem } = useCart()
+  const { addItem } = require('@/contexts/CartContext').useCart()
   const nome = p.name || ''
   const slug = p.slug || ''
   const preco = p.price ?? 0
