@@ -18,9 +18,11 @@ import VendedoresTab from '@/components/admin/VendedoresTab'
 import FAQTab from '@/components/admin/FAQTab'
 import NewsletterTab from '@/components/admin/NewsletterTab'
 import FaleConoscoTab from '@/components/admin/FaleConoscoTab'
+import CMSTab from '@/components/admin/CMSTab'
+import SEOTab from '@/components/admin/SEOTab'
 import ConfiguracoesLojaTab from '@/components/admin/ConfiguracoesLojaTab'
 import { useState, useEffect } from 'react'
-import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2 } from 'lucide-react'
+import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2, FileText, Search } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { registrarAuditoria } from '@/lib/auditLog'
 
@@ -717,7 +719,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -920,6 +922,8 @@ export default function AdminPage() {
             <BtnItem id="usuarios"   label="Usuários"   icon={<Users size={15} />} />
             <BtnItem id="auditoria"  label="Auditoria"  icon={<BarChart3 size={15} />} />
             <BtnItem id="configuracoes" label="Configurações da Loja" icon={<Settings2 size={15} />} />
+            <BtnItem id="cms" label="Páginas e Blocos" icon={<FileText size={15} />} />
+            <BtnItem id="seo" label="SEO" icon={<Search size={15} />} />
           </Grupo>
         )}
       </div>
@@ -955,6 +959,8 @@ export default function AdminPage() {
         {aba === 'usuarios' && <UsuariosTab />}
         {aba === 'auditoria' && <AuditoriaTab />}
         {aba === 'configuracoes' && <ConfiguracoesLojaTab />}
+        {aba === 'cms' && <CMSTab />}
+        {aba === 'seo' && <SEOTab />}
         {aba === 'banners' && <BannersTab meuEmail={meuEmail} />}
         {aba === 'topbar' && <TopBarTab />}
         {aba === 'categorias' && <CategoriasTab />}
