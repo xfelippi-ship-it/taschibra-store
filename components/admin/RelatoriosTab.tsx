@@ -443,13 +443,346 @@ function RelatorioProdutos() {
 // ══════════════════════════════════════════════════════════════════════════
 // COMPONENTE PRINCIPAL
 // ══════════════════════════════════════════════════════════════════════════
-type Relatorio = 'volume' | 'ticket' | 'produtos'
+type Relatorio = 'volume' | 'ticket' | 'produtos' | 'novos_clientes' | 'aniversariantes' | 'estoque' | 'tempo_status'
 
 const RELATORIOS: { id: Relatorio; label: string; icon: React.ReactNode }[] = [
   { id: 'volume',   label: 'Volume de Faturamento', icon: <TrendingUp size={15} /> },
   { id: 'ticket',   label: 'Ticket Médio',           icon: <BarChart2 size={15} /> },
   { id: 'produtos', label: 'Produtos mais Vendidos', icon: <Package size={15} /> },
+  { id: 'novos_clientes',   label: 'Novos Clientes',     icon: <TrendingUp size={15} /> },
+  { id: 'aniversariantes',  label: 'Aniversariantes',    icon: <ShoppingBag size={15} /> },
+  { id: 'estoque',          label: 'Estoque',            icon: <Package size={15} /> },
+  { id: 'tempo_status',     label: 'Tempo por Status',   icon: <BarChart2 size={15} /> },
 ]
+
+
+// ── NOVAS ABAS — adicionar ao RelatoriosTab.tsx existente ──────────────────
+// Cole este bloco ANTES do export default function RelatoriosTab()
+
+function RelatorioNovosClientes() {
+  const [dados, setDados] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [periodo, setPeriodo] = useState<'7d'|'30d'|'90d'>('30d')
+
+  useEffect(() => { carregar() }, [periodo])
+
+  async function carregar() {
+    setLoading(true)
+    const dias = periodo === '7d' ? 7 : periodo === '30d' ? 30 : 90
+    const desde = new Date()
+    desde.setDate(desde.getDate() - dias)
+    const { data } = await supabase
+      .from('customers')
+      .select('id, name, email, created_at')
+      .gte('created_at', desde.toISOString())
+      .order('created_at', { ascending: false })
+    setDados(data || [])
+    setLoading(false)
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-black text-gray-800">Relatório » Novos Clientes</h2>
+        <div className="flex gap-2">
+          {(['7d','30d','90d'] as const).map(p => (
+            <button key={p} onClick={() => setPeriodo(p)}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${periodo === p ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+              {p === '7d' ? '7 dias' : p === '30d' ? '30 dias' : '90 dias'}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4 flex items-center gap-3">
+        <span className="text-2xl font-black text-green-700">{dados.length}</span>
+        <span className="text-sm text-green-600 font-semibold">novos clientes nos últimos {periodo === '7d' ? '7' : periodo === '30d' ? '30' : '90'} dias</span>
+      </div>
+      {loading ? (
+        <div className="text-center py-8 text-gray-400">Carregando...</div>
+      ) : dados.length === 0 ? (
+        <div className="text-center py-8 text-gray-400">Nenhum cliente cadastrado no período.</div>
+      ) : (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Nome</th>
+                <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">E-mail</th>
+                <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Cadastro</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dados.map(c => (
+                <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <td className="px-5 py-3 font-semibold text-gray-800">{c.name || '—'}</td>
+                  <td className="px-5 py-3 text-gray-600">{c.email}</td>
+                  <td className="px-5 py-3 text-gray-500">{new Date(c.created_at).toLocaleDateString('pt-BR')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function RelatorioAniversariantes() {
+  const [dados, setDados] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [mes, setMes] = useState(new Date().getMonth() + 1)
+
+  useEffect(() => { carregar() }, [mes])
+
+  async function carregar() {
+    setLoading(true)
+    const { data } = await supabase
+      .from('customers')
+      .select('id, name, email, birth_date, phone')
+      .not('birth_date', 'is', null)
+    const filtrados = (data || []).filter(c => {
+      if (!c.birth_date) return false
+      const m = new Date(c.birth_date).getMonth() + 1
+      return m === mes
+    })
+    filtrados.sort((a, b) => new Date(a.birth_date).getDate() - new Date(b.birth_date).getDate())
+    setDados(filtrados)
+    setLoading(false)
+  }
+
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-black text-gray-800">Relatório » Aniversariantes</h2>
+      </div>
+      <div className="flex flex-wrap gap-2 mb-4">
+        {meses.map((m, i) => (
+          <button key={i} onClick={() => setMes(i + 1)}
+            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${mes === i+1 ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+            {m}
+          </button>
+        ))}
+      </div>
+      <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4 flex items-center gap-3">
+        <span className="text-2xl font-black text-green-700">{dados.length}</span>
+        <span className="text-sm text-green-600 font-semibold">aniversariantes em {meses[mes-1]}</span>
+      </div>
+      {loading ? (
+        <div className="text-center py-8 text-gray-400">Carregando...</div>
+      ) : dados.length === 0 ? (
+        <div className="text-center py-8 text-gray-400">Nenhum aniversariante neste mês.</div>
+      ) : (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Dia</th>
+                <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Nome</th>
+                <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">E-mail</th>
+                <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Telefone</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dados.map(c => (
+                <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <td className="px-5 py-3 font-black text-green-700 text-lg">{new Date(c.birth_date).getDate()}</td>
+                  <td className="px-5 py-3 font-semibold text-gray-800">{c.name || '—'}</td>
+                  <td className="px-5 py-3 text-gray-600">{c.email}</td>
+                  <td className="px-5 py-3 text-gray-500">{c.phone || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function RelatorioEstoque() {
+  const [dados, setDados] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filtro, setFiltro] = useState<'critico'|'baixo'|'todos'>('critico')
+
+  useEffect(() => { carregar() }, [])
+
+  async function carregar() {
+    setLoading(true)
+    const { data } = await supabase
+      .from('products')
+      .select('id, name, sku, stock_qty, active')
+      .order('stock_qty', { ascending: true })
+    setDados(data || [])
+    setLoading(false)
+  }
+
+  const filtrados = dados.filter(p => {
+    if (filtro === 'critico') return p.stock_qty <= 5
+    if (filtro === 'baixo') return p.stock_qty <= 20
+    return true
+  })
+
+  function corEstoque(qty: number) {
+    if (qty === 0) return 'bg-red-100 text-red-700'
+    if (qty <= 5) return 'bg-orange-100 text-orange-700'
+    if (qty <= 20) return 'bg-yellow-100 text-yellow-700'
+    return 'bg-green-100 text-green-700'
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-black text-gray-800">Relatório » Estoque</h2>
+        <div className="flex gap-2">
+          {([['critico','🔴 Crítico (≤5)'],['baixo','🟡 Baixo (≤20)'],['todos','Todos']] as const).map(([v, l]) => (
+            <button key={v} onClick={() => setFiltro(v)}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${filtro === v ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+              {l}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-4 mb-4">
+        {[
+          { label: 'Sem estoque', val: dados.filter(p => p.stock_qty === 0).length, cor: 'text-red-600' },
+          { label: 'Estoque crítico (≤5)', val: dados.filter(p => p.stock_qty > 0 && p.stock_qty <= 5).length, cor: 'text-orange-600' },
+          { label: 'Estoque baixo (≤20)', val: dados.filter(p => p.stock_qty > 0 && p.stock_qty <= 20).length, cor: 'text-yellow-600' },
+        ].map(({ label, val, cor }) => (
+          <div key={label} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+            <p className={`text-2xl font-black ${cor}`}>{val}</p>
+            <p className="text-xs text-gray-500 mt-1">{label}</p>
+          </div>
+        ))}
+      </div>
+      {loading ? (
+        <div className="text-center py-8 text-gray-400">Carregando...</div>
+      ) : filtrados.length === 0 ? (
+        <div className="text-center py-8 text-gray-400">Nenhum produto nesta categoria.</div>
+      ) : (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Produto</th>
+                <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">SKU</th>
+                <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Estoque</th>
+                <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtrados.map(p => (
+                <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <td className="px-5 py-3 font-semibold text-gray-800 max-w-xs truncate">{p.name}</td>
+                  <td className="px-5 py-3 text-gray-500 font-mono text-xs">{p.sku}</td>
+                  <td className="px-5 py-3 text-center">
+                    <span className={`text-sm font-black px-3 py-1 rounded-full ${corEstoque(p.stock_qty)}`}>
+                      {p.stock_qty}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3 text-center">
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${p.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                      {p.active ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function RelatorioTempoMedioStatus() {
+  const [dados, setDados] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => { carregar() }, [])
+
+  async function carregar() {
+    setLoading(true)
+    const { data } = await supabase
+      .from('orders')
+      .select('id, status, created_at, updated_at')
+      .order('created_at', { ascending: false })
+      .limit(500)
+    setDados(data || [])
+    setLoading(false)
+  }
+
+  const statusList = ['pending','paid','processing','shipped','delivered','cancelled']
+  const statusLabel: Record<string, string> = {
+    pending: 'Aguardando Pagamento',
+    paid: 'Pago',
+    processing: 'Em Processamento',
+    shipped: 'Enviado',
+    delivered: 'Entregue',
+    cancelled: 'Cancelado',
+  }
+  const statusCor: Record<string, string> = {
+    pending: 'bg-yellow-100 text-yellow-700',
+    paid: 'bg-blue-100 text-blue-700',
+    processing: 'bg-purple-100 text-purple-700',
+    shipped: 'bg-indigo-100 text-indigo-700',
+    delivered: 'bg-green-100 text-green-700',
+    cancelled: 'bg-red-100 text-red-700',
+  }
+
+  const porStatus = statusList.map(s => {
+    const pedidos = dados.filter(p => p.status === s)
+    if (pedidos.length === 0) return { status: s, count: 0, tempoMedio: 0 }
+    const tempos = pedidos.map(p => {
+      const criado = new Date(p.created_at).getTime()
+      const atualizado = new Date(p.updated_at).getTime()
+      return (atualizado - criado) / (1000 * 60 * 60)
+    })
+    const media = tempos.reduce((a, b) => a + b, 0) / tempos.length
+    return { status: s, count: pedidos.length, tempoMedio: media }
+  })
+
+  function formatarTempo(horas: number) {
+    if (horas < 1) return `${Math.round(horas * 60)}min`
+    if (horas < 24) return `${Math.round(horas)}h`
+    return `${Math.round(horas / 24)}d`
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-black text-gray-800">Relatório » Tempo Médio por Status</h2>
+      </div>
+      <p className="text-sm text-gray-500 mb-4">Tempo médio que os pedidos permanecem em cada status (últimos 500 pedidos).</p>
+      {loading ? (
+        <div className="text-center py-8 text-gray-400">Carregando...</div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {porStatus.map(({ status, count, tempoMedio }) => (
+            <div key={status} className="bg-white rounded-xl border border-gray-200 p-5">
+              <span className={`text-xs font-bold px-2 py-1 rounded-full ${statusCor[status]}`}>
+                {statusLabel[status]}
+              </span>
+              <div className="mt-3 flex items-end justify-between">
+                <div>
+                  <p className="text-2xl font-black text-gray-800">
+                    {count > 0 ? formatarTempo(tempoMedio) : '—'}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">tempo médio</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-black text-gray-500">{count}</p>
+                  <p className="text-xs text-gray-400">pedidos</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function RelatoriosTab() {
   const [ativo, setAtivo] = useState<Relatorio>('volume')
@@ -475,6 +808,10 @@ export default function RelatoriosTab() {
       {ativo === 'volume'   && <RelatorioVolume />}
       {ativo === 'ticket'   && <RelatorioTicket />}
       {ativo === 'produtos' && <RelatorioProdutos />}
+      {ativo === 'novos_clientes' && <RelatorioNovosClientes />}
+      {ativo === 'aniversariantes' && <RelatorioAniversariantes />}
+      {ativo === 'estoque' && <RelatorioEstoque />}
+      {ativo === 'tempo_status' && <RelatorioTempoMedioStatus />}
     </div>
   )
 }
