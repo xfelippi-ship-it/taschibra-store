@@ -772,6 +772,42 @@ export type Database = {
         }
         Relationships: []
       }
+      direct_billing: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          descricao: string | null
+          id: string
+          max_parcelas: number | null
+          nome: string
+          ordem: number | null
+          padrao: boolean | null
+          valor_minimo: number | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          max_parcelas?: number | null
+          nome: string
+          ordem?: number | null
+          padrao?: boolean | null
+          valor_minimo?: number | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          max_parcelas?: number | null
+          nome?: string
+          ordem?: number | null
+          padrao?: boolean | null
+          valor_minimo?: number | null
+        }
+        Relationships: []
+      }
       faqs: {
         Row: {
           answer: string | null
@@ -1114,6 +1150,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pickup_stores: {
+        Row: {
+          cep: string | null
+          cidade: string | null
+          created_at: string | null
+          endereco: string
+          estado: string | null
+          habilitado: boolean | null
+          id: string
+          nome: string
+          prazo_dias: number | null
+          telefone: string | null
+          valor: number | null
+        }
+        Insert: {
+          cep?: string | null
+          cidade?: string | null
+          created_at?: string | null
+          endereco: string
+          estado?: string | null
+          habilitado?: boolean | null
+          id?: string
+          nome: string
+          prazo_dias?: number | null
+          telefone?: string | null
+          valor?: number | null
+        }
+        Update: {
+          cep?: string | null
+          cidade?: string | null
+          created_at?: string | null
+          endereco?: string
+          estado?: string | null
+          habilitado?: boolean | null
+          id?: string
+          nome?: string
+          prazo_dias?: number | null
+          telefone?: string | null
+          valor?: number | null
+        }
+        Relationships: []
       }
       product_features: {
         Row: {

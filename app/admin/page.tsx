@@ -19,6 +19,7 @@ import FAQTab from '@/components/admin/FAQTab'
 import NewsletterTab from '@/components/admin/NewsletterTab'
 import FaleConoscoTab from '@/components/admin/FaleConoscoTab'
 import CMSTab from '@/components/admin/CMSTab'
+import GaleriaTab from '@/components/admin/GaleriaTab'
 import AvaliacoesTab from '@/components/admin/AvaliacoesTab'
 import MarcasTab from '@/components/admin/MarcasTab'
 import SEOTab from '@/components/admin/SEOTab'
@@ -62,6 +63,7 @@ const TODOS_MODULOS = [
   { id: 'auditoria',     label: 'Auditoria',            grupo: 'Administração' },
   { id: 'configuracoes', label: 'Configurações da Loja',grupo: 'Administração' },
   { id: 'cms',           label: 'Páginas e Blocos',    grupo: 'Administração' },
+  { id: 'galeria',       label: 'Galeria de Imagens',  grupo: 'Administração' },
   { id: 'seo',           label: 'SEO',                  grupo: 'Administração' },
   { id: 'marcas',        label: 'Marcas',               grupo: 'Catálogo' },
   { id: 'avaliacoes',    label: 'Avaliações',           grupo: 'Clientes' },
@@ -725,7 +727,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'galeria'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -931,6 +933,7 @@ export default function AdminPage() {
             <BtnItem id="auditoria"  label="Auditoria"  icon={<BarChart3 size={15} />} />
             <BtnItem id="configuracoes" label="Configurações da Loja" icon={<Settings2 size={15} />} />
             <BtnItem id="cms" label="Páginas e Blocos" icon={<FileText size={15} />} />
+            <BtnItem id="galeria" label="Galeria de Imagens" icon={<ImageIcon size={15} />} />
             <BtnItem id="seo" label="SEO" icon={<Search size={15} />} />
           </Grupo>
         )}
@@ -968,6 +971,7 @@ export default function AdminPage() {
         {aba === 'auditoria' && <AuditoriaTab />}
         {aba === 'configuracoes' && <ConfiguracoesLojaTab />}
         {aba === 'cms' && <CMSTab />}
+        {aba === 'galeria' && <GaleriaTab />}
         {aba === 'avaliacoes' && <AvaliacoesTab />}
         {aba === 'marcas' && <MarcasTab />}
         {aba === 'seo' && <SEOTab />}
