@@ -13,6 +13,7 @@ type Popup = {
   image_url: string | null; button_text: string
   button_link: string; bg_color: string; active: boolean
   created_at: string
+  start_date: string | null; end_date: string | null
 }
 
 const CORES_PRESET = [
@@ -51,7 +52,7 @@ export default function PopupTab() {
     setEditando({
       id: '', title: 'Novo Popup', subtitle: 'Subtitulo do popup',
       image_url: null, button_text: 'Ver Ofertas', button_link: '/produtos',
-      bg_color: '#1e7a3c', active: false, created_at: ''
+      bg_color: '#1e7a3c', active: false, created_at: '', start_date: null, end_date: null
     })
   }
 
@@ -66,6 +67,8 @@ export default function PopupTab() {
       button_link: editando.button_link,
       bg_color: editando.bg_color,
       active: editando.active,
+      start_date: editando.start_date || null,
+      end_date: editando.end_date || null,
     }
     const res = await fetch('/api/admin/popup-save', {
       method: 'POST',
@@ -153,6 +156,16 @@ export default function PopupTab() {
                 className={inputCls} placeholder="https://... (imagem de topo do popup)" />
             </div>
             <div>
+              <label className="text-xs font-bold text-gray-600 block mb-1">Data inicio (opcional)</label>
+              <input type="date" value={editando.start_date || ''} onChange={e => setEditando({...editando, start_date: e.target.value || null})}
+                className={inputCls} />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-600 block mb-1">Data fim (opcional)</label>
+              <input type="date" value={editando.end_date || ''} onChange={e => setEditando({...editando, end_date: e.target.value || null})}
+                className={inputCls} />
+            </div>
+            <div>
               <label className="text-xs font-bold text-gray-600 block mb-1">Cor de fundo</label>
               <div className="flex items-center gap-2">
                 <input type="color" value={editando.bg_color}
@@ -228,6 +241,7 @@ export default function PopupTab() {
                 <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Preview</th>
                 <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Titulo</th>
                 <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Destino</th>
+                <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Periodo</th>
                 <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
                 <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Acoes</th>
               </tr>
@@ -246,6 +260,11 @@ export default function PopupTab() {
                     {p.subtitle && <p className="text-xs text-gray-400 mt-0.5">{p.subtitle}</p>}
                   </td>
                   <td className="px-5 py-3 text-xs text-gray-500 font-mono">{p.button_link}</td>
+                  <td className="px-5 py-3 text-center text-xs text-gray-500">
+                    {p.start_date || p.end_date ? (
+                      <span>{p.start_date ? new Date(p.start_date + 'T12:00:00').toLocaleDateString('pt-BR') : 'Sem inicio'} — {p.end_date ? new Date(p.end_date + 'T12:00:00').toLocaleDateString('pt-BR') : 'Sem fim'}</span>
+                    ) : <span className="text-gray-300">Sempre</span>}
+                  </td>
                   <td className="px-5 py-3 text-center">
                     <button onClick={() => toggleAtivo(p)}
                       className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${p.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
