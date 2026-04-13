@@ -9,6 +9,7 @@ import VariacoesProduto from '@/components/store/VariacoesProduto'
 import { useCart } from '@/contexts/CartContext'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import ProductJsonLd from '@/components/store/ProductJsonLd'
 
 
 type Variacao = {
@@ -312,6 +313,12 @@ export default function ProdutoPage() {
   return (
     <>
       <Header />
+      <ProductJsonLd
+        name={produto.name} description={produto.description}
+        price={precoCartao} promoPrice={precoVista}
+        image={produto.main_image} sku={produto.sku}
+        ean={produto.ean} brand={produto.brand}
+        slug={produto.slug} />
 
       {/* Breadcrumb */}
       <div className="bg-gray-50 border-b border-gray-200 py-2 px-4">
