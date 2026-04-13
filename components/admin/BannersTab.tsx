@@ -168,6 +168,7 @@ export default function BannersTab({ meuEmail = 'admin' }: { meuEmail?: string }
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Banner</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Agendamento</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Tipo</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Ações</th>
             </tr>
           </thead>
