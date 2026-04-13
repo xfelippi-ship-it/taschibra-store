@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body className={`${nunito.variable} antialiased bg-white text-gray-900`}>
+      <body suppressHydrationWarning className={`${nunito.variable} antialiased bg-white text-gray-900`}>
         <CartProvider>
           {children}
         </CartProvider>
