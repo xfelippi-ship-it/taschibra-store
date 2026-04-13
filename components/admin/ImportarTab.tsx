@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { registrarAuditoria } from '@/lib/auditLog'
-import { Upload, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { Upload, CheckCircle, XCircle, ChevronDown, ChevronUp, Package, LayoutGrid, Download, Info } from 'lucide-react'
+import * as XLSX from 'xlsx'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -44,6 +45,54 @@ function parseCSV(text: string): Record<string, string>[] {
     headers.forEach((h, i) => { obj[h] = vals[i] || '' })
     return obj
   })
+}
+
+
+async function parseXLSX(file: File, sheetName?: string): Promise<Record<string, string>[]> {
+  const buffer = await file.arrayBuffer()
+  const wb = XLSX.read(buffer, { type: 'array' })
+  const target = sheetName
+    ? wb.SheetNames.find((s: string) => s.toLowerCase().trim() === sheetName.toLowerCase().trim())
+    : wb.SheetNames[0]
+  if (!target) return []
+  const ws = wb.Sheets[target]
+  const rows: any[] = XLSX.utils.sheet_to_json(ws, { defval: '' })
+  return rows.map((row: any) => {
+    const obj: Record<string, string> = {}
+    Object.keys(row).forEach(k => { obj[k.trim().toLowerCase()] = String(row[k]).trim() })
+    return obj
+  })
+}
+
+async function parseFile(file: File, sheetName?: string): Promise<Record<string, string>[]> {
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  if (ext === 'xlsx' || ext === 'xls') return parseXLSX(file, sheetName)
+  const text = await file.text()
+  return parseCSV(text)
+}
+
+
+async function parseXLSX(file: File, sheetName?: string): Promise<Record<string, string>[]> {
+  const buffer = await file.arrayBuffer()
+  const wb = XLSX.read(buffer, { type: 'array' })
+  const target = sheetName
+    ? wb.SheetNames.find((s: string) => s.toLowerCase().trim() === sheetName.toLowerCase().trim())
+    : wb.SheetNames[0]
+  if (!target) return []
+  const ws = wb.Sheets[target]
+  const rows: any[] = XLSX.utils.sheet_to_json(ws, { defval: '' })
+  return rows.map((row: any) => {
+    const obj: Record<string, string> = {}
+    Object.keys(row).forEach(k => { obj[k.trim().toLowerCase()] = String(row[k]).trim() })
+    return obj
+  })
+}
+
+async function parseFile(file: File, sheetName?: string): Promise<Record<string, string>[]> {
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  if (ext === 'xlsx' || ext === 'xls') return parseXLSX(file, sheetName)
+  const text = await file.text()
+  return parseCSV(text)
 }
 
 // Mapa de colunas em PT-BR para inglês
@@ -94,8 +143,7 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
   async function handleArquivo(file: File) {
     setArquivo(file)
     setResultados([])
-    const text = await file.text()
-    const rows = parseCSV(text)
+    const rows = await parseFile(file, 'Produtos')
     setPreview(rows.slice(0, 5))
     setHeaders(Object.keys(rows[0] || {}))
   }
@@ -194,8 +242,7 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
     setResultados([])
     setMostrarResultados(true)
 
-    const text = await arquivo.text()
-    const rows = parseCSV(text)
+    const rows = await parseFile(arquivo, 'Produtos')
     const total = rows.length
     const res: Resultado[] = []
 
@@ -302,9 +349,13 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
         <div className="flex-1 border-t border-gray-200" />
       </div>
 
-      {/* UPLOAD */}
+      {/* UPLOAD PRODUTOS */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
-        <h2 className="font-black text-gray-700 mb-4 text-sm uppercase tracking-wide">1. Selecione o arquivo</h2>
+        <div className="flex items-center gap-2 mb-1">
+          <Package size={16} className="text-purple-600" />
+          <h2 className="font-black text-gray-700 text-sm uppercase tracking-wide">Cadastro de produtos</h2>
+        </div>
+        <p className="text-xs text-gray-400 mb-4">Importe produtos em massa via planilha. Aceita .csv e .xlsx (aba &quot;Produtos&quot;).</p>
         <div onClick={() => inputRef.current?.click()}
           className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-green-400 hover:bg-green-50 transition-colors">
           <Upload size={32} className="mx-auto mb-3 text-gray-300" />
@@ -316,20 +367,32 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
           ) : (
             <div>
               <p className="font-bold text-gray-600">Clique para selecionar o arquivo</p>
-              <p className="text-sm text-gray-400 mt-1">Arquivo CSV ou Excel — gerado pelo Excel, Google Sheets ou exportado do sistema</p>
+              <p className="text-sm text-gray-400 mt-1">ou arraste e solte aqui — .csv, .xlsx, .xls</p>
             </div>
           )}
         </div>
         <input ref={inputRef} type="file" accept=".csv,.txt,.xlsx,.xls" className="hidden"
           onChange={e => e.target.files?.[0] && handleArquivo(e.target.files[0])} />
-        <div className="mt-4 bg-gray-50 rounded-lg p-3">
-          <p className="text-xs font-black text-gray-500 uppercase mb-1">Colunas aceitas no arquivo:</p>
-          <p className="text-xs text-gray-500 font-mono">sku, nome, preco, preco_pix, estoque, descricao_curta, descricao, categoria, familia, ativo, badges, lancamento, peso_kg, garantia, ean</p>
-          <div className="mt-2 space-y-1">
-            <p className="text-xs text-gray-500">📌 Nas colunas <span className="font-mono font-bold">ativo</span> e <span className="font-mono font-bold">lancamento</span>: escreva <span className="font-mono font-bold">sim</span> para verdadeiro ou <span className="font-mono font-bold">nao</span> para falso.</p>
-            <p className="text-xs text-gray-500">🏷️ Na coluna <span className="font-mono font-bold">badges</span>: para colocar mais de um badge no mesmo produto, separe com o símbolo <span className="font-mono font-bold">|</span> — exemplo: <span className="font-mono font-bold">lancamento|kit</span> coloca dois badges ao mesmo tempo.</p>
-          </div>
+        <div className="flex items-center gap-1.5 mt-3">
+          <Info size={13} className="text-blue-500 flex-shrink-0" />
+          <span className="text-xs text-gray-400">Se o arquivo .xlsx tiver múltiplas abas, apenas a aba &quot;Produtos&quot; será lida.</span>
         </div>
+
+        {/* Legenda colapsável */}
+        <details className="mt-3 border-t border-gray-100 pt-3">
+          <summary className="text-xs font-bold text-gray-500 cursor-pointer select-none hover:text-gray-700">Colunas aceitas no arquivo</summary>
+          <div className="mt-2">
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {['sku','nome','preco','preco_pix','estoque','descricao_curta','descricao','categoria','familia','ativo','badges','lancamento','peso_kg','garantia','ean'].map(col => (
+                <span key={col} className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded text-[11px] font-mono font-bold">{col}</span>
+              ))}
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3 space-y-1.5">
+              <p className="text-xs text-gray-500">📌 Nas colunas <span className="font-mono font-bold">ativo</span> e <span className="font-mono font-bold">lancamento</span>: escreva <span className="font-mono font-bold">sim</span> para verdadeiro ou <span className="font-mono font-bold">nao</span> para falso.</p>
+              <p className="text-xs text-gray-500">🏷️ Na coluna <span className="font-mono font-bold">badges</span>: para mais de um badge, separe com <span className="font-mono font-bold bg-gray-200 px-1 rounded">|</span> — ex: <span className="font-mono font-bold bg-gray-200 px-1 rounded">lancamento|kit</span></p>
+            </div>
+          </div>
+        </details>
       </div>
 
       {/* PREVIEW */}
@@ -411,28 +474,66 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
       )}
 
       {/* IMPORTAR VARIAÇÕES */}
-      <div className="bg-white rounded-xl border border-blue-100 p-6 mb-4">
-        <h2 className="font-black text-blue-700 mb-1 text-sm uppercase tracking-wide">↑ Importar Variações (opcional)</h2>
-        <p className="text-xs text-gray-400 mb-4">Selecione um CSV de variações. Colunas: sku_pai, tipo, valor, sku, ean, preco, preco_pix, estoque, ativo, descricao_tecnica, ordem.</p>
-        <input ref={inputVarRef} type="file" accept=".csv,.txt" className="hidden"
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <LayoutGrid size={16} className="text-emerald-600" />
+          <h2 className="font-black text-gray-700 text-sm uppercase tracking-wide">Variações de produtos</h2>
+        </div>
+        <p className="text-xs text-gray-400 mb-4">Importe variações vinculadas ao SKU do produto pai. Aceita .csv e .xlsx (aba &quot;Variações&quot;).</p>
+        <div onClick={() => inputVarRef.current?.click()}
+          className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50 transition-colors">
+          <Upload size={32} className="mx-auto mb-3 text-gray-300" />
+          {arquivoVar ? (
+            <div>
+              <p className="font-bold text-emerald-700">{arquivoVar.name}</p>
+              <p className="text-sm text-gray-400">Arquivo selecionado</p>
+            </div>
+          ) : (
+            <div>
+              <p className="font-bold text-gray-600">Clique para selecionar o arquivo</p>
+              <p className="text-sm text-gray-400 mt-1">ou arraste e solte aqui — .csv, .xlsx, .xls</p>
+            </div>
+          )}
+        </div>
+        <input ref={inputVarRef} type="file" accept=".csv,.txt,.xlsx,.xls" className="hidden"
           onChange={async e => {
             const file = e.target.files?.[0]
             if (!file) return
             setArquivoVar(file)
-          }} />
-        <div className="flex gap-3 items-center flex-wrap">
-          <button onClick={() => inputVarRef.current?.click()}
-            className="border border-blue-300 text-blue-700 font-bold px-4 py-2 rounded-lg hover:bg-blue-50 text-sm transition-colors">
-            {arquivoVar ? `📄 ${arquivoVar.name}` : '📎 Selecionar CSV de Variações'}
-          </button>
+          }}
+        />
+        <div className="flex items-center gap-1.5 mt-3">
+          <Info size={13} className="text-blue-500 flex-shrink-0" />
+          <span className="text-xs text-gray-400">Se o arquivo .xlsx tiver múltiplas abas, apenas a aba &quot;Variações&quot; será lida. As demais abas são ignoradas.</span>
+        </div>
+
+        {/* Legenda colapsável variações */}
+        <details className="mt-3 border-t border-gray-100 pt-3">
+          <summary className="text-xs font-bold text-gray-500 cursor-pointer select-none hover:text-gray-700">Colunas aceitas no arquivo</summary>
+          <div className="mt-2">
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {['sku_pai','tipo','valor','sku','ean','preco','preco_pix','estoque','ativo'].map(col => (
+                <span key={col} className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[11px] font-mono font-bold">{col}</span>
+              ))}
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3 space-y-1.5">
+              <p className="text-xs text-gray-500">📌 <span className="font-mono font-bold">sku_pai</span> deve ser o SKU exato do produto já cadastrado no sistema.</p>
+              <p className="text-xs text-gray-500">🏷️ <span className="font-mono font-bold">tipo</span>: temperatura_cor, cor, tensao, modelo, angulo_abertura, comprimento, formato, cor_peca, face, aplicacao, indice_protecao, temperatura_frontal</p>
+              <p className="text-xs text-gray-500">✅ Na coluna <span className="font-mono font-bold">ativo</span>: escreva <span className="font-mono font-bold">sim</span> ou <span className="font-mono font-bold">nao</span>.</p>
+            </div>
+          </div>
+        </details>
+
+        {/* Botão importar variações */}
+        <div className="flex gap-3 items-center flex-wrap mt-4">
           {arquivoVar && (
             <button onClick={async () => {
               if (!arquivoVar) return
               setProcessando(true)
               setMostrarResultados(true)
-              const text = await arquivoVar.text()
-              const rows = parseCSV(text)
-              const res = await processarVariacoes(rows)
+              const rows = await parseFile(arquivoVar, 'Variações')
+              const fallback = rows.length === 0 ? await parseFile(arquivoVar) : rows
+              const res = await processarVariacoes(fallback.length > 0 ? fallback : rows)
               setResultados(prev => [...prev, ...res])
               setProcessando(false)
             }} disabled={processando}
@@ -441,6 +542,24 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
               {processando ? 'Processando...' : `Importar ${arquivoVar.name}`}
             </button>
           )}
+        </div>
+      </div>
+
+      {/* PLANILHA MODELO */}
+      <div className="bg-gray-50 rounded-xl p-4 mb-4 flex items-center gap-3">
+        <Download size={16} className="text-blue-500 flex-shrink-0" />
+        <div>
+          <span className="text-sm font-bold text-blue-600 cursor-pointer hover:underline">Baixar planilha modelo v2</span>
+          <span className="text-xs text-gray-400 ml-2">.xlsx com abas Produtos + Variações</span>
+        </div>
+      </div>
+
+      {/* PLANILHA MODELO */}
+      <div className="bg-gray-50 rounded-xl p-4 mb-4 flex items-center gap-3">
+        <Download size={16} className="text-blue-500 flex-shrink-0" />
+        <div>
+          <span className="text-sm font-bold text-blue-600 cursor-pointer hover:underline">Baixar planilha modelo v2</span>
+          <span className="text-xs text-gray-400 ml-2">.xlsx com abas Produtos + Variações</span>
         </div>
       </div>
 
