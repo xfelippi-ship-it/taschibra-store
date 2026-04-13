@@ -183,16 +183,24 @@ export default function PopupTab() {
               </div>
               <input value={editando.image_url || ''} onChange={e => setEditando({...editando, image_url: e.target.value})}
                 className={inputCls} placeholder="ou cole uma URL: https://..." />
+              <p className="text-xs text-gray-400 mt-1">Tamanho recomendado: 800 x 400 px (JPG ou PNG, max 500KB)</p>
             </div>
-            <div>
-              <label className="text-xs font-bold text-gray-600 block mb-1">Data inicio (opcional)</label>
-              <input type="date" value={editando.start_date || ''} onChange={e => setEditando({...editando, start_date: e.target.value || null})}
-                className={inputCls} />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-gray-600 block mb-1">Data fim (opcional)</label>
-              <input type="date" value={editando.end_date || ''} onChange={e => setEditando({...editando, end_date: e.target.value || null})}
-                className={inputCls} />
+            <div className="md:col-span-2">
+              <label className="text-xs font-bold text-gray-600 block mb-1">Periodo de exibicao (opcional)</label>
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <span className="text-xs text-gray-400 mb-0.5 block">Inicio</span>
+                  <input type="date" value={editando.start_date || ''} onChange={e => setEditando({...editando, start_date: e.target.value || null})}
+                    className={inputCls} />
+                </div>
+                <span className="text-gray-300 mt-4">ate</span>
+                <div className="flex-1">
+                  <span className="text-xs text-gray-400 mb-0.5 block">Fim</span>
+                  <input type="date" value={editando.end_date || ''} onChange={e => setEditando({...editando, end_date: e.target.value || null})}
+                    className={inputCls} />
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">Deixe vazio para exibir sempre enquanto estiver ativo.</p>
             </div>
             <div>
               <label className="text-xs font-bold text-gray-600 block mb-1">Cor de fundo</label>
