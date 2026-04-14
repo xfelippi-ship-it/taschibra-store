@@ -415,7 +415,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
       {/* Modal Produto */}
       {modal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-xl max-h-[90vh] flex flex-col">
+          <div className="bg-white rounded-2xl w-full max-w-5xl p-6 shadow-xl max-h-[92vh] flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-black text-gray-800">{produtoEdit.id ? 'Editar Produto' : 'Novo Produto'}</h2>
               <button onClick={() => { setModal(false); setProdutoEdit({}) }} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
@@ -449,78 +449,52 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
 
             <div className="overflow-y-auto flex-1 pr-1">
               {abaModal === 'dados' && (
-                <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-0">
+
+              {/* ── COLUNA ESQUERDA ── */}
+              <div className="space-y-3">
+
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Nome do produto *</label>
+                  <input value={produtoEdit.name || ''} onChange={e => setProdutoEdit({ ...produtoEdit, name: e.target.value })}
+                    placeholder="Ex: Lâmpada LED TKL 60 9W"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-bold text-gray-700 mb-1 block">Nome do produto *</label>
-                    <input value={produtoEdit.name || ''} onChange={e => setProdutoEdit({ ...produtoEdit, name: e.target.value })}
-                      placeholder="Ex: Lâmpada LED TKL 60 9W"
+                    <label className="text-sm font-bold text-gray-700 mb-1 block">SKU</label>
+                    <input value={produtoEdit.sku || ''} onChange={e => setProdutoEdit({ ...produtoEdit, sku: e.target.value })}
+                      placeholder="Ex: 61080246"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 font-mono" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-1 block">EAN</label>
+                    <input value={produtoEdit.ean || ''} onChange={e => setProdutoEdit({ ...produtoEdit, ean: e.target.value })}
+                      placeholder="Ex: 7897079082876"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 font-mono" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-1 block">Família/Linha</label>
+                    <input value={produtoEdit.family || ''} onChange={e => setProdutoEdit({ ...produtoEdit, family: e.target.value })}
+                      placeholder="Ex: TKL, Inlumix, Smart"
                       className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-bold text-gray-700 mb-1 block">SKU</label>
-                      <input value={produtoEdit.sku || ''} onChange={e => setProdutoEdit({ ...produtoEdit, sku: e.target.value })}
-                        placeholder="Ex: 61080246"
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 font-mono" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-bold text-gray-700 mb-1 block">EAN</label>
-                      <input value={produtoEdit.ean || ''} onChange={e => setProdutoEdit({ ...produtoEdit, ean: e.target.value })}
-                        placeholder="Ex: 7897079082876"
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 font-mono" />
-                    </div>
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-1 block">Marca</label>
+                    <select value={produtoEdit.brand_id || ''} onChange={e => setProdutoEdit({ ...produtoEdit, brand_id: e.target.value })}
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
+                      <option value="">Sem marca</option>
+                      {marcas.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+                    </select>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-bold text-gray-700 mb-1 block">Família/Linha</label>
-                      <input value={produtoEdit.family || ''} onChange={e => setProdutoEdit({ ...produtoEdit, family: e.target.value })}
-                        placeholder="Ex: TKL, Inlumix, Smart"
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
-                    </div>
-                    <div>
-                    <label className="text-sm font-bold text-gray-700 mb-1 block">
-                      Categorias
-                      <span className="text-xs font-normal text-gray-400 ml-2">
-                        {(produtoEdit.categories || []).length} selecionada(s)
-                      </span>
-                    </label>
-                    <div className="border border-gray-200 rounded-lg max-h-52 overflow-y-auto p-2 space-y-0.5 bg-white">
-                      {CATEGORIAS_LS.map(cat => {
-                        const checked = (produtoEdit.categories || []).includes(cat.slug)
-                        return (
-                          <label key={cat.slug} className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer hover:bg-gray-50 transition-colors ${cat.pai ? 'pl-5' : ''}`}>
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={e => {
-                                const atual = produtoEdit.categories || []
-                                const novo = e.target.checked
-                                  ? [...atual, cat.slug]
-                                  : atual.filter((c: string) => c !== cat.slug)
-                                setProdutoEdit({ ...produtoEdit, categories: novo, category_slug: novo[0] || '' })
-                              }}
-                              className="w-3.5 h-3.5 accent-green-600 flex-shrink-0"
-                            />
-                            <span className={`text-sm ${cat.pai ? 'text-gray-500' : 'text-gray-800 font-semibold'}`}>
-                              {cat.label}
-                            </span>
-                          </label>
-                        )
-                      })}
-                    </div>
-                  </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-bold text-gray-700 mb-1 block">Marca</label>
-                      <select value={produtoEdit.brand_id || ''} onChange={e => setProdutoEdit({ ...produtoEdit, brand_id: e.target.value })}
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
-                        <option value="">Sem marca</option>
-                        {marcas.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  {meuPapel !== 'marketing' && <div className="grid grid-cols-3 gap-4">
+                </div>
+
+                {meuPapel !== 'marketing' && (
+                  <div className="grid grid-cols-3 gap-3">
                     <div>
                       <label className="text-sm font-bold text-gray-700 mb-1 block">Preço cartão *</label>
                       <input type="number" step="0.01" value={produtoEdit.price || ''}
@@ -542,108 +516,153 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                         placeholder="0"
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                     </div>
-                  </div>}
+                  </div>
+                )}
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-bold text-gray-700 mb-1 block">Peso (kg)</label>
-                      <input type="number" step="0.001" value={produtoEdit.weight_kg || ''}
-                        onChange={e => setProdutoEdit({ ...produtoEdit, weight_kg: parseFloat(e.target.value) })}
-                        placeholder="0.045"
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-bold text-gray-700 mb-1 block">Garantia</label>
-                      <input value={produtoEdit.warranty || ''} onChange={e => setProdutoEdit({ ...produtoEdit, warranty: e.target.value })}
-                        placeholder="Ex: 12 meses"
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
-                    </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-1 block">Peso (kg)</label>
+                    <input type="number" step="0.001" value={produtoEdit.weight_kg || ''}
+                      onChange={e => setProdutoEdit({ ...produtoEdit, weight_kg: parseFloat(e.target.value) })}
+                      placeholder="0.045"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                   </div>
                   <div>
-                    <label className="text-sm font-bold text-gray-700 mb-1 block">
-                      Descrição do produto
-                      <span className="text-xs font-normal text-gray-400 ml-2">Suporta HTML</span>
-                    </label>
-                    <div className="border border-gray-200 rounded-lg overflow-hidden focus-within:border-green-500">
-                      <div className="bg-gray-50 border-b border-gray-100 px-3 py-1.5 flex gap-1 flex-wrap">
-                        {([['B','<b></b>'],['I','<i></i>'],['BR','<br>'],['Lista','<ul><li></li></ul>'],['P','<p></p>']] as [string,string][]).map(([label,tag]) => (
-                          <button key={label} type="button"
-                            onClick={() => setProdutoEdit(prev => ({ ...prev, description: (prev.description||'')+tag }))}
-                            className="text-xs bg-white border border-gray-200 px-2 py-0.5 rounded hover:bg-green-50 hover:border-green-400 font-bold text-gray-600">
-                            {label}
-                          </button>
-                        ))}
-                      </div>
-                      <textarea
-                        value={produtoEdit.description || ''}
-                        onChange={e => setProdutoEdit({ ...produtoEdit, description: e.target.value })}
-                        rows={5}
-                        placeholder="Descrição completa. Suporta HTML: <b>negrito</b>, <i>itálico</i>, <br>, <ul><li>item</li></ul>"
-                        className="w-full px-4 py-2.5 text-sm outline-none resize-none font-mono text-gray-700"
-                      />
-                      {produtoEdit.description && (
-                        <div className="border-t border-gray-100 px-3 py-2 bg-gray-50">
-                          <p className="text-xs text-gray-400 mb-1 font-bold">Preview:</p>
-                          <div className="text-sm text-gray-700" dangerouslySetInnerHTML={{ __html: produtoEdit.description }} />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-bold text-gray-700 mb-1 block">Imagem Principal</label>
-                    <input type="file" ref={fileInputRef} accept="image/*" className="hidden"
-                      onChange={e => { const f = e.target.files?.[0]; if(f) uploadImagem(f) }} />
-                    <div
-                      onDragOver={e => { e.preventDefault(); setDragOver(true) }}
-                      onDragLeave={() => setDragOver(false)}
-                      onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if(f) uploadImagem(f) }}
-                      onClick={() => !uploadingImg && fileInputRef.current?.click()}
-                      className={`relative border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${dragOver ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'}`}
-                    >
-                      {uploadingImg ? (
-                        <div className="flex flex-col items-center gap-2 py-3">
-                          <div className="animate-spin w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full" />
-                          <span className="text-xs text-gray-500">Enviando imagem...</span>
-                        </div>
-                      ) : produtoEdit.main_image ? (
-                        <div onClick={e => e.stopPropagation()}>
-                          <img src={produtoEdit.main_image} alt="Preview" className="h-28 object-contain mx-auto rounded-lg" onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
-                          <div className="flex gap-2 justify-center mt-2">
-                            <button type="button" onClick={() => fileInputRef.current?.click()}
-                              className="text-xs font-bold text-green-600 border border-green-200 px-3 py-1 rounded-lg hover:bg-green-50 flex items-center gap-1">
-                              <Upload size={11} /> Trocar
-                            </button>
-                            <button type="button" onClick={() => setProdutoEdit(p => ({ ...p, main_image: '' }))}
-                              className="text-xs font-bold text-red-500 border border-red-200 px-3 py-1 rounded-lg hover:bg-red-50 flex items-center gap-1">
-                              <X size={11} /> Remover
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center gap-2 py-3">
-                          <ImageIcon size={28} className="text-gray-300" />
-                          <p className="text-sm font-bold text-gray-500">Clique ou arraste a imagem aqui</p>
-                          <p className="text-xs text-gray-400">JPG, PNG, WEBP — máx. 5MB</p>
-                          <span className="mt-1 flex items-center gap-1.5 bg-green-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg">
-                            <Upload size={12} /> Selecionar arquivo
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <input value={produtoEdit.main_image || ''} onChange={e => setProdutoEdit({ ...produtoEdit, main_image: e.target.value })}
-                      placeholder="Ou cole uma URL aqui..."
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2 text-xs text-gray-400 outline-none focus:border-green-500 mt-2" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input type="checkbox" id="ativo_prod" checked={produtoEdit.active ?? true}
-                      onChange={e => setProdutoEdit({ ...produtoEdit, active: e.target.checked })}
-                      className="w-4 h-4 accent-green-600" />
-                    <label htmlFor="ativo_prod" className="text-sm font-bold text-gray-700">Produto ativo</label>
+                    <label className="text-sm font-bold text-gray-700 mb-1 block">Garantia</label>
+                    <input value={produtoEdit.warranty || ''} onChange={e => setProdutoEdit({ ...produtoEdit, warranty: e.target.value })}
+                      placeholder="Ex: 12 meses"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                   </div>
                 </div>
-              )}
 
-              {abaModal === 'fotos' && produtoEdit.id && (
+                <div className="flex items-center gap-3 pt-1">
+                  <input type="checkbox" id="ativo_prod" checked={produtoEdit.active ?? true}
+                    onChange={e => setProdutoEdit({ ...produtoEdit, active: e.target.checked })}
+                    className="w-4 h-4 accent-green-600" />
+                  <label htmlFor="ativo_prod" className="text-sm font-bold text-gray-700">Produto ativo</label>
+                </div>
+
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Imagem Principal</label>
+                  <input type="file" ref={fileInputRef} accept="image/*" className="hidden"
+                    onChange={e => { const f = e.target.files?.[0]; if(f) uploadImagem(f) }} />
+                  <div
+                    onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if(f) uploadImagem(f) }}
+                    onClick={() => !uploadingImg && fileInputRef.current?.click()}
+                    className={`relative border-2 border-dashed rounded-xl p-3 text-center cursor-pointer transition-all ${dragOver ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'}`}
+                  >
+                    {uploadingImg ? (
+                      <div className="flex items-center justify-center gap-2 py-2">
+                        <div className="animate-spin w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full" />
+                        <span className="text-xs text-gray-500">Enviando...</span>
+                      </div>
+                    ) : produtoEdit.main_image ? (
+                      <div onClick={e => e.stopPropagation()} className="flex items-center gap-3">
+                        <img src={produtoEdit.main_image} alt="Preview"
+                          className="h-16 w-16 object-contain rounded-lg border border-gray-100 flex-shrink-0"
+                          onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => fileInputRef.current?.click()}
+                            className="text-xs font-bold text-green-600 border border-green-200 px-2 py-1 rounded-lg hover:bg-green-50 flex items-center gap-1">
+                            <Upload size={10} /> Trocar
+                          </button>
+                          <button type="button" onClick={() => setProdutoEdit(p => ({ ...p, main_image: '' }))}
+                            className="text-xs font-bold text-red-500 border border-red-200 px-2 py-1 rounded-lg hover:bg-red-50">
+                            <X size={10} />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 py-1">
+                        <ImageIcon size={20} className="text-gray-300 flex-shrink-0" />
+                        <div className="text-left">
+                          <p className="text-xs font-bold text-gray-500">Clique ou arraste</p>
+                          <p className="text-xs text-gray-400">JPG, PNG, WEBP</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <input value={produtoEdit.main_image || ''} onChange={e => setProdutoEdit({ ...produtoEdit, main_image: e.target.value })}
+                    placeholder="Ou cole uma URL aqui..."
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2 text-xs text-gray-400 outline-none focus:border-green-500 mt-1" />
+                </div>
+
+              </div>
+
+              {/* ── COLUNA DIREITA ── */}
+              <div className="space-y-3">
+
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">
+                    Categorias
+                    <span className="text-xs font-normal text-gray-400 ml-2">
+                      {(produtoEdit.categories || []).length} selecionada(s)
+                    </span>
+                  </label>
+                  <div className="border border-gray-200 rounded-lg max-h-52 overflow-y-auto p-2 space-y-0.5 bg-white">
+                    {CATEGORIAS_LS.map(cat => {
+                      const checked = (produtoEdit.categories || []).includes(cat.slug)
+                      return (
+                        <label key={cat.slug} className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer hover:bg-gray-50 transition-colors ${cat.pai ? 'pl-5' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={e => {
+                              const atual = produtoEdit.categories || []
+                              const novo = e.target.checked
+                                ? [...atual, cat.slug]
+                                : atual.filter((c: string) => c !== cat.slug)
+                              setProdutoEdit({ ...produtoEdit, categories: novo, category_slug: novo[0] || '' })
+                            }}
+                            className="w-3.5 h-3.5 accent-green-600 flex-shrink-0"
+                          />
+                          <span className={`text-sm ${cat.pai ? 'text-gray-500' : 'text-gray-800 font-semibold'}`}>
+                            {cat.label}
+                          </span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">
+                    Descrição do produto
+                    <span className="text-xs font-normal text-gray-400 ml-2">Suporta HTML</span>
+                  </label>
+                  <div className="border border-gray-200 rounded-lg overflow-hidden focus-within:border-green-500">
+                    <div className="bg-gray-50 border-b border-gray-100 px-3 py-1.5 flex gap-1 flex-wrap">
+                      {([['B','<b></b>'],['I','<i></i>'],['BR','<br>'],['Lista','<ul><li></li></ul>'],['P','<p></p>']] as [string,string][]).map(([label,tag]) => (
+                        <button key={label} type="button"
+                          onClick={() => setProdutoEdit(prev => ({ ...prev, description: (prev.description||'')+tag }))}
+                          className="text-xs bg-white border border-gray-200 px-2 py-0.5 rounded hover:bg-green-50 hover:border-green-400 font-bold text-gray-600">
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <textarea
+                      value={produtoEdit.description || ''}
+                      onChange={e => setProdutoEdit({ ...produtoEdit, description: e.target.value })}
+                      rows={6}
+                      placeholder="Descrição completa. Suporta HTML: <b>negrito</b>, <i>itálico</i>, <br>, <ul><li>item</li></ul>"
+                      className="w-full px-4 py-2.5 text-sm outline-none resize-none font-mono text-gray-700"
+                    />
+                    {produtoEdit.description && (
+                      <div className="border-t border-gray-100 px-3 py-2 bg-gray-50">
+                        <p className="text-xs text-gray-400 mb-1 font-bold">Preview:</p>
+                        <div className="text-sm text-gray-700" dangerouslySetInnerHTML={{ __html: produtoEdit.description }} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          )}
+          {abaModal === 'fotos' && produtoEdit.id && (
             <FotosTab produtoId={produtoEdit.id} />
           )}
           {abaModal === 'variacoes' && produtoEdit.id && (
