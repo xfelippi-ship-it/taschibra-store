@@ -34,7 +34,7 @@ export default function CoresBibliotecaTab() {
   async function criar() {
     if (!novo.nome.trim()) return
     const { data, error } = await supabase.from('color_library')
-      .insert({ nome: novo.nome, hex: novo.hex, ativo: novo.ativo, sort_order: cores.length + 1 } as any)
+      .insert({ nome: novo.nome, hex: novo.hex, ativo: novo.ativo, sort_order: cores.length + 1 })
       .select().single()
     if (error) { showMsg('Erro ao criar'); return }
     setCores(prev => [...prev, data as unknown as Cor])
@@ -44,7 +44,7 @@ export default function CoresBibliotecaTab() {
 
   async function atualizar(cor: Cor) {
     await supabase.from('color_library')
-      .update({ nome: cor.nome, hex: cor.hex, ativo: cor.ativo } as any)
+      .update({ nome: cor.nome, hex: cor.hex, ativo: cor.ativo })
       .eq('id', cor.id!)
     setCores(prev => prev.map(x => x.id === cor.id ? cor : x))
     setEditandoId(null)
@@ -59,7 +59,7 @@ export default function CoresBibliotecaTab() {
   }
 
   async function toggleAtivo(cor: Cor) {
-    await supabase.from('color_library').update({ ativo: !cor.ativo } as any).eq('id', cor.id!)
+    await supabase.from('color_library').update({ ativo: !cor.ativo }).eq('id', cor.id!)
     setCores(prev => prev.map(x => x.id === cor.id ? { ...x, ativo: !x.ativo } : x))
   }
 

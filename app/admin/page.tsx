@@ -24,6 +24,7 @@ import RetiradaLojaTab from '@/components/admin/RetiradaLojaTab'
 import FaturamentoDiretoTab from '@/components/admin/FaturamentoDiretoTab'
 import AvaliacoesTab from '@/components/admin/AvaliacoesTab'
 import MarcasTab from '@/components/admin/MarcasTab'
+import CoresBibliotecaTab from '@/components/admin/CoresBibliotecaTab'
 import SEOTab from '@/components/admin/SEOTab'
 import ConfiguracoesLojaTab from '@/components/admin/ConfiguracoesLojaTab'
 import PopupTab from '@/components/admin/PopupTab'
@@ -74,6 +75,7 @@ const TODOS_MODULOS = [
   { id: 'faturamento',   label: 'Faturamento Direto',  grupo: 'Loja' },
   { id: 'seo',           label: 'SEO',                  grupo: 'Administração' },
   { id: 'marcas',        label: 'Marcas',               grupo: 'Catálogo' },
+    { id: 'cores',         label: 'Cores',                grupo: 'Catálogo' },
   { id: 'avaliacoes',    label: 'Avaliações',           grupo: 'Clientes' },
 ]
 
@@ -743,7 +745,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup' | 'blog'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'cores' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup' | 'blog'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -1069,6 +1071,7 @@ export default function AdminPage() {
         {aba === 'faturamento' && <FaturamentoDiretoTab />}
         {aba === 'avaliacoes' && <AvaliacoesTab />}
         {aba === 'marcas' && <MarcasTab />}
+          {aba === 'cores' && <CoresBibliotecaTab />}
         {aba === 'seo' && <SEOTab />}
         {aba === 'banners' && <BannersTab meuEmail={meuEmail} />}
         {aba === 'promo-banner' && <PromoBannerTab />}
