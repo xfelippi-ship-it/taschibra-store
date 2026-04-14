@@ -103,7 +103,16 @@ export default function CategoriasTab() {
   }
 
   async function excluirCat(cat: Categoria) {
-    if (!confirm(`Excluir "${cat.name}"? Subcategorias e produtos desta categoria serão afetados.`)) return
+    // Verificar produtos vinculados
+    const { count } = await supabase
+      .from('products')
+      .select('id', { count: 'exact', head: true })
+      .contains('categories', [cat.slug])
+    if ((count || 0) > 0) {
+      alert(`⚠️ Não é possível excluir "${cat.name}"\n\nEsta categoria possui ${count} produto(s) vinculado(s).\n\nPrimeiro transfira ou remova esses produtos desta categoria, depois tente excluir novamente.`)
+      return
+    }
+    if (!confirm(`Excluir a categoria "${cat.name}"?\n\nEsta ação também remove as subcategorias do dropdown.`)) return
     await supabase.from('category_subcategories').delete().eq('category_slug', cat.slug)
     await supabase.from('categories').delete().eq('id', cat.id)
     toast('Categoria excluída.')
@@ -182,7 +191,8 @@ export default function CategoriasTab() {
     carregar()
   }
 
-  const catsPai = cats.filter(c => !c.parent_id)
+  const catsPai = cats.filter(c => !c.parent_id && c.active)
+  const catsInativas = cats.filter(c => !c.parent_id && !c.active)
 
   return (
     <div>
@@ -194,7 +204,10 @@ export default function CategoriasTab() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black text-gray-800">Categorias</h1>
-          <p className="text-xs text-gray-400 mt-0.5">{catsPai.length} categorias principais · {Object.values(subcats).flat().length} subcategorias</p>
+          <p className="text-xs text-gray-400 mt-0.5">
+            {catsPai.length} categorias ativas · {Object.values(subcats).flat().length} subcategorias
+            {catsInativas.length > 0 && <span className="ml-2 text-orange-400">· {catsInativas.length} inativas/legado</span>}
+          </p>
         </div>
         <button onClick={() => abrirNovaCat()}
           className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">
@@ -344,6 +357,44 @@ export default function CategoriasTab() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* ── Categorias Inativas / Legado ──────────────────────────── */}
+      {catsInativas.length > 0 && (
+        <div className="mt-8">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs font-black text-gray-400 uppercase tracking-wide">
+              Categorias inativas / legado ({catsInativas.length})
+            </span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+          <p className="text-xs text-gray-400 mb-3 text-center">
+            Estas categorias existem no banco mas estão ocultas do site. Podem ser reativadas ou excluídas com segurança se não tiverem produtos.
+          </p>
+          <div className="space-y-2">
+            {catsInativas.map(cat => (
+              <div key={cat.id} className="bg-gray-50 border border-dashed border-gray-200 rounded-xl px-4 py-3 flex items-center gap-3 opacity-70">
+                <div className="flex-1 min-w-0">
+                  <span className="font-semibold text-sm text-gray-500">{cat.name}</span>
+                  <span className="text-xs text-gray-400 font-mono ml-2">{cat.slug}</span>
+                </div>
+                <span className="text-xs bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full font-bold">Inativa</span>
+                <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">Oculta do menu</span>
+                <div className="flex gap-1.5">
+                  <button onClick={() => abrirEditCat(cat)} title="Reativar ou editar"
+                    className="text-green-400 hover:text-green-600 p-1.5 rounded hover:bg-green-50 transition-colors text-xs font-bold">
+                    Reativar
+                  </button>
+                  <button onClick={() => excluirCat(cat)}
+                    className="text-gray-300 hover:text-red-500 p-1.5 rounded hover:bg-red-50 transition-colors">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
