@@ -134,12 +134,14 @@ export default function CategoriasTab() {
     const idx = lista.findIndex(c => c.id === cat.id)
     const outro = dir === 'up' ? lista[idx - 1] : lista[idx + 1]
     if (!outro) return
-    // Garantir que sort_order tenha valores distintos
-    const ordemCat = idx + 1
-    const ordemOutro = dir === 'up' ? idx : idx + 2
+    const tempA = cat.sort_order
+    const tempB = outro.sort_order
+    // Se sort_orders iguais, usar índices
+    const novaA = tempA !== tempB ? tempB : (dir === 'up' ? idx : idx + 2)
+    const novaB = tempA !== tempB ? tempA : (dir === 'up' ? idx + 1 : idx + 1)
     await Promise.all([
-      supabase.from('categories').update({ sort_order: ordemOutro }).eq('id', cat.id),
-      supabase.from('categories').update({ sort_order: ordemCat }).eq('id', outro.id),
+      supabase.from('categories').update({ sort_order: novaA }).eq('id', cat.id),
+      supabase.from('categories').update({ sort_order: novaB }).eq('id', outro.id),
     ])
     carregar()
   }
@@ -163,7 +165,8 @@ export default function CategoriasTab() {
   async function salvarSub() {
     if (!editSub.label) return
     const slug = editSub.slug || gerarSlug(editSub.label)
-    const dados = { ...editSub, slug }
+    const { id: _id, ...editSemId } = editSub as any
+    const dados = { ...editSemId, slug }
     if (isNewSub) {
       const { error: errIns } = await supabase.from('category_subcategories').insert(dados as any)
       if (errIns) { toast('Erro: ' + errIns.message); console.error(errIns); return }
@@ -189,11 +192,13 @@ export default function CategoriasTab() {
     const idx = lista.findIndex(s => s.id === sub.id)
     const outro = dir === 'up' ? lista[idx - 1] : lista[idx + 1]
     if (!outro) return
-    const ordemSub = idx + 1
-    const ordemOutro = dir === 'up' ? idx : idx + 2
+    const tempA = sub.sort_order
+    const tempB = outro.sort_order
+    const novaA = tempA !== tempB ? tempB : (dir === 'up' ? idx : idx + 2)
+    const novaB = tempA !== tempB ? tempA : (dir === 'up' ? idx + 1 : idx + 1)
     await Promise.all([
-      supabase.from('category_subcategories').update({ sort_order: ordemOutro }).eq('id', sub.id),
-      supabase.from('category_subcategories').update({ sort_order: ordemSub }).eq('id', outro.id),
+      supabase.from('category_subcategories').update({ sort_order: novaA }).eq('id', sub.id),
+      supabase.from('category_subcategories').update({ sort_order: novaB }).eq('id', outro.id),
     ])
     carregar()
   }
