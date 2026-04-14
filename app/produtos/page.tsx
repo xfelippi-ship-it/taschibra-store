@@ -193,18 +193,25 @@ function ProdutosContent() {
                       <Link href={"/produto/" + p.slug}>
                         <p className="text-sm font-semibold text-gray-800 leading-snug mb-2 line-clamp-2 min-h-[2.5rem] hover:text-green-700" style={{textTransform:"capitalize",transformOrigin:"initial"}}>{p.name.toLowerCase().replace(/(?:^|\s|\/|-)\S/g, l => l.toUpperCase())}</p>
                       </Link>
-              {semEstoque ? (
-                <p className="text-sm text-gray-400 font-semibold mt-1 mb-3">Produto Indisponível</p>
-              ) : (
-                <>
-                  {preco > 0 && (
-                    <div className="mb-3">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="bg-teal-500 text-white text-xs font-black px-1.5 py-0.5 rounded">PIX</span>
-                        <span className="font-black text-green-700 text-lg">R$ {preco.toFixed(2).replace(".", ",")}</span>
-                      </div>
-                      {precoCartao > preco && (
-                        <p className="text-xs text-gray-400">ou R$ {precoCartao.toFixed(2).replace(".", ",")} no cartão</p>
+                      {semEstoque ? (
+                        <p className="text-sm text-gray-400 font-semibold mt-1 mb-3">Produto Indisponível</p>
+                      ) : (
+                        <>
+                          {preco > 0 && (
+                            <div className="mb-3">
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <span className="bg-teal-500 text-white text-xs font-black px-1.5 py-0.5 rounded">PIX</span>
+                                <span className="font-black text-green-700 text-lg">R$ {preco.toFixed(2).replace(".", ",")}</span>
+                              </div>
+                              {precoCartao > preco && (
+                                <p className="text-xs text-gray-400">ou R$ {precoCartao.toFixed(2).replace(".", ",")} no cartão</p>
+                              )}
+                            </div>
+                          )}
+                          <button onClick={() => addItem({ id: p.id, name: p.name, slug: p.slug, price: precoCartao, promo_price: preco, emoji: "💡" })} className="w-full bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2.5 rounded-lg transition-colors">
+                            COMPRAR
+                          </button>
+                        </>
                       )}
                     </div>
                   )}
