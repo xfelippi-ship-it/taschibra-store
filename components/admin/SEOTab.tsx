@@ -12,9 +12,43 @@ interface SeoPage {
 
 const ROTAS_PADRAO = [
   { rota: '/',            label: 'Home' },
-  { rota: '/produtos',    label: 'Produtos' },
+  { rota: '/produtos',    label: 'Todos os Produtos' },
+  // Especiais
   { rota: '/lancamentos', label: 'Lançamentos' },
   { rota: '/outlet',      label: 'Outlet' },
+  { rota: '/produtos?categoria=exclusivos', label: 'Exclusivos' },
+  { rota: '/produtos?categoria=smart',      label: 'SMART' },
+  // Lâmpadas
+  { rota: '/produtos?categoria=lampadas',       label: 'Lâmpadas' },
+  { rota: '/produtos?categoria=lampadas-led',   label: 'Lâmpadas LED' },
+  { rota: '/produtos?categoria=lampadas-decor', label: 'Lâmpadas Decor' },
+  // Teto
+  { rota: '/produtos?categoria=teto',          label: 'Teto' },
+  { rota: '/produtos?categoria=teto-painel',   label: 'Painel LED' },
+  { rota: '/produtos?categoria=teto-spot',     label: 'Spot' },
+  { rota: '/produtos?categoria=teto-plafon',   label: 'Plafon' },
+  { rota: '/produtos?categoria=teto-pendente', label: 'Pendente' },
+  { rota: '/produtos?categoria=teto-lustre',   label: 'Lustre' },
+  { rota: '/produtos?categoria=teto-luminaria',label: 'Luminária' },
+  // Ambientes
+  { rota: '/produtos?categoria=parede',      label: 'Parede / Arandela' },
+  { rota: '/produtos?categoria=mesa',        label: 'Mesa / Abajur' },
+  { rota: '/produtos?categoria=piso',        label: 'Piso / Jardim' },
+  { rota: '/produtos?categoria=decorativo',  label: 'Decorativo / Fita LED' },
+  // Trilhos e Perfis
+  { rota: '/produtos?categoria=trilho-magnetico', label: 'Trilho Magnético' },
+  { rota: '/produtos?categoria=perfil',           label: 'Perfil LED' },
+  { rota: '/produtos?categoria=marcenaria',       label: 'Marcenaria' },
+  // Refletor e Profissional
+  { rota: '/produtos?categoria=refletor',     label: 'Refletor' },
+  { rota: '/produtos?categoria=profissional', label: 'Profissional' },
+  { rota: '/produtos?categoria=sinalizacao',  label: 'Sinalização' },
+  // Material Elétrico
+  { rota: '/produtos?categoria=material-eletrico', label: 'Material Elétrico' },
+  { rota: '/produtos?categoria=pilhas',            label: 'Pilhas' },
+  { rota: '/produtos?categoria=energia',           label: 'Energia / Sensores' },
+  { rota: '/produtos?categoria=fechaduras',        label: 'Fechaduras' },
+  // Páginas institucionais
   { rota: '/quem-somos',        label: 'Quem Somos' },
   { rota: '/trocas-devolucoes', label: 'Trocas e Devoluções' },
   { rota: '/seguranca',         label: 'Segurança' },

@@ -421,9 +421,55 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                     </div>
                     <div>
                       <label className="text-sm font-bold text-gray-700 mb-1 block">Categoria</label>
-                      <input value={produtoEdit.category_slug || ''} onChange={e => setProdutoEdit({ ...produtoEdit, category_slug: e.target.value })}
-                        placeholder="Ex: lampadas"
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                      <select value={produtoEdit.category_slug || ''} onChange={e => setProdutoEdit({ ...produtoEdit, category_slug: e.target.value })}
+                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
+                        <option value="">Selecione a categoria...</option>
+                        <optgroup label="Lâmpadas">
+                          <option value="lampadas">Lâmpadas (geral)</option>
+                          <option value="lampadas-led">Lâmpadas LED</option>
+                          <option value="lampadas-decor">Lâmpadas Decor</option>
+                        </optgroup>
+                        <optgroup label="Teto">
+                          <option value="teto">Teto (geral)</option>
+                          <option value="teto-painel">Painel</option>
+                          <option value="teto-spot">Spot</option>
+                          <option value="teto-plafon">Plafon</option>
+                          <option value="teto-pendente">Pendente</option>
+                          <option value="teto-lustre">Lustre</option>
+                          <option value="teto-luminaria">Luminária</option>
+                        </optgroup>
+                        <optgroup label="Ambientes">
+                          <option value="parede">Parede / Arandela</option>
+                          <option value="mesa">Mesa / Abajur</option>
+                          <option value="piso">Piso / Poste / Jardim</option>
+                          <option value="decorativo">Decorativo / Fita LED</option>
+                        </optgroup>
+                        <optgroup label="Trilhos e Perfis">
+                          <option value="trilho-magnetico">Trilho Magnético</option>
+                          <option value="perfil">Perfil LED</option>
+                          <option value="marcenaria">Marcenaria</option>
+                        </optgroup>
+                        <optgroup label="Refletor e Profissional">
+                          <option value="refletor">Refletor</option>
+                          <option value="profissional">Profissional</option>
+                          <option value="sinalizacao">Sinalização</option>
+                        </optgroup>
+                        <optgroup label="Material Elétrico">
+                          <option value="material-eletrico">Material Elétrico (geral)</option>
+                          <option value="pilhas">Pilhas</option>
+                          <option value="energia">Energia / Sensores</option>
+                        </optgroup>
+                        <optgroup label="Fechaduras">
+                          <option value="fechaduras">Fechaduras</option>
+                        </optgroup>
+                        <optgroup label="Especiais">
+                          <option value="smart">SMART</option>
+                          <option value="lancamentos">Lançamentos</option>
+                          <option value="exclusivos">Exclusivos</option>
+                          <option value="outlet">Outlet</option>
+                          <option value="pecas-de-reposicao">Peças de Reposição</option>
+                        </optgroup>
+                      </select>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
