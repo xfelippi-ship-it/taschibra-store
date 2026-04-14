@@ -46,6 +46,24 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
   const [busca, setBusca] = useState('')
+  const [uploadingImg, setUploadingImg] = useState(false)
+  const [dragOver, setDragOver] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  async function uploadImagem(file: File) {
+    if (!file || !file.type.startsWith('image/')) return
+    setUploadingImg(true)
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+      const nome = `produtos/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error } = await supabase.storage.from('midias').upload(nome, file, { upsert: false, contentType: file.type })
+      if (error) throw error
+      const { data: urlData } = supabase.storage.from('midias').getPublicUrl(nome)
+      setProdutoEdit(prev => ({ ...prev, main_image: urlData.publicUrl }))
+    } catch { alert('Erro no upload. Tente novamente.') }
+    finally { setUploadingImg(false) }
+  }
+
   const [badgeModalProduto, setBadgeModalProduto] = useState<any>(null)
   const [marcas, setMarcas] = useState<{id:string;nome:string}[]>([])
   useEffect(() => { supabase.from('brands').select('id,nome').eq('ativo',true).order('nome').then(({data}) => setMarcas(data||[])) }, [])
