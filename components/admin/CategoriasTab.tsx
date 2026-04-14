@@ -129,10 +129,10 @@ export default function CategoriasTab() {
     setCats(prev => prev.map(c => c.id === cat.id ? { ...c, active: !c.active } : c))
   }
 
-  async function moverCat(cat: Categoria, dir: 'up' | 'down') {
-    const lista = cats.filter(c => !c.parent_id && c.active)
-    const idx = lista.findIndex(c => c.id === cat.id)
-    const outro = dir === 'up' ? lista[idx - 1] : lista[idx + 1]
+  async function moverCat(cat: Categoria, dir: 'up' | 'down', lista?: Categoria[]) {
+    const listaAtual = lista || cats.filter(c => !c.parent_id && c.active)
+    const idx = listaAtual.findIndex(c => c.id === cat.id)
+    const outro = dir === 'up' ? listaAtual[idx - 1] : listaAtual[idx + 1]
     if (!outro) return
     const tempA = cat.sort_order
     const tempB = outro.sort_order
@@ -271,9 +271,9 @@ export default function CategoriasTab() {
 
                   {/* Ordem */}
                   <div className="flex flex-col gap-0.5">
-                    <button onClick={() => moverCat(cat, 'up')} disabled={idx === 0}
+                    <button onClick={() => moverCat(cat, 'up', cats.filter(c => !c.parent_id && c.active))} disabled={idx === 0}
                       className="text-gray-300 hover:text-gray-600 disabled:opacity-20 leading-none text-xs">▲</button>
-                    <button onClick={() => moverCat(cat, 'down')} disabled={idx === catsPai.length - 1}
+                    <button onClick={() => moverCat(cat, 'down', cats.filter(c => !c.parent_id && c.active))} disabled={idx === catsPai.length - 1}
                       className="text-gray-300 hover:text-gray-600 disabled:opacity-20 leading-none text-xs">▼</button>
                   </div>
 
