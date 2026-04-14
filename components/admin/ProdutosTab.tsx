@@ -9,7 +9,7 @@ import { registrarAuditoria } from '@/lib/auditLog'
 type Produto = {
   id: string; name: string; sku: string; price: number; promo_price: number
   stock_qty: number; active: boolean; badge: string; badges?: string[]; is_lancamento?: boolean; family?: string; brand_id?: string
-  category_slug?: string; description?: string; main_image?: string
+  category_slug?: string; categories?: string[]; description?: string; main_image?: string
   weight_kg?: number; warranty?: string; ean?: string
 }
 
@@ -18,6 +18,39 @@ type Variacao = {
   sku: string; ean: string; price: number; promo_price: number
   stock_qty: number; active: boolean; technical_description?: string
 }
+
+const CATEGORIAS_LS = [
+  { slug: 'lampadas',          label: 'Lâmpadas',           pai: null },
+  { slug: 'lampadas-led',      label: '↳ LED',               pai: 'lampadas' },
+  { slug: 'lampadas-decor',    label: '↳ Decor / Filamento', pai: 'lampadas' },
+  { slug: 'teto',              label: 'Teto',                pai: null },
+  { slug: 'teto-painel',       label: '↳ Painel LED',        pai: 'teto' },
+  { slug: 'teto-spot',         label: '↳ Spot',              pai: 'teto' },
+  { slug: 'teto-plafon',       label: '↳ Plafon',            pai: 'teto' },
+  { slug: 'teto-pendente',     label: '↳ Pendente',          pai: 'teto' },
+  { slug: 'teto-lustre',       label: '↳ Lustre',            pai: 'teto' },
+  { slug: 'teto-luminaria',    label: '↳ Luminária',         pai: 'teto' },
+  { slug: 'parede',            label: 'Parede / Arandela',   pai: null },
+  { slug: 'mesa',              label: 'Mesa / Abajur',       pai: null },
+  { slug: 'piso',              label: 'Piso / Jardim',       pai: null },
+  { slug: 'decorativo',        label: 'Decorativo',          pai: null },
+  { slug: 'fita-led',          label: '↳ Fita LED',          pai: 'decorativo' },
+  { slug: 'trilho-magnetico',  label: 'Trilho Magnético',    pai: null },
+  { slug: 'perfil',            label: 'Perfil LED',          pai: null },
+  { slug: 'marcenaria',        label: 'Marcenaria',          pai: null },
+  { slug: 'refletor',          label: 'Refletor',            pai: null },
+  { slug: 'profissional',      label: 'Profissional',        pai: null },
+  { slug: 'sinalizacao',       label: 'Sinalização',         pai: null },
+  { slug: 'material-eletrico', label: 'Material Elétrico',   pai: null },
+  { slug: 'pilhas',            label: 'Pilhas',              pai: null },
+  { slug: 'energia',           label: 'Energia / Sensores',  pai: null },
+  { slug: 'fechaduras',        label: 'Fechaduras',          pai: null },
+  { slug: 'smart',             label: 'SMART',               pai: null },
+  { slug: 'lancamentos',       label: 'Lançamentos',         pai: null },
+  { slug: 'exclusivos',        label: 'Exclusivos',          pai: null },
+  { slug: 'outlet',            label: 'Outlet',              pai: null },
+  { slug: 'pecas-de-reposicao',label: 'Peças de Reposição',  pai: null },
+]
 
 const TIPOS_VARIACAO = [
   { value: 'angulo_abertura',     label: 'Ângulo de Abertura'           },
@@ -445,57 +478,37 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                     </div>
                     <div>
-                      <label className="text-sm font-bold text-gray-700 mb-1 block">Categoria</label>
-                      <select value={produtoEdit.category_slug || ''} onChange={e => setProdutoEdit({ ...produtoEdit, category_slug: e.target.value })}
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 bg-white">
-                        <option value="">Selecione a categoria...</option>
-                        <optgroup label="Lâmpadas">
-                          <option value="lampadas">Lâmpadas (geral)</option>
-                          <option value="lampadas-led">Lâmpadas LED</option>
-                          <option value="lampadas-decor">Lâmpadas Decor</option>
-                        </optgroup>
-                        <optgroup label="Teto">
-                          <option value="teto">Teto (geral)</option>
-                          <option value="teto-painel">Painel</option>
-                          <option value="teto-spot">Spot</option>
-                          <option value="teto-plafon">Plafon</option>
-                          <option value="teto-pendente">Pendente</option>
-                          <option value="teto-lustre">Lustre</option>
-                          <option value="teto-luminaria">Luminária</option>
-                        </optgroup>
-                        <optgroup label="Ambientes">
-                          <option value="parede">Parede / Arandela</option>
-                          <option value="mesa">Mesa / Abajur</option>
-                          <option value="piso">Piso / Poste / Jardim</option>
-                          <option value="decorativo">Decorativo / Fita LED</option>
-                        </optgroup>
-                        <optgroup label="Trilhos e Perfis">
-                          <option value="trilho-magnetico">Trilho Magnético</option>
-                          <option value="perfil">Perfil LED</option>
-                          <option value="marcenaria">Marcenaria</option>
-                        </optgroup>
-                        <optgroup label="Refletor e Profissional">
-                          <option value="refletor">Refletor</option>
-                          <option value="profissional">Profissional</option>
-                          <option value="sinalizacao">Sinalização</option>
-                        </optgroup>
-                        <optgroup label="Material Elétrico">
-                          <option value="material-eletrico">Material Elétrico (geral)</option>
-                          <option value="pilhas">Pilhas</option>
-                          <option value="energia">Energia / Sensores</option>
-                        </optgroup>
-                        <optgroup label="Fechaduras">
-                          <option value="fechaduras">Fechaduras</option>
-                        </optgroup>
-                        <optgroup label="Especiais">
-                          <option value="smart">SMART</option>
-                          <option value="lancamentos">Lançamentos</option>
-                          <option value="exclusivos">Exclusivos</option>
-                          <option value="outlet">Outlet</option>
-                          <option value="pecas-de-reposicao">Peças de Reposição</option>
-                        </optgroup>
-                      </select>
+                    <label className="text-sm font-bold text-gray-700 mb-1 block">
+                      Categorias
+                      <span className="text-xs font-normal text-gray-400 ml-2">
+                        {(produtoEdit.categories || []).length} selecionada(s)
+                      </span>
+                    </label>
+                    <div className="border border-gray-200 rounded-lg max-h-52 overflow-y-auto p-2 space-y-0.5 bg-white">
+                      {CATEGORIAS_LS.map(cat => {
+                        const checked = (produtoEdit.categories || []).includes(cat.slug)
+                        return (
+                          <label key={cat.slug} className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer hover:bg-gray-50 transition-colors ${cat.pai ? 'pl-5' : ''}`}>
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={e => {
+                                const atual = produtoEdit.categories || []
+                                const novo = e.target.checked
+                                  ? [...atual, cat.slug]
+                                  : atual.filter((c: string) => c !== cat.slug)
+                                setProdutoEdit({ ...produtoEdit, categories: novo, category_slug: novo[0] || '' })
+                              }}
+                              className="w-3.5 h-3.5 accent-green-600 flex-shrink-0"
+                            />
+                            <span className={`text-sm ${cat.pai ? 'text-gray-500' : 'text-gray-800 font-semibold'}`}>
+                              {cat.label}
+                            </span>
+                          </label>
+                        )
+                      })}
                     </div>
+                  </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
