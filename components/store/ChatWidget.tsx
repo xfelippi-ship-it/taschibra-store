@@ -7,6 +7,7 @@ export default function ChatWidget() {
 
   useEffect(() => {
     async function init() {
+      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) return
       const [{ data: enabled }, { data: script }] = await Promise.all([
         supabase.from('site_config').select('value').eq('key', 'chatbot_enabled').single(),
         supabase.from('site_config').select('value').eq('key', 'chatbot_script').single(),
