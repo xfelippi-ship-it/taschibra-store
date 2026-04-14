@@ -93,6 +93,27 @@ export default function VariacoesProduto({ produtoId, onSelect }: Props) {
                 const ativo = selecionado === v.value
                 const semEstoque = false // variações esgotadas são ocultadas
                 const isTemp = tipo === 'temperatura'
+                const isCor = tipo === 'cor' || tipo === 'cor_peca'
+
+                if (isCor) {
+                  const corHex = cores.find(x => x.nome.toLowerCase() === v.value.toLowerCase())?.hex || '#cccccc'
+                  const isRainbow = corHex === 'rainbow'
+                  return (
+                    <button
+                      key={v.id}
+                      title={v.value}
+                      onClick={() => !semEstoque && setSelecionados(prev => ({ ...prev, [tipo]: v.value }))}
+                      disabled={semEstoque}
+                      className={`relative w-9 h-9 rounded-full transition-all ${semEstoque ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:scale-110'} ${ativo ? 'ring-4 ring-green-500 ring-offset-2 scale-110' : 'ring-2 ring-gray-200'}`}
+                      style={isRainbow
+                        ? { background: 'conic-gradient(red, yellow, lime, cyan, blue, magenta, red)' }
+                        : { backgroundColor: corHex }
+                      }
+                    >
+                      {semEstoque && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center text-white text-[8px]">×</span>}
+                    </button>
+                  )
+                }
 
                 return (
                   <button
