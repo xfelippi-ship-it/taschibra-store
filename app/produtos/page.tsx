@@ -167,8 +167,9 @@ function ProdutosContent() {
                 const preco = p.promo_price || p.price || 0
                 const precoCartao = p.price || 0
                 const badge = (p.badge || "").toLowerCase()
+                const semEstoque = p.stock_qty !== null && p.stock_qty !== undefined && p.stock_qty <= 0
                 return (
-                  <div key={p.id} className="bg-white rounded-xl border border-gray-200 hover:shadow-md transition-shadow group">
+                  <div key={p.id} className={`bg-white rounded-xl border transition-shadow group ${semEstoque ? "border-gray-100 grayscale opacity-60" : "border-gray-200 hover:shadow-md"}`}>
                     <Link href={"/produto/" + p.slug}>
                       <div className="relative aspect-square overflow-hidden rounded-t-xl bg-gray-50">
                         {(() => {
@@ -192,22 +193,26 @@ function ProdutosContent() {
                       <Link href={"/produto/" + p.slug}>
                         <p className="text-sm font-semibold text-gray-800 leading-snug mb-2 line-clamp-2 min-h-[2.5rem] hover:text-green-700" style={{textTransform:"capitalize",transformOrigin:"initial"}}>{p.name.toLowerCase().replace(/(?:^|\s|\/|-)\S/g, l => l.toUpperCase())}</p>
                       </Link>
-                      {preco > 0 && (
-                        <div className="mb-3">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="bg-teal-500 text-white text-xs font-black px-1.5 py-0.5 rounded">PIX</span>
-                            <span className="font-black text-green-700 text-lg">R$ {preco.toFixed(2).replace(".", ",")}</span>
-                          </div>
-                          {precoCartao > preco && (
-                            <p className="text-xs text-gray-400">ou R$ {precoCartao.toFixed(2).replace(".", ",")} no cartão</p>
-                          )}
-                        </div>
+              {semEstoque ? (
+                <p className="text-sm text-gray-400 font-semibold mt-1 mb-3">Produto Indisponível</p>
+              ) : (
+                <>
+                  {preco > 0 && (
+                    <div className="mb-3">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="bg-teal-500 text-white text-xs font-black px-1.5 py-0.5 rounded">PIX</span>
+                        <span className="font-black text-green-700 text-lg">R$ {preco.toFixed(2).replace(".", ",")}</span>
+                      </div>
+                      {precoCartao > preco && (
+                        <p className="text-xs text-gray-400">ou R$ {precoCartao.toFixed(2).replace(".", ",")} no cartão</p>
                       )}
-                      <button onClick={() => addItem({ id: p.id, name: p.name, slug: p.slug, price: precoCartao, promo_price: preco, emoji: "💡" })}
-                        className="w-full bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2.5 rounded-lg transition-colors">
-                        COMPRAR
-                      </button>
                     </div>
+                  )}
+                  <button onClick={() => addItem({ id: p.id, name: p.name, slug: p.slug, price: precoCartao, promo_price: preco, emoji: "💡" })} className="w-full bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2.5 rounded-lg transition-colors">
+                    COMPRAR
+                  </button>
+                </>
+              )}
                   </div>
                 )
               })}
