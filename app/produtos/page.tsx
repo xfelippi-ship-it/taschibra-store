@@ -166,8 +166,8 @@ function ProdutosContent() {
               {produtos.map(p => {
                 const preco = p.promo_price || p.price || 0
                 const precoCartao = p.price || 0
-                const badge = (p.badge || "").toLowerCase()
                 const semEstoque = p.stock_qty !== null && p.stock_qty !== undefined && p.stock_qty <= 0
+                const badge = (p.badge || "").toLowerCase()
                 return (
                   <div key={p.id} className={`bg-white rounded-xl border transition-shadow group ${semEstoque ? "border-gray-100 grayscale opacity-60" : "border-gray-200 hover:shadow-md"}`}>
                     <Link href={"/produto/" + p.slug}>
@@ -214,12 +214,6 @@ function ProdutosContent() {
                         </>
                       )}
                     </div>
-                  )}
-                  <button onClick={() => addItem({ id: p.id, name: p.name, slug: p.slug, price: precoCartao, promo_price: preco, emoji: "💡" })} className="w-full bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2.5 rounded-lg transition-colors">
-                    COMPRAR
-                  </button>
-                </>
-              )}
                   </div>
                 )
               })}
