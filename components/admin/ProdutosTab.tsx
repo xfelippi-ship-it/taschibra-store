@@ -528,10 +528,49 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                       className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 resize-none" />
                   </div>
                   <div>
-                    <label className="text-sm font-bold text-gray-700 mb-1 block">Imagem principal (URL)</label>
+                    <label className="text-sm font-bold text-gray-700 mb-1 block">Imagem Principal</label>
+                    <input type="file" ref={fileInputRef} accept="image/*" className="hidden"
+                      onChange={e => { const f = e.target.files?.[0]; if(f) uploadImagem(f) }} />
+                    <div
+                      onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+                      onDragLeave={() => setDragOver(false)}
+                      onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if(f) uploadImagem(f) }}
+                      onClick={() => !uploadingImg && fileInputRef.current?.click()}
+                      className={`relative border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${dragOver ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'}`}
+                    >
+                      {uploadingImg ? (
+                        <div className="flex flex-col items-center gap-2 py-3">
+                          <div className="animate-spin w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full" />
+                          <span className="text-xs text-gray-500">Enviando imagem...</span>
+                        </div>
+                      ) : produtoEdit.main_image ? (
+                        <div onClick={e => e.stopPropagation()}>
+                          <img src={produtoEdit.main_image} alt="Preview" className="h-28 object-contain mx-auto rounded-lg" onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+                          <div className="flex gap-2 justify-center mt-2">
+                            <button type="button" onClick={() => fileInputRef.current?.click()}
+                              className="text-xs font-bold text-green-600 border border-green-200 px-3 py-1 rounded-lg hover:bg-green-50 flex items-center gap-1">
+                              <Upload size={11} /> Trocar
+                            </button>
+                            <button type="button" onClick={() => setProdutoEdit(p => ({ ...p, main_image: '' }))}
+                              className="text-xs font-bold text-red-500 border border-red-200 px-3 py-1 rounded-lg hover:bg-red-50 flex items-center gap-1">
+                              <X size={11} /> Remover
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 py-3">
+                          <ImageIcon size={28} className="text-gray-300" />
+                          <p className="text-sm font-bold text-gray-500">Clique ou arraste a imagem aqui</p>
+                          <p className="text-xs text-gray-400">JPG, PNG, WEBP — máx. 5MB</p>
+                          <span className="mt-1 flex items-center gap-1.5 bg-green-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg">
+                            <Upload size={12} /> Selecionar arquivo
+                          </span>
+                        </div>
+                      )}
+                    </div>
                     <input value={produtoEdit.main_image || ''} onChange={e => setProdutoEdit({ ...produtoEdit, main_image: e.target.value })}
-                      placeholder="https://..."
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                      placeholder="Ou cole uma URL aqui..."
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2 text-xs text-gray-400 outline-none focus:border-green-500 mt-2" />
                   </div>
                   <div className="flex items-center gap-3">
                     <input type="checkbox" id="ativo_prod" checked={produtoEdit.active ?? true}
