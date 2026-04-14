@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Plus, Pencil, Trash2, X, ChevronRight, ChevronDown, Eye, EyeOff, GripVertical, Tag } from 'lucide-react'
 
@@ -39,6 +39,7 @@ export default function CategoriasTab() {
   const [subcats, setSubcats] = useState<Record<string, SubCat[]>>({})
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const subcatsRef = useRef<Record<string, SubCat[]>>({})
   const [msg, setMsg] = useState<string | null>(null)
 
   // Modal categoria
@@ -67,6 +68,7 @@ export default function CategoriasTab() {
       grouped[s.category_slug].push(s)
     }
     setSubcats(grouped)
+    subcatsRef.current = grouped
     setLoading(false)
   }
 
@@ -112,7 +114,13 @@ export default function CategoriasTab() {
       alert(`⚠️ Não é possível excluir "${cat.name}"\n\nEsta categoria possui ${count} produto(s) vinculado(s).\n\nPrimeiro transfira ou remova esses produtos desta categoria, depois tente excluir novamente.`)
       return
     }
-    if (!confirm(`Excluir a categoria "${cat.name}"?\n\nEsta ação também remove as subcategorias do dropdown.`)) return
+    const subs = subcatsRef.current[cat.slug] || []
+    if (subs.length > 0) {
+      const ok = confirm(`Excluir "${cat.name}"?\n\n${subs.length} subcategoria(s) serão removidas junto:\n${subs.map(s => '• ' + s.label).join('\n')}`)
+      if (!ok) return
+    } else {
+      if (!confirm(`Excluir a categoria "${cat.name}"?`)) return
+    }
     await supabase.from('category_subcategories').delete().eq('category_slug', cat.slug)
     await supabase.from('categories').delete().eq('id', cat.id)
     toast('Categoria excluída.')
