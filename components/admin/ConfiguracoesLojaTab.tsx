@@ -230,7 +230,7 @@ export default function ConfiguracoesLojaTab() {
       )}
 
       {/* ── Dados da Empresa ── */}
-      <Section icon={Building2} title="Dados da Empresa">
+      <Section icon={Building2} title="Dados da Empresa" defaultOpen={false}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           {([
             { label: 'Razão Social', key: 'razao_social', full: true },
