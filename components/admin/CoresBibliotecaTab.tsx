@@ -140,7 +140,10 @@ export default function CoresBibliotecaTab() {
                   <td className="px-5 py-4">
                     <div
                       className="w-8 h-8 rounded-full border border-gray-200 shadow-sm"
-                      style={{ backgroundColor: cor.hex }}
+                      style={cor.hex === 'rainbow'
+                        ? { background: 'conic-gradient(red, yellow, lime, cyan, blue, magenta, red)' }
+                        : { backgroundColor: cor.hex }
+                      }
                     />
                   </td>
                   <td className="px-5 py-4">
