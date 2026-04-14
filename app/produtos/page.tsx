@@ -52,7 +52,7 @@ function ProdutosContent() {
         query = query.or(`name.ilike.%${busca}%,sku.ilike.%${busca}%,description.ilike.%${busca}%`)
         setTitulo(`Resultados para: "${busca}"`)
       } else if (categoria) {
-        query = categoria === 'lancamentos' ? query.eq('is_lancamento', true) : query.ilike('category_slug', categoria)
+        query = categoria === 'lancamentos' ? query.eq('is_lancamento', true) : query.eq('category_slug', categoria)
         const label: Record<string, string> = {
           "lancamentos": "Lançamentos",
           "lampadas": "Lâmpadas",
