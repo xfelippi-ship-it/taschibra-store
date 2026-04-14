@@ -203,10 +203,25 @@ export default function CategoriasTab() {
       </div>
 
       {/* Legenda */}
-      <div className="flex gap-4 mb-4 text-xs text-gray-500">
-        <span className="flex items-center gap-1.5"><Eye size={12} className="text-green-600" /> Visível no menu</span>
-        <span className="flex items-center gap-1.5"><EyeOff size={12} className="text-gray-400" /> Oculto do menu</span>
-        <span className="flex items-center gap-1.5"><Tag size={12} className="text-blue-500" /> Subcategoria (dropdown)</span>
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4 space-y-2">
+        <p className="text-xs font-black text-blue-800 mb-2">📖 Como funciona a estrutura de categorias</p>
+        <div className="grid grid-cols-3 gap-3 text-xs text-gray-600">
+          <div className="bg-white rounded-lg p-3 border border-gray-200">
+            <p className="font-black text-gray-800 mb-1">🏠 Categoria principal</p>
+            <p>Aparece no <strong>menu horizontal</strong> do topo do site. Ex: Ambientes, Lâmpadas, SMART</p>
+            <p className="mt-1 text-green-700 font-bold">Badge verde = visível no menu</p>
+          </div>
+          <div className="bg-white rounded-lg p-3 border border-gray-200">
+            <p className="font-black text-gray-800 mb-1">📋 Subcategoria (dropdown)</p>
+            <p>Aparece quando o cliente passa o mouse sobre a categoria. Ex: Bulbo, Dicroica dentro de Lâmpadas</p>
+            <p className="mt-1 text-blue-600 font-bold">Clique no ícone 🏷️ para gerenciar</p>
+          </div>
+          <div className="bg-white rounded-lg p-3 border border-gray-200">
+            <p className="font-black text-gray-800 mb-1">☰ Só no hambúrguer</p>
+            <p>Categorias com <strong>badge cinza "Oculto"</strong> aparecem apenas no menu lateral (mobile/hambúrguer), não no menu do topo</p>
+            <p className="mt-1 text-gray-500 font-bold">Ex: Peças de Reposição</p>
+          </div>
+        </div>
       </div>
 
       {loading ? (
@@ -250,10 +265,10 @@ export default function CategoriasTab() {
 
                   {/* Badges */}
                   <div className="flex items-center gap-2">
-                    <button onClick={() => toggleMenu(cat)} title={cat.show_in_menu ? 'Ocultar do menu' : 'Mostrar no menu'}
+                    <button onClick={() => toggleMenu(cat)} title={cat.show_in_menu ? 'Clique para ocultar do menu horizontal' : 'Clique para mostrar no menu horizontal'}
                       className={`text-xs font-bold px-2.5 py-1 rounded-full transition-colors flex items-center gap-1 ${cat.show_in_menu ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
                       {cat.show_in_menu ? <Eye size={11} /> : <EyeOff size={11} />}
-                      {cat.show_in_menu ? 'No menu' : 'Oculto'}
+                      {cat.show_in_menu ? '🏠 Menu topo' : '☰ Só hambúrguer'}
                     </button>
                     <button onClick={() => toggleAtivo(cat)}
                       className={`text-xs font-bold px-2.5 py-1 rounded-full transition-colors ${cat.active ? 'bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-600' : 'bg-gray-100 text-gray-500 hover:bg-green-100 hover:text-green-700'}`}>
@@ -263,9 +278,14 @@ export default function CategoriasTab() {
 
                   {/* Ações */}
                   <div className="flex items-center gap-1.5">
-                    <button onClick={() => abrirNovaSub(cat.slug)} title="Adicionar subcategoria"
-                      className="text-blue-400 hover:text-blue-600 p-1.5 rounded hover:bg-blue-50 transition-colors">
-                      <Tag size={14} />
+                    <button onClick={() => {
+                        const n = new Set(expanded)
+                        n.add(cat.id)
+                        setExpanded(n)
+                        abrirNovaSub(cat.slug)
+                      }} title="Gerenciar subcategorias do dropdown"
+                      className="text-blue-400 hover:text-blue-600 p-1.5 rounded hover:bg-blue-50 transition-colors flex items-center gap-1 text-xs font-bold">
+                      <Tag size={14} /> <span className="hidden group-hover:inline">Subs</span>
                     </button>
                     <button onClick={() => abrirEditCat(cat)}
                       className="text-gray-400 hover:text-green-600 p-1.5 rounded hover:bg-gray-50 transition-colors">
