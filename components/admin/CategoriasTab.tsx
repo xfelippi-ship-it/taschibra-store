@@ -165,11 +165,13 @@ export default function CategoriasTab() {
     const slug = editSub.slug || gerarSlug(editSub.label)
     const dados = { ...editSub, slug }
     if (isNewSub) {
-      await supabase.from('category_subcategories').insert(dados as any)
-      toast('Subcategoria criada!')
+      const { error: errIns } = await supabase.from('category_subcategories').insert(dados as any)
+      if (errIns) { toast('Erro: ' + errIns.message); console.error(errIns); return }
+      toast('✅ Subcategoria criada!')
     } else {
-      await supabase.from('category_subcategories').update(dados).eq('id', editSub.id!)
-      toast('Subcategoria salva!')
+      const { error: errUpd } = await supabase.from('category_subcategories').update(dados as any).eq('id', editSub.id!)
+      if (errUpd) { toast('Erro: ' + errUpd.message); console.error(errUpd); return }
+      toast('✅ Subcategoria salva!')
     }
     setModalSub(false)
     carregar()
