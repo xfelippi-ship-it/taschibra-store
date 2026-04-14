@@ -14,6 +14,7 @@ type Produto = {
   main_image?: string | null
   badge?: string | null
   badges?: string[] | null
+  stock_qty?: number | null
 }
 
 const badgeColors: Record<string, string> = {
@@ -48,19 +49,22 @@ function ProdCard({ p }: { p: Produto }) {
     p.promo_price && p.promo_price > 0 && preco > 0
       ? Math.round((1 - p.promo_price / preco) * 100)
       : 0
+  const semEstoque = p.stock_qty !== null && p.stock_qty !== undefined && p.stock_qty <= 0
+
   const badgeCat = p.category_slug ? badgeMap[p.category_slug] : null
   const badges = p.badges && p.badges.length > 0 ? p.badges : badgeCat ? [badgeCat] : []
   const badge = badges[0] || null
 
   function handleAdd(e: React.MouseEvent) {
     e.preventDefault()
+    if (semEstoque) return
     addItem({ id: p.id, slug, name: nome, price: preco, promo_price: p.promo_price ?? 0, emoji: '💡' })
   }
 
   return (
     <Link
       href={`/produto/${slug}`}
-      className="border border-gray-200 rounded-xl overflow-hidden hover:border-green-500 hover:shadow-md hover:-translate-y-1 transition-all relative group block bg-white"
+      className={`border rounded-xl overflow-hidden transition-all relative group block bg-white ${semEstoque ? "border-gray-100 grayscale opacity-60" : "border-gray-200 hover:border-green-500 hover:shadow-md hover:-translate-y-1"}`}
     >
       <div className="bg-gray-50 flex items-center justify-center h-44 group-hover:scale-105 transition-transform relative">
         {badge && badgeColors[badge] && (
@@ -90,12 +94,14 @@ function ProdCard({ p }: { p: Produto }) {
         <p className="text-xs text-gray-500 mb-3">
           ou <strong>R$ {formatPrice(preco)}</strong> no cartao
         </p>
-        <button
-          onClick={handleAdd}
-          className="w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-black text-xs py-2.5 rounded-md transition-colors mt-auto"
-        >
-          COMPRAR
-        </button>
+        {!semEstoque && (
+          <button
+            onClick={handleAdd}
+            className="w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-black text-xs py-2.5 rounded-md transition-colors mt-auto"
+          >
+            COMPRAR
+          </button>
+        )}
       </div>
     </Link>
   )
@@ -118,7 +124,7 @@ export default function ProductGrid({
       try {
         let q = supabase
           .from('products')
-          .select('id, name, slug, price, promo_price, category_slug, main_image, badge, badges')
+          .select('id, name, slug, price, promo_price, category_slug, main_image, badge, badges, stock_qty')
         if (categorySlug) {
           q =
             categorySlug === 'lancamentos'
