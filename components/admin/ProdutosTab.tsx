@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Upload, ImageIcon } from 'lucide-react'
+import FotosTab from '@/components/admin/FotosTab'
 import { supabase } from '@/lib/supabase'
 import { registrarAuditoria } from '@/lib/auditLog'
 
@@ -89,7 +90,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
   // Modal produto
   const [modal, setModal] = useState(false)
   const [produtoEdit, setProdutoEdit] = useState<Partial<Produto>>({})
-  const [abaModal, setAbaModal] = useState<'dados' | 'variacoes' | 'funcionalidades'>('dados')
+  const [abaModal, setAbaModal] = useState<'dados' | 'fotos' | 'variacoes' | 'funcionalidades'>('dados')
 
   // Modal variação
   const [modalVar, setModalVar] = useState(false)
@@ -394,6 +395,12 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                 Dados gerais
               </button>
               {produtoEdit.id && (
+                <button onClick={() => setAbaModal('fotos')}
+                  className={`px-4 py-2 text-sm font-bold transition-colors border-b-2 ${abaModal === 'fotos' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
+                  Fotos
+                </button>
+              )}
+              {produtoEdit.id && (
                 <button onClick={() => { setAbaModal('variacoes'); carregarVariacoes(produtoEdit.id!) }}
                   className={`px-4 py-2 text-sm font-bold transition-colors border-b-2 ${abaModal === 'variacoes' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
                   Variações {variacoesPorProduto[produtoEdit.id!] ? `(${variacoesPorProduto[produtoEdit.id!].length})` : ''}
@@ -540,10 +547,34 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-bold text-gray-700 mb-1 block">Descrição</label>
-                    <textarea value={produtoEdit.description || ''} onChange={e => setProdutoEdit({ ...produtoEdit, description: e.target.value })}
-                      rows={3} placeholder="Descrição do produto..."
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500 resize-none" />
+                    <label className="text-sm font-bold text-gray-700 mb-1 block">
+                      Descrição do produto
+                      <span className="text-xs font-normal text-gray-400 ml-2">Suporta HTML</span>
+                    </label>
+                    <div className="border border-gray-200 rounded-lg overflow-hidden focus-within:border-green-500">
+                      <div className="bg-gray-50 border-b border-gray-100 px-3 py-1.5 flex gap-1 flex-wrap">
+                        {([['B','<b></b>'],['I','<i></i>'],['BR','<br>'],['Lista','<ul><li></li></ul>'],['P','<p></p>']] as [string,string][]).map(([label,tag]) => (
+                          <button key={label} type="button"
+                            onClick={() => setProdutoEdit(prev => ({ ...prev, description: (prev.description||'')+tag }))}
+                            className="text-xs bg-white border border-gray-200 px-2 py-0.5 rounded hover:bg-green-50 hover:border-green-400 font-bold text-gray-600">
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                      <textarea
+                        value={produtoEdit.description || ''}
+                        onChange={e => setProdutoEdit({ ...produtoEdit, description: e.target.value })}
+                        rows={5}
+                        placeholder="Descrição completa. Suporta HTML: <b>negrito</b>, <i>itálico</i>, <br>, <ul><li>item</li></ul>"
+                        className="w-full px-4 py-2.5 text-sm outline-none resize-none font-mono text-gray-700"
+                      />
+                      {produtoEdit.description && (
+                        <div className="border-t border-gray-100 px-3 py-2 bg-gray-50">
+                          <p className="text-xs text-gray-400 mb-1 font-bold">Preview:</p>
+                          <div className="text-sm text-gray-700" dangerouslySetInnerHTML={{ __html: produtoEdit.description }} />
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <label className="text-sm font-bold text-gray-700 mb-1 block">Imagem Principal</label>
@@ -599,7 +630,10 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                 </div>
               )}
 
-              {abaModal === 'variacoes' && produtoEdit.id && (
+              {abaModal === 'fotos' && produtoEdit.id && (
+            <FotosTab produtoId={produtoEdit.id} />
+          )}
+          {abaModal === 'variacoes' && produtoEdit.id && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-sm text-gray-500">Variações do produto (temperatura, cor, voltagem, etc.)</p>
