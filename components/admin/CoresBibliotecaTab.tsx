@@ -24,7 +24,7 @@ export default function CoresBibliotecaTab() {
 
   async function carregar() {
     setLoading(true)
-    const { data } = await supabase.from('color_library').select('*').order('sort_order')
+    const { data } = await (supabase.from('color_library') as any).select('*').order('sort_order')
     setCores((data || []) as unknown as Cor[])
     setLoading(false)
   }
@@ -33,7 +33,7 @@ export default function CoresBibliotecaTab() {
 
   async function criar() {
     if (!novo.nome.trim()) return
-    const { data, error } = await supabase.from('color_library')
+    const { data, error } = await (supabase.from('color_library') as any)
       .insert({ nome: novo.nome, hex: novo.hex, ativo: novo.ativo, sort_order: cores.length + 1 })
       .select().single()
     if (error) { showMsg('Erro ao criar'); return }
@@ -43,7 +43,7 @@ export default function CoresBibliotecaTab() {
   }
 
   async function atualizar(cor: Cor) {
-    await supabase.from('color_library')
+    await (supabase.from('color_library') as any)
       .update({ nome: cor.nome, hex: cor.hex, ativo: cor.ativo })
       .eq('id', cor.id!)
     setCores(prev => prev.map(x => x.id === cor.id ? cor : x))
@@ -53,13 +53,13 @@ export default function CoresBibliotecaTab() {
 
   async function excluir(id: string) {
     if (!confirm('Excluir esta cor?')) return
-    await supabase.from('color_library').delete().eq('id', id)
+    await (supabase.from('color_library') as any).delete().eq('id', id)
     setCores(prev => prev.filter(x => x.id !== id))
     showMsg('Removida!')
   }
 
   async function toggleAtivo(cor: Cor) {
-    await supabase.from('color_library').update({ ativo: !cor.ativo }).eq('id', cor.id!)
+    await (supabase.from('color_library') as any).update({ ativo: !cor.ativo }).eq('id', cor.id!)
     setCores(prev => prev.map(x => x.id === cor.id ? { ...x, ativo: !x.ativo } : x))
   }
 
