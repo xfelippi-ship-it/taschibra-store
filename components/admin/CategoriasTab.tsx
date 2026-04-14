@@ -95,8 +95,8 @@ export default function CategoriasTab() {
       toast('Categoria criada!')
     } else {
       const { error } = await supabase.from('categories').update(dados as any).eq('id', editCat.id!)
-      if (error) { toast('Erro: ' + error.message); return }
-      toast('Categoria salva!')
+      if (error) { console.error('Erro salvar:', error); toast('Erro ao salvar: ' + error.message); return }
+      toast('✅ Categoria salva!')
     }
     setModalCat(false)
     carregar()
@@ -130,13 +130,16 @@ export default function CategoriasTab() {
   }
 
   async function moverCat(cat: Categoria, dir: 'up' | 'down') {
-    const lista = cats.filter(c => c.parent_id === cat.parent_id)
+    const lista = cats.filter(c => !c.parent_id && c.active)
     const idx = lista.findIndex(c => c.id === cat.id)
     const outro = dir === 'up' ? lista[idx - 1] : lista[idx + 1]
     if (!outro) return
+    // Garantir que sort_order tenha valores distintos
+    const ordemCat = idx + 1
+    const ordemOutro = dir === 'up' ? idx : idx + 2
     await Promise.all([
-      supabase.from('categories').update({ sort_order: outro.sort_order }).eq('id', cat.id),
-      supabase.from('categories').update({ sort_order: cat.sort_order }).eq('id', outro.id),
+      supabase.from('categories').update({ sort_order: ordemOutro }).eq('id', cat.id),
+      supabase.from('categories').update({ sort_order: ordemCat }).eq('id', outro.id),
     ])
     carregar()
   }
@@ -184,9 +187,11 @@ export default function CategoriasTab() {
     const idx = lista.findIndex(s => s.id === sub.id)
     const outro = dir === 'up' ? lista[idx - 1] : lista[idx + 1]
     if (!outro) return
+    const ordemSub = idx + 1
+    const ordemOutro = dir === 'up' ? idx : idx + 2
     await Promise.all([
-      supabase.from('category_subcategories').update({ sort_order: outro.sort_order }).eq('id', sub.id),
-      supabase.from('category_subcategories').update({ sort_order: sub.sort_order }).eq('id', outro.id),
+      supabase.from('category_subcategories').update({ sort_order: ordemOutro }).eq('id', sub.id),
+      supabase.from('category_subcategories').update({ sort_order: ordemSub }).eq('id', outro.id),
     ])
     carregar()
   }
