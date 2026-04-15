@@ -182,7 +182,7 @@ function ProdutosContent() {
                         })()}
                         {p.main_image ? (
                           <img src={p.main_image} alt={p.name}
-                            className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-contain p-3 scale-[1.35] group-hover:scale-[1.5] transition-transform duration-300"
                             onError={e => { (e.target as HTMLImageElement).style.display = "none" }} />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-5xl">💡</div>
