@@ -27,12 +27,12 @@ const menuItems = [
   { label: 'Ambientes',        slug: 'ambientes',      type: 'mega' },
   { label: 'Lâmpadas',         slug: 'lampadas',       type: 'sub' },
   { label: 'SMART',            slug: 'smart',          type: 'sub' },
-  { label: 'Decorativo',       slug: 'decorativo',     type: 'sub' },
   { label: 'Trilhos & Perfis', slug: 'trilhos-perfis', type: 'mega' },
-  { label: 'Pilhas',           slug: 'pilhas',         type: 'sub' },
+  { label: 'Fitas & Neon',     slug: 'fitas-neon',     type: 'mega' },
   { label: 'Energia',          slug: 'energia',        type: 'mega' },
-  { label: 'Fechaduras',       slug: 'fechaduras',     type: 'sub' },
   { label: 'Profissional',     slug: 'profissional',   type: 'sub' },
+  { label: 'Bazar',            slug: 'bazar',          type: 'sub' },
+  { label: 'Fechaduras',       slug: 'fechaduras',     type: 'sub' },
   { label: 'Outlet',           slug: 'outlet',         type: 'sub' },
 ] as const
 
@@ -53,6 +53,14 @@ const trilhosPerfis = [
   { label: 'Trilho Magnético', slug: 'trilho-magnetico', desc: 'Attract · Embutir · Sobrepor' },
   { label: 'Perfil LED',       slug: 'perfil',           desc: 'Apex · Vertex · Zenith · Sopé' },
   { label: 'Cinta Soho',       slug: 'cinta-soho',       desc: 'Fita eletrificada flexível 48V' },
+]
+
+const fitasNeonItems = [
+  { label: 'Fita LED',             slug: 'fita-led',              desc: 'Techcord · Neon Flex · Pro COB' },
+  { label: 'Corda Luminosa',       slug: 'corda-luminosa',        desc: 'Corda LED · Mangueira · Pisca' },
+  { label: 'Acessórios',           slug: 'acessorios-para-fita',  desc: 'Conectores · Clips · Capas' },
+  { label: '12V',                  slug: '12V',                   desc: 'Fitas 12V com fonte' },
+  { label: '127V / 220V',          slug: '127V',                  desc: 'Direto na tomada' },
 ]
 
 const energiaItems = [
@@ -454,6 +462,18 @@ export default function Header() {
               <div className="max-w-7xl mx-auto px-6 py-5">
                 <div className="grid grid-cols-3 gap-3 max-w-2xl">
                   {energiaItems.map(item => <MegaCard key={item.slug} {...item} type="trilho" onClick={closeAll} />)}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Megamenu Fitas & Neon */}
+          {activeMega === 'fitas-neon' && (
+            <div onMouseEnter={cancelDelay} onMouseLeave={closeMega}
+              className="absolute top-full left-0 right-0 bg-white border-t border-b border-gray-200 shadow-lg z-50">
+              <div className="max-w-7xl mx-auto px-6 py-5">
+                <div className="grid grid-cols-3 gap-3 max-w-2xl">
+                  {fitasNeonItems.map(item => <MegaCard key={item.slug} {...item} type="trilho" onClick={closeAll} />)}
                 </div>
               </div>
             </div>
