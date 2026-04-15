@@ -344,8 +344,8 @@ export default function ProdutoPage() {
           <div className="bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-center h-64 md:h-96 overflow-hidden mb-3">
             {imagens.length > 0
               ? imagens[imgAtiva]?.match(/\.(mp4|webm|mov)/i)
-                ? <video src={imagens[imgAtiva]} controls className="h-56 md:h-80 object-contain" />
-                : <ProdutoZoom src={imagens[imgAtiva]} alt={produto.name} className="h-56 md:h-80 w-full" />
+                ? <video src={imagens[imgAtiva]} controls className="w-full aspect-square object-contain" />
+                : <ProdutoZoom src={imagens[imgAtiva]} alt={produto.name} className="w-full aspect-square" />
               : <span className="text-8xl md:text-9xl">💡</span>}
           </div>
           {imagens.length > 1 && (
