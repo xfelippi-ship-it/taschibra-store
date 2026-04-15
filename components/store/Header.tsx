@@ -30,7 +30,7 @@ const menuItems = [
   { label: 'Decorativo',       slug: 'decorativo',     type: 'sub' },
   { label: 'Trilhos & Perfis', slug: 'trilhos-perfis', type: 'mega' },
   { label: 'Pilhas',           slug: 'pilhas',         type: 'sub' },
-  { label: 'Energia',          slug: 'energia',        type: 'sub' },
+  { label: 'Energia',          slug: 'energia',        type: 'mega' },
   { label: 'Fechaduras',       slug: 'fechaduras',     type: 'sub' },
   { label: 'Profissional',     slug: 'profissional',   type: 'sub' },
   { label: 'Outlet',           slug: 'outlet',         type: 'sub' },
@@ -53,6 +53,15 @@ const trilhosPerfis = [
   { label: 'Trilho Magnético', slug: 'trilho-magnetico', desc: 'Attract · Embutir · Sobrepor' },
   { label: 'Perfil LED',       slug: 'perfil',           desc: 'Apex · Vertex · Zenith · Sopé' },
   { label: 'Cinta Soho',       slug: 'cinta-soho',       desc: 'Fita eletrificada flexível 48V' },
+]
+
+const energiaItems = [
+  { label: 'Fitas LED',          slug: 'energia',              desc: 'Techcord · Neon Flex · Pro COB' },
+  { label: 'Extensões',          slug: 'energia-extensoes',    desc: 'Filtros · Réguas · Tomadas' },
+  { label: 'Carregadores',       slug: 'energia-carregadores', desc: 'USB · Fast Charge · Turbo' },
+  { label: 'Cabos USB',          slug: 'energia-cabos',        desc: 'USB-A · USB-C · Cabos' },
+  { label: 'Sensores',           slug: 'sensores-de-presenca', desc: 'Presença · Movimento' },
+  { label: 'Fontes e Drivers',   slug: 'energia',              desc: 'Drivers · Fontes · Transformadores' },
 ]
 
 // ─── Ícones SVG ───────────────────────────────────────────────────────────────
@@ -433,6 +442,18 @@ export default function Header() {
               <div className="max-w-7xl mx-auto px-6 py-5">
                 <div className="grid grid-cols-3 gap-3 max-w-2xl">
                   {trilhosPerfis.map(item => <MegaCard key={item.slug} {...item} type="trilho" onClick={closeAll} />)}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Megamenu Energia */}
+          {activeMega === 'energia' && (
+            <div onMouseEnter={cancelDelay} onMouseLeave={closeMega}
+              className="absolute top-full left-0 right-0 bg-white border-t border-b border-gray-200 shadow-lg z-50">
+              <div className="max-w-7xl mx-auto px-6 py-5">
+                <div className="grid grid-cols-3 gap-3 max-w-2xl">
+                  {energiaItems.map(item => <MegaCard key={item.slug} {...item} type="trilho" onClick={closeAll} />)}
                 </div>
               </div>
             </div>
