@@ -124,6 +124,9 @@ type Feature = { id?: string; title: string; description: string; image_url: str
 
 export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }: { meuPapel?: string, meuEmail?: string }) {
   const [produtos, setProdutos] = useState<Produto[]>([])
+  const [totalProdutos, setTotalProdutos] = useState(0)
+  const [pagina, setPagina] = useState(1)
+  const PAGE_SIZE = 50
   const [loading, setLoading] = useState(true)
   const [busca, setBusca] = useState('')
   const [uploadingImg, setUploadingImg] = useState(false)
@@ -205,12 +208,18 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
   }
   const [varEdit, setVarEdit] = useState<Variacao | null>(null)
 
-  useEffect(() => { carregar() }, [])
+  useEffect(() => { carregar(1) }, [])
 
-  async function carregar() {
+  async function carregar(pag = 1, textoBusca = busca) {
     setLoading(true)
-    const { data } = await supabase.from('products').select('*').order('name')
+    const from = (pag - 1) * PAGE_SIZE
+    const to = from + PAGE_SIZE - 1
+    let q = (supabase as any).from('products').select('*', { count: 'exact' }).order('name').range(from, to)
+    if (textoBusca.trim()) q = q.or(`name.ilike.%${textoBusca}%,sku.ilike.%${textoBusca}%`)
+    const { data, count } = await q
     setProdutos(data || [])
+    setTotalProdutos(count || 0)
+    setPagina(pag)
     setLoading(false)
   }
 
@@ -456,6 +465,30 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
             })}
           </tbody>
         </table>
+
+        {/* Paginação */}
+        {totalProdutos > PAGE_SIZE && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50">
+            <span className="text-sm text-gray-500">
+              {(pagina-1)*PAGE_SIZE+1}–{Math.min(pagina*PAGE_SIZE, totalProdutos)} de {totalProdutos} produtos
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => carregar(pagina-1)}
+                disabled={pagina === 1}
+                className="px-3 py-1.5 text-sm font-bold border border-gray-200 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              >← Anterior</button>
+              <span className="px-3 py-1.5 text-sm font-bold bg-green-600 text-white rounded-lg">
+                {pagina} / {Math.ceil(totalProdutos/PAGE_SIZE)}
+              </span>
+              <button
+                onClick={() => carregar(pagina+1)}
+                disabled={pagina >= Math.ceil(totalProdutos/PAGE_SIZE)}
+                className="px-3 py-1.5 text-sm font-bold border border-gray-200 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              >Próxima →</button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal Produto */}
