@@ -23,19 +23,34 @@ export default function ProdutoZoom({ src, alt = '', className = '' }: Props) {
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden cursor-zoom-in ${className}`}
+      className={`relative overflow-hidden cursor-crosshair ${className}`}
       onMouseEnter={() => setZoom(true)}
       onMouseLeave={() => setZoom(false)}
       onMouseMove={handleMove}
     >
-      <img src={src} alt={alt}
-        className={`w-full h-full object-contain transition-opacity duration-150 ${zoom ? 'opacity-0' : 'opacity-100'}`} />
+      {/* Imagem sempre visível */}
+      <img
+        src={src}
+        alt={alt}
+        className="w-full h-full object-contain"
+      />
+
+      {/* Overlay de zoom por cima da imagem — sem esconder o original */}
       {zoom && (
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage: `url(${src})`, backgroundSize: '250%', backgroundPosition: `${pos.x}% ${pos.y}%`, backgroundRepeat: 'no-repeat' }} />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `url(${src})`,
+            backgroundSize: '280%',
+            backgroundPosition: `${pos.x}% ${pos.y}%`,
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
       )}
+
+      {/* Indicador */}
       {!zoom && (
-        <div className="absolute bottom-2 right-2 bg-black/30 text-white text-[10px] px-2 py-1 rounded-full pointer-events-none">
+        <div className="absolute bottom-2 right-2 bg-black/30 text-white text-[10px] px-2 py-1 rounded-full pointer-events-none select-none">
           🔍 zoom
         </div>
       )}
