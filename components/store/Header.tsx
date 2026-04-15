@@ -56,12 +56,12 @@ const trilhosPerfis = [
 ]
 
 const energiaItems = [
-  { label: 'Fitas LED',          slug: 'energia',              desc: 'Techcord · Neon Flex · Pro COB' },
+  { label: 'Fitas LED',          slug: 'fita-led',             desc: 'Techcord · Neon Flex · Pro COB' },
   { label: 'Extensões',          slug: 'energia-extensoes',    desc: 'Filtros · Réguas · Tomadas' },
   { label: 'Carregadores',       slug: 'energia-carregadores', desc: 'USB · Fast Charge · Turbo' },
   { label: 'Cabos USB',          slug: 'energia-cabos',        desc: 'USB-A · USB-C · Cabos' },
   { label: 'Sensores',           slug: 'sensores-de-presenca', desc: 'Presença · Movimento' },
-  { label: 'Fontes e Drivers',   slug: 'energia',              desc: 'Drivers · Fontes · Transformadores' },
+  { label: 'Acessórios',         slug: 'acessorios-para-fita', desc: 'Conectores · Drivers · Fontes' },
 ]
 
 // ─── Ícones SVG ───────────────────────────────────────────────────────────────
