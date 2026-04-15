@@ -32,7 +32,7 @@ import PopupTab from '@/components/admin/PopupTab'
 import BlogTab from '@/components/admin/BlogTab'
 import PromoBannerTab from '@/components/admin/PromoBannerTab'
 import { useState, useEffect } from 'react'
-import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2, FileText, Search, Star, MapPin, CreditCard } from 'lucide-react'
+import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2, FileText, Search, Star, MapPin, CreditCard, Sliders } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { registrarAuditoria } from '@/lib/auditLog'
 
@@ -52,8 +52,8 @@ const TODOS_MODULOS = [
   { id: 'dashboard',     label: 'Dashboard',           grupo: 'Geral' },
   { id: 'produtos',      label: 'Produtos',             grupo: 'Catálogo' },
   { id: 'categorias',    label: 'Categorias',           grupo: 'Catálogo' },
-      { id: 'caracteristicas', label: 'Características',    grupo: 'Catálogo' },
-    { id: 'importar',      label: 'Importar CSV',         grupo: 'Catálogo' },
+  { id: 'caracteristicas', label: 'Características',        grupo: 'Catálogo' },
+  { id: 'importar',      label: 'Importar CSV',           grupo: 'Catálogo' },
   { id: 'pedidos',       label: 'Pedidos',              grupo: 'Vendas' },
   { id: 'cupons',        label: 'Cupons',               grupo: 'Vendas' },
   { id: 'carrinhos',     label: 'Carrinhos',            grupo: 'Vendas' },
