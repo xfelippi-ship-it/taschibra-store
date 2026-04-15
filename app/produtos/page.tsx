@@ -52,7 +52,14 @@ function ProdutosContent() {
         query = query.or(`name.ilike.%${busca}%,sku.ilike.%${busca}%,description.ilike.%${busca}%`)
         setTitulo(`Resultados para: "${busca}"`)
       } else if (categoria) {
-        query = categoria === 'lancamentos' ? query.eq('is_lancamento', true) : query.eq('category_slug', categoria)
+        if (categoria === 'lancamentos') {
+          query = query.eq('is_lancamento', true)
+        } else {
+          const cats = ['ambientes','decorativo','energia','lampadas','profissional','smart','trilhos-perfis','acessorios','novidades']
+          query = cats.includes(categoria)
+            ? query.eq('category_slug', categoria)
+            : (query as any).eq('subcategory_slug', categoria)
+        }
         const label: Record<string, string> = {
           "lancamentos": "Lançamentos",
           "lampadas": "Lâmpadas",
