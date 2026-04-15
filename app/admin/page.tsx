@@ -980,6 +980,7 @@ export default function AdminPage() {
           <Grupo id="catalogo" label="Catálogo">
             {tem([], 'catalogo') && <BtnItem id="produtos"   label="Produtos"     icon={<Package size={15} />} />}
             {tem([], 'categorias') && <BtnItem id="categorias" label="Categorias"   icon={<Tag size={15} />} />}
+            {tem([], 'caracteristicas') && <BtnItem id="caracteristicas" label="Características" icon={<Sliders size={15} />} />}
             {tem([], 'importar') && <BtnItem id="importar"   label="Importar CSV" icon={<Upload size={15} />} />}
             {tem([], 'marcas') && <BtnItem id="marcas"     label="Marcas"       icon={<Tag size={15} />} />}
             {tem([], 'cores') && <BtnItem id="cores"      label="Cores"        icon={<Tag size={15} />} />}
