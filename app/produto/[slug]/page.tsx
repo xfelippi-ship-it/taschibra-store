@@ -357,7 +357,7 @@ export default function ProdutoPage() {
                     className={`flex-shrink-0 w-16 h-16 border-2 rounded-lg overflow-hidden transition-colors bg-white ${imgAtiva === i ? 'border-green-500' : 'border-gray-200'}`}>
                     {isVideo
                       ? <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-lg">▶</div>
-                      : <img src={img} alt="" className="w-full h-full object-contain bg-white" />}
+                      : <img src={img} alt="" className="w-full h-full object-cover" />}
                   </button>
                 )
               })}
