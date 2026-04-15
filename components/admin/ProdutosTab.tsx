@@ -1,4 +1,6 @@
 'use client'
+import ProdutoGaleriaUpload from '@/components/store/ProdutoGaleriaUpload'
+import { ProdutoDatasheetUpload } from '@/components/store/ProdutoDatasheet'
 import { useState, useEffect, useRef } from 'react'
 import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Upload, ImageIcon } from 'lucide-react'
 import FotosTab from '@/components/admin/FotosTab'
@@ -9,7 +11,7 @@ import { registrarAuditoria } from '@/lib/auditLog'
 type Produto = {
   id: string; name: string; sku: string; price: number; promo_price: number
   stock_qty: number; active: boolean; badge: string; badges?: string[]; is_lancamento?: boolean; family?: string; brand_id?: string
-  category_slug?: string; categories?: string[]; description?: string; main_image?: string
+  category_slug?: string; categories?: string[]; description?: string; main_image?: string; images?: string[]; datasheet_url?: string
   weight_kg?: number; warranty?: string; ean?: string
 }
 
@@ -632,6 +634,20 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                     placeholder="Ou cole uma URL aqui..."
                     className="w-full border border-gray-200 rounded-lg px-4 py-2 text-xs text-gray-400 outline-none focus:border-green-500 mt-1" />
                 </div>
+
+                {/* Galeria de imagens */}
+                <ProdutoGaleriaUpload
+                  images={produtoEdit.images || []}
+                  onChange={imgs => setProdutoEdit(prev => ({ ...prev, images: imgs }))}
+                  sku={produtoEdit.sku}
+                />
+
+                {/* Ficha técnica PDF */}
+                <ProdutoDatasheetUpload
+                  value={produtoEdit.datasheet_url || ""}
+                  onChange={url => setProdutoEdit(prev => ({ ...prev, datasheet_url: url }))}
+                  sku={produtoEdit.sku}
+                />
 
               </div>
 

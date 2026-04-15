@@ -10,6 +10,8 @@ import { useCart } from '@/contexts/CartContext'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import ProductJsonLd from '@/components/store/ProductJsonLd'
+import ProdutoZoom from '@/components/store/ProdutoZoom'
+import { ProdutoDatasheetDownload } from '@/components/store/ProdutoDatasheet'
 
 
 type Variacao = {
@@ -24,7 +26,7 @@ type Produto = {
   warranty?: string; warranty_months?: number; weight_kg?: number
   height_cm?: number; width_cm?: number; length_cm?: number
   voltage?: string; power_w?: number; color_temp_k?: number
-  ip_rating?: string; brand?: string
+  ip_rating?: string; brand?: string; datasheet_url?: string
 }
 type Feature = {
   id: string; title: string
@@ -343,7 +345,7 @@ export default function ProdutoPage() {
             {imagens.length > 0
               ? imagens[imgAtiva]?.match(/\.(mp4|webm|mov)/i)
                 ? <video src={imagens[imgAtiva]} controls className="h-56 md:h-80 object-contain" />
-                : <img src={imagens[imgAtiva]} alt={produto.name} className="h-56 md:h-80 object-contain" />
+                : <ProdutoZoom src={imagens[imgAtiva]} alt={produto.name} className="h-56 md:h-80 w-full" />
               : <span className="text-8xl md:text-9xl">💡</span>}
           </div>
           {imagens.length > 1 && (
@@ -420,7 +422,12 @@ export default function ProdutoPage() {
           </div>
 
           {/* Garantia — só se preenchida */}
-          {garantia && (
+          {produto.datasheet_url && (
+          <div className="mb-3">
+            <ProdutoDatasheetDownload url={produto.datasheet_url} nomeProduto={produto.name} />
+          </div>
+        )}
+        {garantia && (
             <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-lg px-4 py-3 text-sm text-gray-600">
               <Shield size={16} className="text-green-600 flex-shrink-0" />
               <span><strong>Garantia:</strong> {garantia}</span>
