@@ -341,7 +341,7 @@ export default function ProdutoPage() {
 
         {/* Galeria — até 10 imagens/vídeos */}
         <div className="mb-4 md:mb-0">
-          <div className="bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-center h-64 md:h-96 overflow-hidden mb-3">
+          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden mb-3 aspect-square">
             {imagens.length > 0
               ? imagens[imgAtiva]?.match(/\.(mp4|webm|mov)/i)
                 ? <video src={imagens[imgAtiva]} controls className="w-full aspect-square object-contain" />
@@ -354,10 +354,10 @@ export default function ProdutoPage() {
                 const isVideo = img.match(/\.(mp4|webm|mov)/i)
                 return (
                   <button key={i} onClick={() => setImgAtiva(i)}
-                    className={`flex-shrink-0 w-14 h-14 border-2 rounded-lg overflow-hidden transition-colors ${imgAtiva === i ? 'border-green-500' : 'border-gray-200'}`}>
+                    className={`flex-shrink-0 w-16 h-16 border-2 rounded-lg overflow-hidden transition-colors bg-white ${imgAtiva === i ? 'border-green-500' : 'border-gray-200'}`}>
                     {isVideo
                       ? <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-lg">▶</div>
-                      : <img src={img} alt="" className="w-full h-full object-contain" />}
+                      : <img src={img} alt="" className="w-full h-full object-contain bg-white" />}
                   </button>
                 )
               })}
