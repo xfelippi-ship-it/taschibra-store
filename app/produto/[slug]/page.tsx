@@ -341,7 +341,7 @@ export default function ProdutoPage() {
 
         {/* Galeria — até 10 imagens/vídeos */}
         <div className="mb-4 md:mb-0">
-          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden mb-3 aspect-square">
+          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden mb-3" style={{ aspectRatio: "1/1", maxHeight: "520px" }}>
             {imagens.length > 0
               ? imagens[imgAtiva]?.match(/\.(mp4|webm|mov)/i)
                 ? <video src={imagens[imgAtiva]} controls className="w-full aspect-square object-contain" />
