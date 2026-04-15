@@ -6,6 +6,7 @@ import BannersTab from '@/components/admin/BannersTab'
 import ProdutosTab from '@/components/admin/ProdutosTab'
 import PedidosTab from '@/components/admin/PedidosTab'
 import ImportarTab from '@/components/admin/ImportarTab'
+import CaracteristicasTab from '@/components/admin/CaracteristicasTab'
 import DashboardTab from '@/components/admin/DashboardTab'
 import TopBarTab from '@/components/admin/TopBarTab'
 import CategoriasTab from '@/components/admin/CategoriasTab'
@@ -51,7 +52,9 @@ const TODOS_MODULOS = [
   { id: 'dashboard',     label: 'Dashboard',           grupo: 'Geral' },
   { id: 'produtos',      label: 'Produtos',             grupo: 'Catálogo' },
   { id: 'categorias',    label: 'Categorias',           grupo: 'Catálogo' },
-  { id: 'importar',      label: 'Importar CSV',         grupo: 'Catálogo' },
+  { id: 'caracteristicas', label: 'Características', icon: 'Sliders' },
+    { id: 'caracteristicas', label: 'Características', icon: 'Sliders' },
+    { id: 'importar',      label: 'Importar CSV',         grupo: 'Catálogo' },
   { id: 'pedidos',       label: 'Pedidos',              grupo: 'Vendas' },
   { id: 'cupons',        label: 'Cupons',               grupo: 'Vendas' },
   { id: 'carrinhos',     label: 'Carrinhos',            grupo: 'Vendas' },
@@ -745,7 +748,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'cores' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup' | 'blog'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'cores' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup' | 'blog' | 'caracteristicas'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -1081,6 +1084,7 @@ export default function AdminPage() {
         {aba === 'topbar' && <TopBarTab />}
         {aba === 'categorias' && <CategoriasTab />}
         {aba === 'importar' && <ImportarTab meuEmail={meuEmail} />}
+                {aba === 'caracteristicas' && <CaracteristicasTab meuEmail={meuEmail} />}
         {aba === 'frete' && <FreteGratisTab />}
         {aba === 'carrinhos' && <CarrinhosAbandonadosTab />}
         {aba === 'relatorios' && <RelatoriosTab />}
