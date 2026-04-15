@@ -220,6 +220,7 @@ export default function ProdutoPage() {
   const [adicionado, setAdicionado] = useState(false)
   const [variacaoSelecionada, setVariacaoSelecionada] = useState<Variacao | null>(null)
   const [features, setFeatures] = useState<Feature[]>([])
+  const [productSpecs, setProductSpecs] = useState<{chave:string;valor:string}[]>([])
   const [reviews, setReviews] = useState<Review[]>([])
   const [reviewRating, setReviewRating] = useState(5)
   const [reviewAuthor, setReviewAuthor] = useState('')
@@ -232,13 +233,15 @@ export default function ProdutoPage() {
       const { data } = await supabase.from('products').select('*').eq('slug', slug).single()
       setProduto(data as any)
       if (data?.id) {
-        const [{ data: feats }, { data: revs }] = await Promise.all([
+        const [{ data: specsData }, { data: feats }, { data: revs }] = await Promise.all([
+          supabase.from('product_specs' as any).select('chave,valor,sort_order').eq('product_id', data.id).order('sort_order'),
           supabase.from('product_features').select('id,title,description,image_url,sort_order')
             .eq('product_id', data.id).order('sort_order'),
           supabase.from('product_reviews').select('id,author_name,rating,comment,verified,created_at')
             .eq('product_id', data.id).order('created_at', { ascending: false })
         ])
-        setFeatures((feats || []) as any)
+        setProductSpecs((specsData as any[] || []) as {chave:string;valor:string}[])
+      setFeatures((feats || []) as any)
         setReviews((revs || []) as any)
       }
       setLoading(false)
@@ -464,7 +467,7 @@ export default function ProdutoPage() {
       )}
 
       {/* ── Especificações técnicas ── */}
-      {specs.length > 0 && (
+      {(productSpecs.length > 0 || specs.length > 0) && (
         <div className="max-w-7xl mx-auto px-4 border-t border-gray-100 py-8">
           <h2 className="text-lg font-black text-gray-800 mb-4 flex items-center gap-3">
             <span className="w-1 h-5 bg-indigo-500 rounded-full block" />Especificações técnicas
