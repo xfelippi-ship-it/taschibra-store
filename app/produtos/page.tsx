@@ -55,7 +55,7 @@ function ProdutosContent() {
         if (categoria === 'lancamentos') {
           query = query.eq('is_lancamento', true)
         } else {
-          const cats = ['ambientes','decorativo','energia','lampadas','profissional','smart','trilhos-perfis','acessorios','novidades']
+          const cats = ['ambientes','decorativo','energia','lampadas','profissional','smart','trilhos-perfis','acessorios','novidades','lancamentos','pilhas','fechaduras','outlet']
           query = cats.includes(categoria)
             ? query.eq('category_slug', categoria)
             : (query as any).eq('subcategory_slug', categoria)
