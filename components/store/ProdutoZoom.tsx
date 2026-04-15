@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 
 interface Props {
   src: string
@@ -9,30 +9,41 @@ interface Props {
 
 export default function ProdutoZoom({ src, alt = '', className = '' }: Props) {
   const [zoom, setZoom] = useState(false)
-  const [pos, setPos] = useState({ x: 50, y: 50 })
   const [lensPos, setLensPos] = useState({ x: 0, y: 0 })
+  const [panelPos, setPanelPos] = useState({ top: 0, left: 0 })
+  const [bgPos, setBgPos] = useState({ x: 50, y: 50 })
   const containerRef = useRef<HTMLDivElement>(null)
-  const LENS = 120  // tamanho da lupa em px
-  const SCALE = 3   // fator de ampliação
+  const LENS = 130
+  const SCALE = 3
+  const PANEL = 420
 
   const handleMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return
     const rect = containerRef.current.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    // Porcentagem para o painel
-    const px = Math.max(0, Math.min(100, (x / rect.width) * 100))
-    const py = Math.max(0, Math.min(100, (y / rect.height) * 100))
-    setPos({ x: px, y: py })
-    // Posição da lente (centrada no cursor, limitada às bordas)
+
+    // Posição da lente (clampada às bordas)
     const lx = Math.max(0, Math.min(rect.width - LENS, x - LENS / 2))
     const ly = Math.max(0, Math.min(rect.height - LENS, y - LENS / 2))
     setLensPos({ x: lx, y: ly })
+
+    // Porcentagem para o background do painel
+    const px = Math.max(0, Math.min(100, (x / rect.width) * 100))
+    const py = Math.max(0, Math.min(100, (y / rect.height) * 100))
+    setBgPos({ x: px, y: py })
+
+    // Posição fixed do painel — à direita do container
+    const panelTop = Math.max(0, Math.min(
+      window.innerHeight - PANEL,
+      rect.top + (y - PANEL / 2)
+    ))
+    setPanelPos({ top: panelTop, left: rect.right + 12 })
   }, [])
 
   return (
-    <div className={`relative flex ${className}`}>
-      {/* Imagem principal com lente */}
+    <div className={`relative ${className}`}>
+      {/* Container da imagem com lente */}
       <div
         ref={containerRef}
         className="relative w-full aspect-square bg-white overflow-hidden cursor-crosshair"
@@ -40,23 +51,13 @@ export default function ProdutoZoom({ src, alt = '', className = '' }: Props) {
         onMouseLeave={() => setZoom(false)}
         onMouseMove={handleMove}
       >
-        <img
-          src={src}
-          alt={alt}
-          draggable={false}
-          className="w-full h-full object-contain"
-        />
+        <img src={src} alt={alt} draggable={false} className="w-full h-full object-contain" />
 
-        {/* Lente quadrada sobre a imagem */}
+        {/* Lente quadrada */}
         {zoom && (
           <div
             className="absolute border-2 border-green-500 bg-green-500/10 pointer-events-none"
-            style={{
-              width: LENS,
-              height: LENS,
-              left: lensPos.x,
-              top: lensPos.y,
-            }}
+            style={{ width: LENS, height: LENS, left: lensPos.x, top: lensPos.y }}
           />
         )}
 
@@ -67,24 +68,25 @@ export default function ProdutoZoom({ src, alt = '', className = '' }: Props) {
         )}
       </div>
 
-      {/* Painel ampliado à direita — estilo Amazon */}
+      {/* Painel ampliado — position fixed para escapar de overflow:hidden */}
       {zoom && (
         <div
-          className="absolute left-full top-0 ml-2 w-[420px] aspect-square bg-white border border-gray-200 shadow-2xl overflow-hidden z-50 pointer-events-none"
-          style={{ minHeight: '100%' }}
+          className="fixed bg-white border-2 border-gray-200 shadow-2xl overflow-hidden pointer-events-none"
+          style={{
+            width: PANEL,
+            height: PANEL,
+            top: panelPos.top,
+            left: panelPos.left,
+            zIndex: 9999,
+          }}
         >
-          <img
-            src={src}
-            alt=""
-            draggable={false}
-            className="absolute"
+          <div
+            className="w-full h-full"
             style={{
-              width: `${SCALE * 100}%`,
-              height: `${SCALE * 100}%`,
-              maxWidth: 'none',
-              top: `${-pos.y * (SCALE - 1)}%`,
-              left: `${-pos.x * (SCALE - 1)}%`,
-              objectFit: 'contain',
+              backgroundImage: `url(${src})`,
+              backgroundSize: `${SCALE * 100}%`,
+              backgroundPosition: `${bgPos.x}% ${bgPos.y}%`,
+              backgroundRepeat: 'no-repeat',
             }}
           />
         </div>
