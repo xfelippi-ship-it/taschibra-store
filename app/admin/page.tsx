@@ -54,6 +54,7 @@ const TODOS_MODULOS = [
   { id: 'categorias',    label: 'Categorias',           grupo: 'Catálogo' },
   { id: 'caracteristicas', label: 'Características', icon: 'Sliders' },
     { id: 'caracteristicas', label: 'Características', icon: 'Sliders' },
+    { id: 'caracteristicas', label: 'Características',    grupo: 'Catálogo' },
     { id: 'importar',      label: 'Importar CSV',         grupo: 'Catálogo' },
   { id: 'pedidos',       label: 'Pedidos',              grupo: 'Vendas' },
   { id: 'cupons',        label: 'Cupons',               grupo: 'Vendas' },
