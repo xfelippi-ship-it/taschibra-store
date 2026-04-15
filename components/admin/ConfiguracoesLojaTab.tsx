@@ -156,7 +156,7 @@ export default function ConfiguracoesLojaTab() {
   async function savePix() {
     setSaving('pix')
     if (pix.id) {
-      await supabase.from('payment_pix_settings').update({ desconto_percentual: pix.desconto_percentual, ativo: pix.ativo, updated_at: new Date().toISOString() }).eq('id', pix.id)
+      await supabase.from('payment_pix_settings' as any).update({ desconto_percentual: pix.desconto_percentual, ativo: pix.ativo, updated_at: new Date().toISOString() }).eq('id', pix.id)
     }
     setSaving(null)
   }
@@ -269,7 +269,7 @@ export default function ConfiguracoesLojaTab() {
             <input
               type="number" min={0} max={100} step={0.01}
               className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
-              value={boleto.desconto_percentual}
+              value={boleto.desconto_percentual ?? 0}
               onChange={e => setBoleto(prev => ({ ...prev, desconto_percentual: parseFloat(e.target.value) || 0 }))}
             />
           </div>
@@ -278,7 +278,7 @@ export default function ConfiguracoesLojaTab() {
             <input
               type="number" min={1}
               className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
-              value={boleto.dias_vencimento}
+              value={boleto.dias_vencimento ?? 2}
               onChange={e => setBoleto(prev => ({ ...prev, dias_vencimento: parseInt(e.target.value) || 1 }))}
             />
             <p className="text-xs text-gray-400 mt-1">Deve ser ≤ ao configurado no PagarMe</p>
@@ -288,7 +288,7 @@ export default function ConfiguracoesLojaTab() {
             <input
               type="number" min={0} step={0.01}
               className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
-              value={boleto.valor_minimo}
+              value={boleto.valor_minimo ?? 0}
               onChange={e => setBoleto(prev => ({ ...prev, valor_minimo: parseFloat(e.target.value) || 0 }))}
             />
           </div>
@@ -353,7 +353,7 @@ export default function ConfiguracoesLojaTab() {
             <input
               type="number" min={1} max={24}
               className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
-              value={card.max_parcelas}
+              value={card.max_parcelas ?? 10}
               onChange={e => setCard(prev => ({ ...prev, max_parcelas: parseInt(e.target.value) || 1 }))}
             />
             <p className="text-xs text-gray-400 mt-1">Deve ser ≤ ao configurado no PagarMe</p>
@@ -363,7 +363,7 @@ export default function ConfiguracoesLojaTab() {
             <input
               type="number" min={0} step={0.01}
               className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
-              value={card.valor_minimo_parcela}
+              value={card.valor_minimo_parcela ?? 50}
               onChange={e => setCard(prev => ({ ...prev, valor_minimo_parcela: parseFloat(e.target.value) || 0 }))}
             />
           </div>

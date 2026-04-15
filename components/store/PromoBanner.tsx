@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
 type Cupom = { pct: string; desc: string; code: string }
-type PromoBanner = {
+
+type PromoBannerData = {
   id: string
   titulo: string
   subtitulo: string
@@ -16,22 +17,23 @@ type PromoBanner = {
 }
 
 export default function PromoBanner() {
-  const [banner, setBanner] = useState<PromoBanner | null>(null)
+  const [banner, setBanner] = useState<PromoBannerData | null>(null)
 
   useEffect(() => {
-    supabase
-      .from('promo_banners')
+    (supabase as any)
+      .from('promo_banners' as any)
       .select('*')
       .eq('ativo', true)
       .order('created_at', { ascending: false })
       .limit(1)
       .single()
-      .then(({ data }) => { if (data) setBanner(data as PromoBanner) })
+      .then(({ data }) => {
+        if (data) setBanner(data as PromoBannerData)
+      })
   }, [])
 
   if (!banner) return null
 
-  // Modo imagem
   if (banner.tipo === 'imagem' && banner.imagem_url) {
     return (
       <div className="mx-6 my-2 max-w-7xl md:mx-auto rounded-2xl overflow-hidden">
@@ -40,7 +42,6 @@ export default function PromoBanner() {
     )
   }
 
-  // Modo cupons (padrão)
   return (
     <div className={`mx-6 my-2 rounded-2xl bg-gradient-to-r ${banner.cor_fundo} p-10 flex flex-wrap items-center justify-between gap-8 relative overflow-hidden max-w-7xl md:mx-auto`}>
       <div className="absolute right-0 top-0 w-48 h-48 rounded-full bg-yellow-400 opacity-10 -translate-y-1/4 translate-x-1/4" />
@@ -48,9 +49,7 @@ export default function PromoBanner() {
         <h3 className="text-2xl font-black text-white mb-2" style={{ fontFamily: 'Nunito,sans-serif' }}>
           {banner.emoji} {banner.titulo}
         </h3>
-        {banner.subtitulo && (
-          <p className="text-green-200 text-sm max-w-sm">{banner.subtitulo}</p>
-        )}
+        {banner.subtitulo && <p className="text-green-200 text-sm max-w-sm">{banner.subtitulo}</p>}
       </div>
       {banner.cupons && banner.cupons.length > 0 && (
         <div className="flex gap-3 flex-wrap">

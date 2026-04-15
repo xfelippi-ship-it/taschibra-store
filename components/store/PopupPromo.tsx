@@ -5,9 +5,13 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
 type PopupData = {
-  id: string; title: string; subtitle: string | null
-  image_url: string | null; button_text: string
-  button_link: string; bg_color: string
+  id: string
+  title: string
+  subtitle: string | null
+  image_url: string | null
+  button_text: string
+  button_link: string
+  bg_color: string
 }
 
 export default function PopupPromo() {
@@ -18,22 +22,24 @@ export default function PopupPromo() {
     const dismissed = sessionStorage.getItem('popup_dismissed')
     if (dismissed) return
 
-    supabase.from('popup_promos').select('*').eq('active', true).order('created_at', { ascending: false })
-      .then(({ data: all }) => {
-        const hoje = new Date().toISOString().slice(0, 10)
-        const valido = (all || []).find((p: any) => {
-          if (p.start_date && p.start_date > hoje) return false
-          if (p.end_date && p.end_date < hoje) return false
-          return true
-        })
-        return { data: valido || null }
+    async function loadPopup() {
+      const { data: all } = await (supabase as any)
+        .from('popup_promos' as any)
+        .select('*')
+        .eq('active', true)
+        .order('created_at', { ascending: false })
+      const hoje = new Date().toISOString().slice(0, 10)
+      const valido = (all || []).find((p: any) => {
+        if (p.start_date && p.start_date > hoje) return false
+        if (p.end_date && p.end_date < hoje) return false
+        return true
       })
-      .then(({ data }) => {
-        if (data) {
-          setPopup(data as any)
-          setTimeout(() => setVisible(true), 2000)
-        }
-      })
+      if (valido) {
+        setPopup(valido as PopupData)
+        setTimeout(() => setVisible(true), 2000)
+      }
+    }
+    loadPopup()
   }, [])
 
   function fechar() {
@@ -49,9 +55,9 @@ export default function PopupPromo() {
       <div
         onClick={e => e.stopPropagation()}
         className="relative w-full max-w-md rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300"
-        style={{ background: popup.bg_color || '#1e7a3c' }}>
-        <button onClick={fechar}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-colors z-10">
+        style={{ background: popup.bg_color || '#1e7a3c' }}
+      >
+        <button onClick={fechar} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-colors z-10">
           <X size={16} />
         </button>
         {popup.image_url && (
@@ -61,11 +67,8 @@ export default function PopupPromo() {
         )}
         <div className="p-6 text-center">
           <h2 className="text-2xl font-black text-white leading-tight mb-2">{popup.title}</h2>
-          {popup.subtitle && (
-            <p className="text-sm text-white/80 leading-relaxed mb-5">{popup.subtitle}</p>
-          )}
-          <Link href={popup.button_link} onClick={fechar}
-            className="inline-block bg-white text-green-700 font-black text-sm px-8 py-3 rounded-full hover:bg-green-50 transition-colors">
+          {popup.subtitle && <p className="text-sm text-white/80 leading-relaxed mb-5">{popup.subtitle}</p>}
+          <Link href={popup.button_link} onClick={fechar} className="inline-block bg-white text-green-700 font-black text-sm px-8 py-3 rounded-full hover:bg-green-50 transition-colors">
             {popup.button_text}
           </Link>
         </div>

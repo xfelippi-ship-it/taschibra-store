@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { createClient } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import {
   Search, Filter, RefreshCw, ChevronDown, ChevronUp,
   CreditCard, RotateCcw, ShieldCheck, Bell, MessageSquare,
@@ -9,7 +9,7 @@ import {
   Loader2, AlertTriangle, Plus, Trash2,
 } from 'lucide-react'
 
-const supabase = createClient()
+
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 type Pedido = {
@@ -121,7 +121,7 @@ export default function PedidosPage() {
       .select('*, order_items(*)')
       .order('created_at', { ascending: false })
       .limit(200)
-    setPedidos((data as Pedido[]) || [])
+    setPedidos((data as any as Pedido[]) || [])
     setLoading(false)
   }, [])
 

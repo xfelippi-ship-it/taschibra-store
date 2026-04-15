@@ -90,8 +90,8 @@ export default function GaleriaTab() {
 
   async function carregar() {
     setLoading(true)
-    const { data } = await supabase.from('image_gallery').select('*').order('ordem')
-    setItens((data || []) as GalleryItem[])
+    const { data } = await supabase.from('image_gallery' as any).select('*').order('ordem')
+    setItens((data as any[] || []) as GalleryItem[])
     setLoading(false)
   }
 
@@ -139,7 +139,7 @@ export default function GaleriaTab() {
     setItens(prev => prev.map(x => x.id === item.id ? { ...x, ativo: !x.ativo } : x))
   }
 
-  function set(k: keyof GalleryItem, v: GalleryItem[keyof GalleryItem]) {
+  function set(k: keyof GalleryItem, v: unknown) {
     setEditando(prev => ({ ...prev, [k]: v }))
   }
 
