@@ -134,7 +134,10 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
   const [varEdit, setVarEdit] = useState<Variacao | null>(null)
 
   useEffect(() => { carregar(1) }, [])
-  useEffect(() => { carregar(1, busca) }, [busca])
+  useEffect(() => {
+    const t = setTimeout(() => { carregar(1, busca); setSelecionados(new Set()) }, 400)
+    return () => clearTimeout(t)
+  }, [busca])
 
   const [catsLS, setCatsLS] = useState<{ slug: string; label: string; pai: string | null }[]>([])
   const [selecionados, setSelecionados] = useState<Set<string>>(new Set())
