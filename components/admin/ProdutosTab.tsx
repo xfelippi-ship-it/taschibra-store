@@ -209,6 +209,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
   const [varEdit, setVarEdit] = useState<Variacao | null>(null)
 
   useEffect(() => { carregar(1) }, [])
+  useEffect(() => { carregar(1, busca) }, [busca])
 
   async function carregar(pag = 1, textoBusca = busca) {
     setLoading(true)
