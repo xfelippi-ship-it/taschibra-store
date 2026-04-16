@@ -11,7 +11,7 @@ import { registrarAuditoria } from '@/lib/auditLog'
 type Produto = {
   id: string; name: string; sku: string; price: number; promo_price: number
   stock_qty: number; active: boolean; badge: string; badges?: string[]; is_lancamento?: boolean; family?: string; brand_id?: string
-  category_slug?: string; categories?: string[]; description?: string; main_image?: string; images?: string[]; datasheet_url?: string
+  category_slug?: string; subcategory_slug?: string; categories?: string[]; description?: string; main_image?: string; images?: string[]; datasheet_url?: string
   weight_kg?: number; warranty?: string; ean?: string
 }
 
@@ -345,6 +345,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
               </th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Produto</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">SKU</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Categoria</th>
               {meuPapel !== 'marketing' && <th className="text-right px-5 py-3 text-xs font-black text-gray-500 uppercase">Preço</th>}
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Estoque</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Badge</th>
@@ -355,7 +356,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={9} className="text-center py-8 text-gray-400">Carregando...</td></tr>
+              <tr><td colSpan={10} className="text-center py-8 text-gray-400">Carregando...</td></tr>
             ) : produtosFiltrados.map(p => {
               const expandido = expandidos.has(p.id)
               const variacoes = variacoesPorProduto[p.id] || []
@@ -378,6 +379,16 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                       {p.family && <span className="text-xs text-gray-400 ml-1">{p.family}</span>}
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500 font-mono">{p.sku}</td>
+                    <td className="px-5 py-4">
+                      <div className="flex flex-col gap-0.5">
+                        {p.category_slug && (
+                          <span className="text-xs font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full w-fit">{p.category_slug}</span>
+                        )}
+                        {p.subcategory_slug && (
+                          <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full w-fit">↳ {p.subcategory_slug}</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-5 py-4 text-right">
                       {p.promo_price > 0 && <p className="text-xs text-gray-400 line-through">R$ {Number(p.price).toFixed(2).replace('.', ',')}</p>}
                       <p className="font-black text-green-700">R$ {Number(p.promo_price || p.price).toFixed(2).replace('.', ',')}</p>
@@ -421,7 +432,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
 
                   {expandido && (
                     <tr key={`var-${p.id}`} className="bg-gray-50 border-b border-gray-100">
-                      <td colSpan={9} className="px-8 py-3">
+                      <td colSpan={10} className="px-8 py-3">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs font-black text-gray-500 uppercase tracking-wide">
                             Variações ({variacoes.length})
