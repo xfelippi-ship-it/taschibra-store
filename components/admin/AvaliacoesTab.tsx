@@ -46,9 +46,10 @@ export default function AvaliacoesTab() {
   }
 
   async function atualizar(id: string, status: 'aprovado' | 'reprovado') {
-    await (supabase.from('product_reviews') as any)
+    const { error } = await (supabase.from('product_reviews') as any)
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', id)
+    if (error) { alert('Erro ao atualizar: ' + error.message); return }
     setReviews(prev => prev.map(r => r.id === id ? { ...r, status } : r))
   }
 
