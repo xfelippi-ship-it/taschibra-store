@@ -142,7 +142,7 @@ function TodasCategoriasPanel({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     async function load() {
       const [{ data: catsData }, { data: subsData }] = await Promise.all([
-        supabase.from('categories').select('id,name,slug,icon_svg,panel_image_url,panel_bg_color,panel_title,panel_tagline,show_in_menu').order('name'),
+        supabase.from('categories').select('id,name,slug,icon_svg,panel_image_url,panel_bg_color,panel_title,panel_tagline,show_in_menu').order('sort_order'),
         supabase.from('category_subcategories').select('id,category_slug,label,slug,sort_order').order('sort_order'),
       ])
       const c = (catsData || []).filter((x: CatData & {show_in_menu?: boolean}) => x.show_in_menu !== false)
