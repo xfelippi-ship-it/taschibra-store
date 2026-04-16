@@ -118,10 +118,12 @@ export default function GaleriaTab() {
       starts_at: editando.starts_at || null, ends_at: editando.ends_at || null,
     }
     if (editando.id) {
-      await supabase.from('image_gallery').update(dados as any).eq('id', editando.id)
+      const { error } = await supabase.from('image_gallery').update(dados as any).eq('id', editando.id)
+      if (error) { showMsg('Erro: ' + error.message); return }
       showMsg('Atualizado!')
     } else {
-      await supabase.from('image_gallery').insert(dados as any)
+      const { error } = await supabase.from('image_gallery').insert([dados] as any)
+      if (error) { showMsg('Erro: ' + error.message); return }
       showMsg('Bloco criado!')
     }
     setModal(false); setPreview(false); setEditando(vazio); carregar()
