@@ -58,7 +58,7 @@ function CardProduto({ p }: { p: ProdCard }) {
   return (
     <Link href={`/produto/${p.slug}`}
       className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-green-400 hover:shadow-md transition-all group flex flex-col">
-      <div className="bg-gray-50 flex items-center justify-center h-36 p-3 relative">
+      <div className="bg-gray-50 flex items-center justify-center aspect-square w-full overflow-hidden relative">
         {desc > 0 && (
           <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">
             -{desc}%
