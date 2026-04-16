@@ -57,7 +57,7 @@ function ProdutosContent() {
         } else {
           // Categorias raiz conhecidas -> filtrar por category_slug
           // Qualquer outro slug -> filtrar por subcategory_slug
-          const catsRaiz = ['ambientes','decorativo','energia','lampadas','profissional','smart','trilhos-perfis','pilhas','fechaduras','outlet','novidades']
+          const catsRaiz = ['ambientes','decorativo','energia','lampadas','profissional','smart','trilhos-perfis','pilhas','fechaduras','outlet','novidades','bazar','fitas-neon','pecas-de-reposicao']
           query = catsRaiz.includes(categoria)
             ? query.eq('category_slug', categoria)
             : (query as any).eq('subcategory_slug', categoria)
