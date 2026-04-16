@@ -39,14 +39,14 @@ const menuItems = [
 // ─── Dados dos megamenus inline ───────────────────────────────────────────────
 
 const ambientes = [
-  { label: 'Mesa / Sala',  slug: 'pendentes',   desc: 'Pendentes · Spots · Fitas LED' },
-  { label: 'Teto',         slug: 'plafons',     desc: 'Embutidos · Plafons · Trilhos' },
-  { label: 'Externo',      slug: 'refletores',  desc: 'Refletores · Postes · Jardim' },
-  { label: 'Parede',       slug: 'parede',      desc: 'Arandelas · Balizadores' },
-  { label: 'Piso',         slug: 'piso',        desc: 'Balizadores · Embutidos' },
-  { label: 'Sinalização',  slug: 'sinalizacao', desc: 'Emergência · Setorização' },
-  { label: 'Marcenaria',   slug: 'marcenaria',  desc: 'Perfis LED · Fitas · Embutidos' },
-  { label: 'Exclusivos',   slug: 'exclusivos',  desc: 'Design · Decorativos' },
+  { label: 'Pendente',         slug: 'pendente',        desc: 'Pendentes · Lustres · Spots' },
+  { label: 'Plafons',          slug: 'plafons',         desc: 'Embutidos · Plafons · Sobrepor' },
+  { label: 'Teto',             slug: 'teto',            desc: 'Spots · Luminárias · Embutidos' },
+  { label: 'Parede',           slug: 'parede',          desc: 'Arandelas · Balizadores' },
+  { label: 'Mesa',             slug: 'mesa',            desc: 'Abajures · Luminárias de Mesa' },
+  { label: 'Piso',             slug: 'piso',            desc: 'Balizadores · Colunas · Espetos' },
+  { label: 'Externo',          slug: 'externo',         desc: 'Refletores · Postes · Solar' },
+  { label: 'Pendente/Plafon',  slug: 'pendente-plafon', desc: 'Uso misto' },
 ]
 
 const trilhosPerfis = [
@@ -57,19 +57,19 @@ const trilhosPerfis = [
 
 const fitasNeonItems = [
   { label: 'Fita LED',             slug: 'fita-led',              desc: 'Techcord · Neon Flex · Pro COB' },
-  { label: 'Corda Luminosa',       slug: 'corda-luminosa',        desc: 'Corda LED · Mangueira · Pisca' },
-  { label: 'Acessórios',           slug: 'acessorios-para-fita',  desc: 'Conectores · Clips · Capas' },
-  { label: '12V',                  slug: '12V',                   desc: 'Fitas 12V com fonte' },
-  { label: '127V / 220V',          slug: '127V',                  desc: 'Direto na tomada' },
+  { label: 'Acessórios p/ Fita',   slug: 'acessorios-para-fita',  desc: 'Conectores · Clips · Capas' },
+  { label: 'Fontes e Drivers',     slug: 'fonte',                 desc: 'Drivers · Fontes · Transformadores' },
+  { label: 'Corda LED',            slug: 'corda-led',             desc: 'Corda LED · Mangueira · Pisca' },
+  { label: 'Neon Flex 360°',       slug: 'neon-flex-360',         desc: 'Neon Flex 360° Taschibra' },
 ]
 
 const energiaItems = [
-  { label: 'Fitas LED',          slug: 'fita-led',             desc: 'Techcord · Neon Flex · Pro COB' },
-  { label: 'Extensões',          slug: 'energia-extensoes',    desc: 'Filtros · Réguas · Tomadas' },
-  { label: 'Carregadores',       slug: 'energia-carregadores', desc: 'USB · Fast Charge · Turbo' },
-  { label: 'Cabos USB',          slug: 'energia-cabos',        desc: 'USB-A · USB-C · Cabos' },
-  { label: 'Sensores',           slug: 'sensores-de-presenca', desc: 'Presença · Movimento' },
-  { label: 'Acessórios',         slug: 'acessorios-para-fita', desc: 'Conectores · Drivers · Fontes' },
+  { label: 'Solar',            slug: 'solar',               desc: 'Luminárias · Painéis · Postes' },
+  { label: 'Soquete',          slug: 'soquete',             desc: 'Soquetes · Adaptadores' },
+  { label: 'Extensões',        slug: 'extensao',            desc: 'Filtros · Réguas · Tomadas' },
+  { label: 'Sensores',         slug: 'sensores-de-presenca',desc: 'Presença · Movimento' },
+  { label: 'Cabos USB',        slug: 'cabo-usb',            desc: 'USB-A · USB-C · Cabos' },
+  { label: 'Fita Isolante',    slug: 'fita-isolante',       desc: 'Isolamento elétrico' },
 ]
 
 // ─── Ícones SVG ───────────────────────────────────────────────────────────────
