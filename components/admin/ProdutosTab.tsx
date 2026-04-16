@@ -137,6 +137,31 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
   useEffect(() => { carregar(1, busca) }, [busca])
 
   const [catsLS, setCatsLS] = useState<{ slug: string; label: string; pai: string | null }[]>([])
+  const [selecionados, setSelecionados] = useState<Set<string>>(new Set())
+  const [loteCat, setLoteCat] = useState('')
+  const [loteSub, setLoteSub] = useState('')
+  const [aplicandoLote, setAplicandoLote] = useState(false)
+  const [msgLote, setMsgLote] = useState<string | null>(null)
+
+  function toggleSel(id: string) {
+    setSelecionados(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }
+  function toggleTodos() {
+    setSelecionados(prev => prev.size === produtos.length ? new Set() : new Set(produtos.map(p => p.id)))
+  }
+  async function aplicarLote() {
+    if (!loteCat || selecionados.size === 0) return
+    setAplicandoLote(true)
+    const ids = Array.from(selecionados)
+    for (const id of ids) {
+      await (supabase as any).from('products').update({ category_slug: loteCat, subcategory_slug: loteSub || null }).eq('id', id)
+    }
+    setAplicandoLote(false)
+    setMsgLote('✅ ' + ids.length + ' produtos atualizados!')
+    setSelecionados(new Set())
+    setTimeout(() => setMsgLote(null), 3000)
+    carregar(pagina)
+  }
   useEffect(() => {
     async function carregarCats() {
       const { data: cats } = await supabase.from('categories').select('slug,name,show_in_menu').order('sort_order')
@@ -280,10 +305,44 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full">
+        {selecionados.size > 0 && (
+            <div className="mx-4 mb-3 p-4 bg-green-50 border border-green-200 rounded-xl flex flex-wrap items-center gap-3">
+              <span className="text-sm font-black text-green-700">{selecionados.size} selecionado(s)</span>
+              <select value={loteCat} onChange={e => { setLoteCat(e.target.value); setLoteSub('') }}
+                className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:border-green-500">
+                <option value="">Categoria...</option>
+                {catsLS.filter(c => c.pai === null).map(c => (
+                  <option key={c.slug} value={c.slug}>{c.label}</option>
+                ))}
+              </select>
+              {loteCat && (
+                <select value={loteSub} onChange={e => setLoteSub(e.target.value)}
+                  className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:border-green-500">
+                  <option value="">Subcategoria...</option>
+                  {catsLS.filter(c => c.pai === loteCat).map(c => (
+                    <option key={c.slug} value={c.slug}>{c.label.replace('↳ ', '')}</option>
+                  ))}
+                </select>
+              )}
+              <button onClick={aplicarLote} disabled={!loteCat || aplicandoLote}
+                className="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg disabled:opacity-50 transition-colors">
+                {aplicandoLote ? 'Aplicando...' : 'Aplicar'}
+              </button>
+              <button onClick={() => setSelecionados(new Set())}
+                className="px-3 py-1.5 border border-gray-300 text-gray-600 text-sm font-bold rounded-lg hover:bg-gray-50">
+                Limpar
+              </button>
+              {msgLote && <span className="text-sm font-bold text-green-700">{msgLote}</span>}
+            </div>
+          )}
+          <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase w-8"></th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase w-8">
+                <input type="checkbox" checked={selecionados.size === produtos.length && produtos.length > 0}
+                  onChange={toggleTodos}
+                  className="w-4 h-4 rounded accent-green-600 cursor-pointer" />
+              </th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Produto</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">SKU</th>
               {meuPapel !== 'marketing' && <th className="text-right px-5 py-3 text-xs font-black text-gray-500 uppercase">Preço</th>}
@@ -303,7 +362,11 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
               return (
                 <>
                   <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="pl-4 py-4">
+                    <td className="pl-4 py-4 flex items-center gap-2">
+                      <input type="checkbox" checked={selecionados.has(p.id)}
+                        onChange={() => toggleSel(p.id)}
+                        onClick={e => e.stopPropagation()}
+                        className="w-4 h-4 rounded accent-green-600 cursor-pointer" />
                       <button onClick={() => toggleExpandir(p.id)}
                         className="text-gray-400 hover:text-green-600 transition-colors">
                         {expandido ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
