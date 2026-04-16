@@ -50,7 +50,11 @@ export default function AvaliacoesTab() {
       .update({ status })
       .eq('id', id)
     if (error) { alert('Erro ao atualizar: ' + error.message); return }
-    setReviews(prev => prev.map(r => r.id === id ? { ...r, status } : r))
+    if (filtro !== 'todos' && filtro !== status) {
+      setReviews(prev => prev.filter(r => r.id !== id))
+    } else {
+      setReviews(prev => prev.map(r => r.id === id ? { ...r, status } : r))
+    }
   }
 
   async function excluir(id: string) {
