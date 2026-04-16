@@ -145,7 +145,7 @@ function TodasCategoriasPanel({ onClose }: { onClose: () => void }) {
         supabase.from('categories').select('id,name,slug,icon_svg,panel_image_url,panel_bg_color,panel_title,panel_tagline,show_in_menu').order('sort_order'),
         supabase.from('category_subcategories').select('id,category_slug,label,slug,sort_order').order('sort_order'),
       ])
-      const c = (catsData || []).filter((x: CatData & {show_in_menu?: boolean}) => x.show_in_menu !== false)
+      const c = (catsData || []).filter((x: CatData & {show_in_menu?: boolean}) => x.show_in_menu !== false || x.slug === 'pecas-de-reposicao')
       setCats(c)
       if (c.length) setAtiva(c[0])
       const grouped: Record<string, SubCat[]> = {}
