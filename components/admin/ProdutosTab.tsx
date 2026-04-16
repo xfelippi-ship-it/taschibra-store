@@ -346,6 +346,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase w-8">
                 <input type="checkbox" checked={selecionados.size === produtos.length && produtos.length > 0}
                   onChange={toggleTodos}
+                  onClick={toggleTodos}
                   className="w-4 h-4 rounded accent-green-600 cursor-pointer" />
               </th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Produto</th>
@@ -371,7 +372,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                     <td className="pl-4 py-4 flex items-center gap-2">
                       <input type="checkbox" checked={selecionados.has(p.id)}
                         onChange={() => toggleSel(p.id)}
-                        onClick={e => e.stopPropagation()}
+                        onClick={e => { e.stopPropagation(); toggleSel(p.id) }}
                         className="w-4 h-4 rounded accent-green-600 cursor-pointer" />
                       <button onClick={() => toggleExpandir(p.id)}
                         className="text-gray-400 hover:text-green-600 transition-colors">
