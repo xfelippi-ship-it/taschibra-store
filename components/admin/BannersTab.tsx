@@ -121,12 +121,15 @@ export default function BannersTab({ meuEmail = 'admin' }: { meuEmail?: string }
       active: editando.active,
       starts_at: editando.starts_at || null,
       ends_at: editando.ends_at || null,
+      banner_type: editando.banner_type || 'principal',
     }
     if (editando.id) {
-      await supabase.from('banners').update(dados).eq('id', editando.id)
+      const { error } = await supabase.from('banners').update(dados).eq('id', editando.id)
+      if (error) { alert('Erro ao salvar: ' + error.message); return }
       await registrarAuditoria({ executedBy: meuEmail, acao: 'banner_editado', entidade: 'banners', detalhe: `Banner ID: ${editando.id}` })
     } else {
-      await supabase.from('banners').insert(dados)
+      const { error } = await supabase.from('banners').insert([dados])
+      if (error) { alert('Erro ao criar: ' + error.message); return }
       await registrarAuditoria({ executedBy: meuEmail, acao: 'banner_criado', entidade: 'banners', detalhe: 'Novo banner criado' })
     }
     setModal(false)
@@ -153,7 +156,7 @@ export default function BannersTab({ meuEmail = 'admin' }: { meuEmail?: string }
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-black text-gray-800">Banners do Carousel</h1>
+        <h1 className="text-2xl font-black text-gray-800">Banners do Carrossel</h1>
         <button onClick={() => { setEditando(bannerVazio); setPreview(false); setModal(true) }}
           className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-5 py-2.5 rounded-lg transition-colors">
           <Plus size={16} /> Novo Banner

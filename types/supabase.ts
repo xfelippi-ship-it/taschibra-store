@@ -159,6 +159,7 @@ export type Database = {
         Row: {
           active: boolean | null
           badge: string | null
+          banner_type: string | null
           bg_color: string | null
           btn1_href: string | null
           btn1_label: string | null
@@ -182,6 +183,7 @@ export type Database = {
         Insert: {
           active?: boolean | null
           badge?: string | null
+          banner_type?: string | null
           bg_color?: string | null
           btn1_href?: string | null
           btn1_label?: string | null
@@ -205,6 +207,7 @@ export type Database = {
         Update: {
           active?: boolean | null
           badge?: string | null
+          banner_type?: string | null
           bg_color?: string | null
           btn1_href?: string | null
           btn1_label?: string | null
