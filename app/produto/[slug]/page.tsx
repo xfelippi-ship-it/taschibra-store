@@ -65,7 +65,7 @@ function CardProduto({ p }: { p: ProdCard }) {
           </span>
         )}
         {p.main_image
-          ? <img src={p.main_image} alt={p.name} className="h-28 object-contain group-hover:scale-105 transition-transform" />
+          ? <img src={p.main_image} alt={p.name} className="w-full h-28 object-cover group-hover:scale-105 transition-transform" />
           : <span className="text-5xl opacity-20">💡</span>}
       </div>
       <div className="p-3 flex flex-col flex-1">
@@ -114,12 +114,12 @@ function CompreJunto({ categorySlug, produtoAtual }: {
 
   return (
     <div>
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-start gap-3 flex-wrap">
         {/* Produto atual */}
         <div className="flex flex-col items-center gap-2 w-36">
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 w-full flex items-center justify-center h-28">
             {produtoAtual.main_image
-              ? <img src={produtoAtual.main_image} alt={produtoAtual.name} className="h-20 object-contain" />
+              ? <img src={produtoAtual.main_image} alt={produtoAtual.name} className="w-full h-20 object-cover" />
               : <span className="text-4xl opacity-20">💡</span>}
           </div>
           <p className="text-[11px] text-gray-600 text-center leading-tight line-clamp-2">{produtoAtual.name}</p>
@@ -130,14 +130,14 @@ function CompreJunto({ categorySlug, produtoAtual }: {
           const preco = p.promo_price && p.promo_price > 0 ? p.promo_price : p.price
           const sel = !!selecionados[p.id]
           return (
-            <div key={p.id} className="flex items-center gap-3">
+            <div key={p.id} className="flex items-start gap-3">
               <span className="text-2xl text-gray-300 font-light">+</span>
               <div className="flex flex-col items-center gap-2 w-36">
                 <div onClick={() => setSelecionados(prev => ({ ...prev, [p.id]: !prev[p.id] }))}
                   className={`relative bg-gray-50 border-2 rounded-xl p-3 w-full flex items-center justify-center h-28 cursor-pointer transition-colors ${sel ? 'border-green-500' : 'border-gray-200 opacity-60'}`}>
                   {sel && <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center text-white text-[10px]">✓</span>}
                   {p.main_image
-                    ? <img src={p.main_image} alt={p.name} className="h-20 object-contain" />
+                    ? <img src={p.main_image} alt={p.name} className="w-full h-20 object-cover" />
                     : <span className="text-4xl opacity-20">💡</span>}
                 </div>
                 <p className="text-[11px] text-gray-600 text-center leading-tight line-clamp-2">{p.name}</p>
