@@ -65,7 +65,7 @@ function CardProduto({ p }: { p: ProdCard }) {
           </span>
         )}
         {p.main_image
-          ? <img src={p.main_image} alt={p.name} className="w-full h-28 object-cover group-hover:scale-105 transition-transform" />
+          ? <img src={p.main_image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
           : <span className="text-5xl opacity-20">💡</span>}
       </div>
       <div className="p-3 flex flex-col flex-1">
