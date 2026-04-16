@@ -7,6 +7,7 @@ import ProdutosTab from '@/components/admin/ProdutosTab'
 import PedidosTab from '@/components/admin/PedidosTab'
 import ImportarTab from '@/components/admin/ImportarTab'
 import CaracteristicasTab from '@/components/admin/CaracteristicasTab'
+import CanaisVendaTab from '@/components/admin/CanaisVendaTab'
 import DashboardTab from '@/components/admin/DashboardTab'
 import TopBarTab from '@/components/admin/TopBarTab'
 import CategoriasTab from '@/components/admin/CategoriasTab'
@@ -53,6 +54,7 @@ const TODOS_MODULOS = [
   { id: 'produtos',      label: 'Produtos',             grupo: 'Catálogo' },
   { id: 'categorias',    label: 'Categorias',           grupo: 'Catálogo' },
   { id: 'caracteristicas', label: 'Características',        grupo: 'Catálogo' },
+  { id: 'canais',           label: 'Canais de Venda',          grupo: 'Vendas' },
   { id: 'importar',      label: 'Importar CSV',           grupo: 'Catálogo' },
   { id: 'pedidos',       label: 'Pedidos',              grupo: 'Vendas' },
   { id: 'cupons',        label: 'Cupons',               grupo: 'Vendas' },
@@ -747,7 +749,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'cores' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup' | 'blog' | 'caracteristicas'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'cores' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup' | 'blog' | 'caracteristicas' | 'canais'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -981,6 +983,7 @@ export default function AdminPage() {
             {tem([], 'catalogo') && <BtnItem id="produtos"   label="Produtos"     icon={<Package size={15} />} />}
             {tem([], 'categorias') && <BtnItem id="categorias" label="Categorias"   icon={<Tag size={15} />} />}
             {tem([], 'caracteristicas') && <BtnItem id="caracteristicas" label="Características" icon={<Sliders size={15} />} />}
+            {tem([], 'canais') && <BtnItem id="canais" label="Canais de Venda" icon={<ShoppingBag size={15} />} />}
             {tem([], 'importar') && <BtnItem id="importar"   label="Importar CSV" icon={<Upload size={15} />} />}
             {tem([], 'marcas') && <BtnItem id="marcas"     label="Marcas"       icon={<Tag size={15} />} />}
             {tem([], 'cores') && <BtnItem id="cores"      label="Cores"        icon={<Tag size={15} />} />}
@@ -1091,6 +1094,7 @@ export default function AdminPage() {
         {aba === 'categorias' && <CategoriasTab />}
         {aba === 'importar' && <ImportarTab meuEmail={meuEmail} />}
                 {aba === 'caracteristicas' && <CaracteristicasTab meuEmail={meuEmail} />}
+                {aba === 'canais' && <CanaisVendaTab />}
         {aba === 'frete' && <FreteGratisTab />}
         {aba === 'carrinhos' && <CarrinhosAbandonadosTab />}
         {aba === 'relatorios' && <RelatoriosTab />}
