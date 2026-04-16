@@ -111,7 +111,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
     setLoading(true)
     let q = supabase
       .from('orders')
-      .select('*, customers(name, email, phone, cpf)')
+      .select('*, customers(first_name, last_name, email, phone, cpf)')
       .order('created_at', { ascending: false })
       .limit(200)
     if (filtroStatus !== 'todos')  q = q.eq('status', filtroStatus)
@@ -130,7 +130,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
       const b = busca.toLowerCase()
       if (
         !p.order_number?.toLowerCase().includes(b) &&
-        !p.customers?.name?.toLowerCase().includes(b) &&
+        !(p.customers?.first_name + ' ' + p.customers?.last_name)?.toLowerCase().includes(b) &&
         !p.customers?.email?.toLowerCase().includes(b) &&
         !p.customers?.cpf?.includes(b)
       ) return false
