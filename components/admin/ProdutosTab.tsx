@@ -153,11 +153,13 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
     if (!loteCat || selecionados.size === 0) return
     setAplicandoLote(true)
     const ids = Array.from(selecionados)
+    let ok = 0; let erros = 0
     for (const id of ids) {
-      await (supabase as any).from('products').update({ category_slug: loteCat, subcategory_slug: loteSub || null }).eq('id', id)
+      const { error } = await (supabase as any).from('products').update({ category_slug: loteCat, subcategory_slug: loteSub || null }).eq('id', id)
+      if (error) { console.error('Erro ao atualizar', id, error); erros++ } else { ok++ }
     }
     setAplicandoLote(false)
-    setMsgLote('✅ ' + ids.length + ' produtos atualizados!')
+    setMsgLote(erros > 0 ? '❌ ' + erros + ' erros. Ver console.' : '✅ ' + ok + ' produtos atualizados!')
     setSelecionados(new Set())
     setTimeout(() => setMsgLote(null), 3000)
     carregar(pagina)
