@@ -45,7 +45,7 @@ function ProdutosContent() {
       const [ordemCampo, ordemDir] = ordem.split("_")
       const ascending = ordemDir === "asc"
       const campoOrdem = ordemCampo === "name" ? "name" : ordemCampo === "preco" ? "price" : ordemCampo === "sales" ? "sales_count" : ordemCampo === "sort" ? "sort_order" : "created_at"
-      let query = supabase.from("products").select("*", { count: "exact" }).order('stock_qty', { ascending: false, nullsFirst: false }).order(campoOrdem, { ascending })
+      let query = supabase.from("products").select("*", { count: "exact" }).order(campoOrdem, { ascending })
       if (precoMin) query = query.gte("price", parseFloat(precoMin))
       if (precoMax) query = query.lte("price", parseFloat(precoMax))
       if (busca) {
