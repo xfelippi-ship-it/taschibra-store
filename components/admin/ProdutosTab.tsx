@@ -21,82 +21,7 @@ type Variacao = {
   stock_qty: number; active: boolean; technical_description?: string
 }
 
-const CATEGORIAS_LS = [
-  // ── LANÇAMENTOS ──────────────────────────────────────────────
-  { slug: 'lancamentos',            label: 'Lançamentos',                         pai: null },
-
-  // ── AMBIENTES ────────────────────────────────────────────────
-  { slug: 'ambientes',              label: 'Ambientes',                           pai: null },
-  { slug: 'pendentes',              label: '↳ Mesa / Sala',                       pai: 'ambientes' },
-  { slug: 'plafons',                label: '↳ Teto',                              pai: 'ambientes' },
-  { slug: 'refletores',             label: '↳ Externo (Refletores/Postes/Espetos)', pai: 'ambientes' },
-  { slug: 'parede',                 label: '↳ Parede / Arandela',                 pai: 'ambientes' },
-  { slug: 'piso',                   label: '↳ Piso / Jardim',                     pai: 'ambientes' },
-  { slug: 'sinalizacao',            label: '↳ Sinalização',                       pai: 'ambientes' },
-  { slug: 'marcenaria',             label: '↳ Marcenaria',                        pai: 'ambientes' },
-  { slug: 'exclusivos',             label: '↳ Exclusivos',                        pai: 'ambientes' },
-
-  // ── LÂMPADAS ─────────────────────────────────────────────────
-  { slug: 'lampadas',               label: 'Lâmpadas',                            pai: null },
-  { slug: 'lampadas-bulbo',         label: '↳ Bulbo',                             pai: 'lampadas' },
-  { slug: 'lampadas-dicroica',      label: '↳ Dicroica',                          pai: 'lampadas' },
-  { slug: 'lampadas-tubular',       label: '↳ Tubular',                           pai: 'lampadas' },
-  { slug: 'lampadas-filamento',     label: '↳ Filamento',                         pai: 'lampadas' },
-  { slug: 'lampadas-vela',          label: '↳ Vela',                              pai: 'lampadas' },
-  { slug: 'lampadas-halopin',       label: '↳ Halopin',                           pai: 'lampadas' },
-
-  // ── SMART ─────────────────────────────────────────────────────
-  { slug: 'smart',                  label: 'SMART',                               pai: null },
-  { slug: 'smart-lampadas',         label: '↳ Lâmpadas Smart',                    pai: 'smart' },
-  { slug: 'smart-refletores',       label: '↳ Refletores Smart',                  pai: 'smart' },
-  { slug: 'smart-fitas',            label: '↳ Fitas Smart',                       pai: 'smart' },
-  { slug: 'smart-controles',        label: '↳ Controles',                         pai: 'smart' },
-
-  // ── DECORATIVO ───────────────────────────────────────────────
-  { slug: 'decorativo',             label: 'Decorativo',                          pai: null },
-  { slug: 'fita-led',               label: '↳ Fita LED',                          pai: 'decorativo' },
-  { slug: 'corda-luminosa',         label: '↳ Corda Luminosa',                    pai: 'decorativo' },
-  { slug: 'acessorios-para-fita',   label: '↳ Acessórios para Fita',              pai: 'decorativo' },
-  { slug: 'acessorios-para-corda',  label: '↳ Acessórios para Corda',             pai: 'decorativo' },
-  { slug: 'natal',                  label: '↳ Natal',                             pai: 'decorativo' },
-  { slug: 'halloween',              label: '↳ Halloween',                         pai: 'decorativo' },
-
-  // ── TRILHOS & PERFIS ──────────────────────────────────────────
-  { slug: 'trilhos-perfis',         label: 'Trilhos & Perfis',                    pai: null },
-  { slug: 'trilho-magnetico',       label: '↳ Trilho Magnético',                  pai: 'trilhos-perfis' },
-  { slug: 'perfil',                 label: '↳ Perfil LED',                        pai: 'trilhos-perfis' },
-  { slug: 'cinta-soho',             label: '↳ Cinta Soho',                        pai: 'trilhos-perfis' },
-
-  // ── PILHAS ────────────────────────────────────────────────────
-  { slug: 'pilhas',                 label: 'Pilhas',                              pai: null },
-
-  // ── ENERGIA ───────────────────────────────────────────────────
-  { slug: 'energia',                label: 'Energia',                             pai: null },
-  { slug: 'energia-cabos',          label: '↳ Cabos USB',                         pai: 'energia' },
-  { slug: 'energia-carregadores',   label: '↳ Carregadores',                      pai: 'energia' },
-  { slug: 'energia-extensoes',      label: '↳ Extensões',                         pai: 'energia' },
-  { slug: 'sensores-presenca',      label: '↳ Sensores de Presença',              pai: 'energia' },
-
-  // ── FECHADURAS ────────────────────────────────────────────────
-  { slug: 'fechaduras',             label: 'Fechaduras',                          pai: null },
-
-  // ── PROFISSIONAL ──────────────────────────────────────────────
-  { slug: 'profissional',           label: 'Profissional',                        pai: null },
-  { slug: 'refletor',               label: '↳ Refletor PRO',                      pai: 'profissional' },
-  { slug: 'downlight',              label: '↳ Downlight',                         pai: 'profissional' },
-  { slug: 'high-bay',               label: '↳ High Bay',                          pai: 'profissional' },
-  { slug: 'luminaria-poste',        label: '↳ Luminária p/ Poste',                pai: 'profissional' },
-  { slug: 'luminaria-publica',      label: '↳ Luminária Pública',                 pai: 'profissional' },
-  { slug: 'calha',                  label: '↳ Calha',                             pai: 'profissional' },
-  { slug: 'painel',                 label: '↳ Painel',                            pai: 'profissional' },
-  { slug: 'luminaria-lente',        label: '↳ Com Lente',                         pai: 'profissional' },
-
-  // ── OUTLET ────────────────────────────────────────────────────
-  { slug: 'outlet',                 label: 'Outlet',                              pai: null },
-
-  // ── PEÇAS DE REPOSIÇÃO (só menu hambúrguer) ───────────────────
-  { slug: 'pecas-de-reposicao',     label: 'Peças de Reposição',                  pai: null },
-]
+const catsLS: { slug: string; label: string; pai: string | null }[] = []
 
 const TIPOS_VARIACAO = [
   { value: 'angulo_abertura',     label: 'Ângulo de Abertura'           },
@@ -210,6 +135,23 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
 
   useEffect(() => { carregar(1) }, [])
   useEffect(() => { carregar(1, busca) }, [busca])
+
+  const [catsLS, setCatsLS] = useState<{ slug: string; label: string; pai: string | null }[]>([])
+  useEffect(() => {
+    async function carregarCats() {
+      const { data: cats } = await supabase.from('categories').select('slug,name,show_in_menu').order('sort_order')
+      const { data: subs } = await (supabase as any).from('category_subcategories').select('category_slug,slug,label').order('sort_order')
+      if (!cats) return
+      const lista: { slug: string; label: string; pai: string | null }[] = []
+      cats.forEach((c: any) => {
+        lista.push({ slug: c.slug, label: c.name, pai: null })
+        const subsCat = (subs || []).filter((s: any) => s.category_slug === c.slug)
+        subsCat.forEach((s: any) => lista.push({ slug: s.slug, label: '↳ ' + s.label, pai: c.slug }))
+      })
+      setCatsLS(lista)
+    }
+    carregarCats()
+  }, [])
 
   async function carregar(pag = 1, textoBusca = busca) {
     setLoading(true)
@@ -696,7 +638,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                     </span>
                   </label>
                   <div className="border border-gray-200 rounded-lg max-h-52 overflow-y-auto p-2 space-y-0.5 bg-white">
-                    {CATEGORIAS_LS.map(cat => {
+                    {catsLS.map(cat => {
                       const checked = (produtoEdit.categories || []).includes(cat.slug)
                       return (
                         <label key={cat.slug} className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer hover:bg-gray-50 transition-colors ${cat.pai ? 'pl-5' : ''}`}>
