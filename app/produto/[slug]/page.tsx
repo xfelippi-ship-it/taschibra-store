@@ -117,9 +117,9 @@ function CompreJunto({ categorySlug, produtoAtual }: {
       <div className="flex items-start gap-3 flex-wrap">
         {/* Produto atual */}
         <div className="flex flex-col items-center gap-2 w-36">
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 w-full flex items-center justify-center h-28">
+          <div className="bg-gray-50 border border-gray-200 rounded-xl w-full aspect-square flex items-center justify-center overflow-hidden">
             {produtoAtual.main_image
-              ? <img src={produtoAtual.main_image} alt={produtoAtual.name} className="w-full h-20 object-cover" />
+              ? <img src={produtoAtual.main_image} alt={produtoAtual.name} className="w-full h-full object-cover" />
               : <span className="text-4xl opacity-20">💡</span>}
           </div>
           <p className="text-[11px] text-gray-600 text-center leading-tight line-clamp-2">{produtoAtual.name}</p>
@@ -134,10 +134,10 @@ function CompreJunto({ categorySlug, produtoAtual }: {
               <span className="text-2xl text-gray-300 font-light">+</span>
               <div className="flex flex-col items-center gap-2 w-36">
                 <div onClick={() => setSelecionados(prev => ({ ...prev, [p.id]: !prev[p.id] }))}
-                  className={`relative bg-gray-50 border-2 rounded-xl p-3 w-full flex items-center justify-center h-28 cursor-pointer transition-colors ${sel ? 'border-green-500' : 'border-gray-200 opacity-60'}`}>
+                  className={`relative bg-gray-50 border-2 rounded-xl w-full aspect-square flex items-center justify-center overflow-hidden cursor-pointer transition-colors ${sel ? 'border-green-500' : 'border-gray-200 opacity-60'}`}>
                   {sel && <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center text-white text-[10px]">✓</span>}
                   {p.main_image
-                    ? <img src={p.main_image} alt={p.name} className="w-full h-20 object-cover" />
+                    ? <img src={p.main_image} alt={p.name} className="w-full h-full object-cover" />
                     : <span className="text-4xl opacity-20">💡</span>}
                 </div>
                 <p className="text-[11px] text-gray-600 text-center leading-tight line-clamp-2">{p.name}</p>
