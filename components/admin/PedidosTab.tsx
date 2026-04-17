@@ -151,7 +151,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
     setLoading(true)
     let q = supabase
       .from('orders')
-      .select('*, customers(first_name, last_name, email, phone, cpf)')
+      .select('*, customers(first_name, last_name, email, phone, cpf), order_items(id, product_id, quantity, unit_price, total_price, products(name, main_image, sku))')
       .order('created_at', { ascending: false })
       .limit(200)
     if (filtroStatus !== 'todos')  q = q.eq('status', filtroStatus)
@@ -962,6 +962,42 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
 
 
                         </div>
+
+                        {/* ══ Itens do pedido ══ */}
+                        {p.order_items && p.order_items.length > 0 && (
+                          <div className="mt-6 pt-4 border-t border-gray-200">
+                            <p className="text-xs font-black text-gray-500 uppercase mb-3">Itens do Pedido</p>
+                            <div className="space-y-2">
+                              {p.order_items.map((item: any) => (
+                                <div key={item.id} className="flex items-center gap-3 bg-gray-50 rounded-lg px-3 py-2">
+                                  {item.products?.main_image ? (
+                                    <img
+                                      src={item.products.main_image}
+                                      alt={item.products?.name || ''}
+                                      className="w-10 h-10 object-cover rounded border border-gray-200 flex-shrink-0"
+                                    />
+                                  ) : (
+                                    <div className="w-10 h-10 bg-gray-200 rounded border border-gray-200 flex-shrink-0 flex items-center justify-center">
+                                      <Package size={16} className="text-gray-400" />
+                                    </div>
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-bold text-gray-800 truncate">
+                                      {item.products?.name || `Produto #${item.product_id}`}
+                                    </p>
+                                    {item.products?.sku && (
+                                      <p className="text-xs text-gray-400 font-mono">SKU: {item.products.sku}</p>
+                                    )}
+                                  </div>
+                                  <div className="text-right flex-shrink-0">
+                                    <p className="text-xs text-gray-500">{item.quantity}x R$ {Number(item.unit_price).toFixed(2).replace('.', ',')}</p>
+                                    <p className="text-sm font-black text-green-700">R$ {Number(item.total_price).toFixed(2).replace('.', ',')}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         {/* ══ Bloco 2: Timeline vertical (últimos 5 eventos) ══ */}
                         <div className="mt-6 pt-4 border-t border-gray-200">
