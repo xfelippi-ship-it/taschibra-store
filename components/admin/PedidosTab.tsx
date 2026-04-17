@@ -117,6 +117,9 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
   // Dropdown Mais ações
   const [menuAberto, setMenuAberto] = useState<string | null>(null)
 
+  // Canal de notificação
+  const [notifCanal, setNotifCanal] = useState<'email' | 'whatsapp' | 'ambos'>('email')
+
   // ── Filtros ──────────────────────────────────────────────────────────────
   const [busca,          setBusca]          = useState('')
   const [filtroStatus,   setFiltroStatus]   = useState('todos')
@@ -757,7 +760,6 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                             {p.sapiens_order_id && (
                               <p className="text-xs text-gray-500 mt-1">Sapiens ID: <span className="font-mono font-bold text-gray-700">{p.sapiens_order_id}</span></p>
                             )}
-
                             <p className="text-xs font-black text-gray-500 uppercase mt-4 mb-2">Valores</p>
                             <div className="text-sm space-y-1">
                               <div className="flex justify-between">
@@ -779,33 +781,96 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                                 <span className="font-black text-green-700">R$ {Number(p.total).toFixed(2).replace('.', ',')}</span>
                               </div>
                             </div>
+                          </div>
 
-                            {/* Tracking */}
-                            <div className="mt-3">
-                              <p className="text-xs font-black text-gray-500 uppercase mb-1">Código de Rastreio</p>
-                              <div className="flex gap-2">
+                          {/* Col 2: Rastreio + Antifraude */}
+                          <div>
+                            <p className="text-xs font-black text-gray-500 uppercase mb-2">Rastreio & Antifraude</p>
+                            <p className="text-xs text-gray-500 mb-1">Código de rastreio</p>
+                            <div className="flex gap-2 mb-4">
+                              <input
+                                value={trackingEdit[p.id] ?? p.tracking_code ?? ''}
+                                onChange={e => setTrackingEdit(t => ({ ...t, [p.id]: e.target.value }))}
+                                placeholder="Ex: BR123456789BR"
+                                className="flex-1 border border-gray-200 rounded px-2 py-1 text-xs font-mono outline-none focus:border-green-500"
+                              />
+                              <button onClick={() => salvarTracking(p)} className="text-xs font-bold bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700">
+                                Salvar
+                              </button>
+                            </div>
+                            {p.tracking_code && (
+                              <p className="text-xs text-gray-500 mb-4 font-mono">{p.tracking_code}</p>
+                            )}
+                            <p className="text-xs text-gray-500 mb-1">ClearSales</p>
+                            {p.clearsales_status ? (
+                              <p className="text-xs font-bold text-gray-700 mb-2">
+                                {p.clearsales_status}{p.clearsales_score ? ` (score ${p.clearsales_score})` : ''}
+                              </p>
+                            ) : (
+                              <button
+                                disabled={acao[p.id + '_clearsale']}
+                                onClick={e => { e.stopPropagation(); enviarClearSales(p) }}
+                                className="w-full flex items-center gap-2 text-xs font-bold bg-orange-500 text-white px-3 py-2 rounded-lg hover:bg-orange-600 disabled:opacity-50 mb-2">
+                                <AlertTriangle size={13} />
+                                {acao[p.id + '_clearsale'] ? 'Enviando...' : 'Enviar p/ análise'}
+                              </button>
+                            )}
+                            {p.payment_status === 'paid' && (
+                              <button
+                                disabled={acao[p.id + '_capturar']}
+                                onClick={e => { e.stopPropagation(); capturarPagamento(p) }}
+                                className="w-full flex items-center gap-2 text-xs font-bold bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 mt-2">
+                                <CreditCard size={13} />
+                                {acao[p.id + '_capturar'] ? 'Capturando...' : 'Capturar Pagamento'}
+                              </button>
+                            )}
+                            {!['cancelled', 'refunded'].includes(p.status) && p.payment_status !== 'refunded' && (
+                              <div className="mt-3">
+                                <p className="text-xs font-black text-gray-500 uppercase mb-1">Estorno</p>
                                 <input
-                                  value={trackingEdit[p.id] ?? p.tracking_code ?? ''}
-                                  onChange={e => setTrackingEdit(t => ({ ...t, [p.id]: e.target.value }))}
-                                  placeholder="Ex: BR123456789BR"
-                                  className="flex-1 border border-gray-200 rounded px-2 py-1 text-xs font-mono outline-none focus:border-green-500"
+                                  value={motivoEstorno[p.id] || ''}
+                                  onChange={e => setMotivoEstorno(m => ({ ...m, [p.id]: e.target.value }))}
+                                  placeholder="Motivo obrigatório..."
+                                  className="w-full border border-gray-200 rounded px-2 py-1 text-xs outline-none focus:border-red-400 mb-1"
                                 />
-                                <button onClick={() => salvarTracking(p)} className="text-xs font-bold bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700">
-                                  Salvar
+                                <button
+                                  disabled={acao[p.id + '_estorno']}
+                                  onClick={e => { e.stopPropagation(); estornarPedido(p) }}
+                                  className="w-full flex items-center justify-center gap-2 text-xs font-bold bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50">
+                                  <XCircle size={13} />
+                                  {acao[p.id + '_estorno'] ? 'Estornando...' : 'Estornar Pedido'}
                                 </button>
                               </div>
-                            </div>
+                            )}
                           </div>
 
                           {/* Col 3: Notificar cliente */}
                           <div>
                             <p className="text-xs font-black text-gray-500 uppercase mb-2">Notificar Cliente</p>
-                            <p className="text-xs text-gray-400 mb-2">Envia e-mail ao cliente com o status selecionado:</p>
+                            <div className="flex gap-1 mb-3 bg-gray-100 p-0.5 rounded-lg">
+                              {(['email', 'whatsapp', 'ambos'] as const).map(canal => (
+                                <button
+                                  key={canal}
+                                  onClick={e => { e.stopPropagation(); setNotifCanal(canal) }}
+                                  className={`flex-1 text-xs font-bold py-1.5 rounded-md transition-colors ${
+                                    notifCanal === canal
+                                      ? 'bg-white text-gray-800 shadow-sm'
+                                      : 'text-gray-500 hover:text-gray-700'
+                                  }`}>
+                                  {canal === 'email' ? 'Email' : canal === 'whatsapp' ? 'WhatsApp' : 'Ambos'}
+                                </button>
+                              ))}
+                            </div>
+                            {notifCanal === 'whatsapp' && (
+                              <p className="text-[11px] text-orange-600 bg-orange-50 px-2 py-1.5 rounded mb-2">
+                                WhatsApp disponível após integração com API (TI Taschibra)
+                              </p>
+                            )}
                             <div className="flex flex-col gap-1.5">
                               {NOTIF_STATUS.map(s => (
                                 <button
                                   key={s}
-                                  disabled={!!acao[p.id + '_notif']}
+                                  disabled={!!acao[p.id + '_notif'] || notifCanal === 'whatsapp'}
                                   onClick={e => { e.stopPropagation(); notificarCliente(p, s) }}
                                   className="flex items-center gap-2 text-xs font-bold px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50">
                                   {acao[p.id + '_notif']
