@@ -27,6 +27,7 @@ type Produto = {
   height_cm?: number; width_cm?: number; length_cm?: number
   voltage?: string; power_w?: number; color_temp_k?: number
   ip_rating?: string; brand?: string; datasheet_url?: string
+  stock_qty?: number | null
 }
 type Feature = {
   id: string; title: string
@@ -303,7 +304,11 @@ export default function ProdutoPage() {
     ? produto.category_slug.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
     : 'Produtos'
 
+  const estoqueAtual = variacaoSelecionada?.stock_qty ?? produto.stock_qty ?? null
+  const semEstoque = estoqueAtual !== null && estoqueAtual <= 0
+
   function handleAdd() {
+    if (semEstoque) return
     addItem({
       id: variacaoSelecionada?.id || produto!.id,
       slug: produto!.slug,
@@ -409,11 +414,17 @@ export default function ProdutoPage() {
               <span className="w-12 h-12 flex items-center justify-center text-sm font-black border-x border-gray-200">{qty}</span>
               <button onClick={() => setQty(q => q + 1)} className="w-10 h-12 bg-gray-50 text-lg font-bold text-gray-700 hover:bg-gray-100">+</button>
             </div>
-            <button onClick={handleAdd}
-              className={`flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all ${adicionado ? 'bg-green-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}>
-              <ShoppingCart size={18} />
-              {adicionado ? 'ADICIONADO! ✓' : 'ADICIONAR AO CARRINHO'}
-            </button>
+            {semEstoque ? (
+              <div className="flex-1 border-2 border-gray-200 rounded-lg py-3 flex items-center justify-center text-sm font-black text-gray-400 bg-gray-50">
+                Produto Indisponível
+              </div>
+            ) : (
+              <button onClick={handleAdd}
+                className={`flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all ${adicionado ? 'bg-green-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}>
+                <ShoppingCart size={18} />
+                {adicionado ? 'ADICIONADO! ✓' : 'ADICIONAR AO CARRINHO'}
+              </button>
+            )}
           </div>
           <div className="hidden md:flex gap-3 mb-4">
             <button className="flex-1 border border-gray-200 rounded-lg py-2.5 text-sm font-semibold text-gray-600 hover:border-green-500 hover:text-green-600 flex items-center justify-center gap-2 transition-colors">
@@ -604,11 +615,17 @@ export default function ProdutoPage() {
           <span className="w-9 h-11 flex items-center justify-center text-sm font-black border-x border-gray-200">{qty}</span>
           <button onClick={() => setQty(q => q + 1)} className="w-9 h-11 bg-gray-50 text-lg font-bold text-gray-700">+</button>
         </div>
+        {semEstoque ? (
+          <div className="flex-1 border-2 border-gray-200 rounded-lg py-3 flex items-center justify-center text-sm font-black text-gray-400 bg-gray-50">
+            Produto Indisponível
+          </div>
+        ) : (
         <button onClick={handleAdd}
           className={`flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all ${adicionado ? 'bg-green-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}>
           <ShoppingCart size={16} />
           {adicionado ? 'Adicionado! ✓' : 'Comprar'}
         </button>
+        )}
         <button className="border border-gray-200 rounded-lg px-3 flex items-center justify-center text-gray-500 hover:text-red-500 transition-colors">
           <Heart size={18} />
         </button>
