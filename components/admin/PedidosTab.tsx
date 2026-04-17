@@ -271,6 +271,52 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
     carregar()
   }
 
+  // ── Etapas do pedido (Magazord-style) ────────────────────────────────────
+  // Constrói os 5 cards a partir do status atual e do histórico
+  function construirEtapas(pedido: any, hist: HistoryEvent[]) {
+    // Etapa 4 muda conforme o método: entrega ou retirada
+    const terceiraEntrega = pedido.shipping_method?.toLowerCase?.().includes('retirada')
+      ? 'awaiting_pickup'
+      : 'shipped'
+
+    const etapas = [
+      { key: 'pending',           label: 'Aguardando Pagamento' },
+      { key: 'awaiting_shipment', label: 'Aguardando Expedição' },
+      { key: 'processing',        label: 'Em Separação' },
+      { key: terceiraEntrega,     label: terceiraEntrega === 'awaiting_pickup' ? 'Aguardando Retirada' : 'Aguardando Entrega' },
+      { key: 'delivered',         label: 'Finalizado' },
+    ]
+
+    // Índice da etapa atual baseado no status do pedido
+    const idxAtual = etapas.findIndex(e => e.key === pedido.status)
+
+    // Busca a data em que cada etapa foi atingida olhando o histórico
+    const eventosStatus = hist.filter(h => h.tipo === 'status')
+    const dataPorStatus: Record<string, string> = {}
+    eventosStatus.forEach(e => {
+      if (e.new_status && !dataPorStatus[e.new_status]) {
+        dataPorStatus[e.new_status] = e.created_at
+      }
+    })
+
+    return etapas.map((etapa, i) => {
+      let estado: 'concluida' | 'ativa' | 'futura' = 'futura'
+      if (idxAtual === -1) estado = 'futura'
+      else if (i < idxAtual) estado = 'concluida'
+      else if (i === idxAtual) estado = 'ativa'
+      return { ...etapa, estado, data: dataPorStatus[etapa.key] }
+    })
+  }
+
+  async function concluirEtapa(pedido: any) {
+    const permitidos = STATUS_TRANSITIONS[pedido.status] || []
+    if (permitidos.length === 0) return
+    // Se houver apenas uma transição "positiva" (ignora cancelled), usa ela
+    const proximaNormal = permitidos.find(s => s !== 'cancelled')
+    if (!proximaNormal) return
+    await atualizarStatus(pedido, proximaNormal)
+  }
+
   // ── Histórico unificado (status + notas) ─────────────────────────────────
   async function carregarHistorico(pedidoId: string) {
     // Busca status history
@@ -550,6 +596,77 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                   {expandido === p.id && (
                     <tr className="bg-gray-50 border-b border-gray-200">
                       <td colSpan={9} className="px-6 py-5">
+
+                        {/* ══ Bloco 1: Etapas do pedido (cards horizontais) ══ */}
+                        {!STATUS_FINAIS.includes(p.status) ? (
+                          <div className="mb-6">
+                            <p className="text-xs font-black text-gray-500 uppercase mb-2">Etapas do pedido</p>
+                            <div className="grid grid-cols-5 gap-2">
+                              {construirEtapas(p, historico[p.id] || []).map((etapa) => {
+                                const cfg = STATUS_LABELS[etapa.key]
+                                if (etapa.estado === 'concluida') {
+                                  return (
+                                    <div key={etapa.key} className="bg-green-50 rounded-lg p-3 min-h-[92px] flex flex-col justify-between">
+                                      <div>
+                                        <div className="flex items-center gap-1.5 mb-1.5">
+                                          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#16a34a"/><path d="M5 8.5l2 2 4-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                          <span className="text-[10px] font-black text-green-700 uppercase tracking-wide">Concluída</span>
+                                        </div>
+                                        <p className="text-xs font-bold text-green-900 leading-snug">{etapa.label}</p>
+                                      </div>
+                                      {etapa.data && (
+                                        <p className="text-[10px] text-green-600 mt-1">
+                                          {new Date(etapa.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} · {new Date(etapa.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                      )}
+                                    </div>
+                                  )
+                                }
+                                if (etapa.estado === 'ativa') {
+                                  return (
+                                    <div key={etapa.key} className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-3 min-h-[92px] flex flex-col justify-between">
+                                      <div>
+                                        <div className="flex items-center gap-1.5 mb-1.5">
+                                          <span className="w-2 h-2 bg-yellow-600 rounded-full inline-block" />
+                                          <span className="text-[10px] font-black text-yellow-700 uppercase tracking-wide">Em andamento</span>
+                                        </div>
+                                        <p className="text-xs font-bold text-yellow-900 leading-snug">{etapa.label}</p>
+                                      </div>
+                                      {(STATUS_TRANSITIONS[p.status] || []).some(s => s !== 'cancelled') && (
+                                        <button
+                                          onClick={e => { e.stopPropagation(); concluirEtapa(p) }}
+                                          disabled={acao[p.id + '_status']}
+                                          className="mt-1 text-[11px] font-bold bg-yellow-600 text-white px-2 py-1 rounded hover:bg-yellow-700 disabled:opacity-50">
+                                          Concluir etapa →
+                                        </button>
+                                      )}
+                                    </div>
+                                  )
+                                }
+                                return (
+                                  <div key={etapa.key} className="bg-gray-100 rounded-lg p-3 min-h-[92px] flex flex-col justify-between">
+                                    <div>
+                                      <div className="flex items-center gap-1.5 mb-1.5">
+                                        <span className="w-2 h-2 border-[1.5px] border-gray-400 rounded-full inline-block" />
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-wide">Aguardando</span>
+                                      </div>
+                                      <p className="text-xs font-bold text-gray-500 leading-snug">{etapa.label}</p>
+                                    </div>
+                                    <p className="text-[10px] text-gray-300 mt-1">—</p>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="mb-6 bg-red-50 border border-red-300 rounded-lg p-3 flex items-center gap-2">
+                            <XCircle size={16} className="text-red-700" />
+                            <p className="text-sm font-bold text-red-700">
+                              Pedido {STATUS_LABELS[p.status]?.label.toLowerCase() || p.status}
+                            </p>
+                          </div>
+                        )}
+
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
                           {/* Col 1: Endereço + Valores */}
