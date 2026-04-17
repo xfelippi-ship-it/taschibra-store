@@ -797,11 +797,38 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                                 <span className="font-black text-green-700">R$ {Number(p.total).toFixed(2).replace('.', ',')}</span>
                               </div>
                             </div>
+
+                            {/* Dados do cliente */}
+                            <p className="text-xs font-black text-gray-500 uppercase mt-4 mb-2">Dados do Cliente</p>
+                            <div className="text-sm space-y-0.5">
+                              {p.customers?.first_name && (
+                                <p className="font-bold text-gray-800">{[p.customers.first_name, p.customers.last_name].filter(Boolean).join(' ')}</p>
+                              )}
+                              {p.customers?.email && <p className="text-gray-500 text-xs">{p.customers.email}</p>}
+                              {p.customers?.phone && <p className="text-gray-500 text-xs">{p.customers.phone}</p>}
+                              {p.customers?.cpf && <p className="text-gray-400 text-xs font-mono">{p.customers.cpf}</p>}
+                              {p.customers?.erp_code && <p className="text-gray-400 text-xs">ERP: {p.customers.erp_code}</p>}
+                            </div>
                           </div>
 
-                          {/* Col 2: Rastreio + Antifraude */}
+                          {/* Col 2: Frete + Rastreio + Pagamento + Antifraude + Estorno */}
                           <div>
-                            <p className="text-xs font-black text-gray-500 uppercase mb-2">Rastreio & Antifraude</p>
+                            {/* Frete */}
+                            <p className="text-xs font-black text-gray-500 uppercase mb-2">Frete & Rastreio</p>
+                            {p.shipping_method && (
+                              <div className="text-xs text-gray-600 space-y-0.5 mb-3">
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">Método</span>
+                                  <span className="font-bold">{p.shipping_method}</span>
+                                </div>
+                                {p.shipping_days && (
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-400">Prazo</span>
+                                    <span>{p.shipping_days} dias úteis</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                             <p className="text-xs text-gray-500 mb-1">Código de rastreio</p>
                             <div className="flex gap-2 mb-4">
                               <input
@@ -814,34 +841,63 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                                 Salvar
                               </button>
                             </div>
-                            {p.tracking_code && (
-                              <p className="text-xs text-gray-500 mb-4 font-mono">{p.tracking_code}</p>
+
+                            {/* Pagamento */}
+                            <p className="text-xs font-black text-gray-500 uppercase mb-2">Pagamento</p>
+                            <div className="text-xs text-gray-600 space-y-1 mb-3">
+                              <div className="flex justify-between">
+                                <span className="text-gray-400">Método</span>
+                                <span className="font-bold">{PAYMENT_METHOD_LABELS[p.payment_method] || p.payment_method || '—'}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-400">Status</span>
+                                <Badge cfg={PAYMENT_LABELS[p.payment_status] || { label: p.payment_status || '—', bg: 'bg-gray-100', text: 'text-gray-500' }} />
+                              </div>
+                              {p.boleto_expiration_date && (
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">Vencimento</span>
+                                  <span>{new Date(p.boleto_expiration_date).toLocaleDateString('pt-BR')}</span>
+                                </div>
+                              )}
+                              {p.payment_method === 'boleto' && p.boleto_url && (
+                                <div className="flex justify-between items-center">
+                                  <span className="text-gray-400">2ª via</span>
+                                  <a href={p.boleto_url} target="_blank" rel="noreferrer" className="text-blue-600 font-bold hover:underline text-xs">
+                                    Abrir →
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+
+                            {p.payment_status === 'paid' && (
+                              <button
+                                disabled={acao[p.id + '_capturar']}
+                                onClick={e => { e.stopPropagation(); capturarPagamento(p) }}
+                                className="w-full flex items-center gap-2 text-xs font-bold bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 mb-3">
+                                <CreditCard size={13} />
+                                {acao[p.id + '_capturar'] ? 'Capturando...' : 'Capturar Pagamento'}
+                              </button>
                             )}
-                            <p className="text-xs text-gray-500 mb-1">ClearSales</p>
+
+                            {/* ClearSales */}
+                            <p className="text-xs font-black text-gray-500 uppercase mb-1">ClearSales</p>
                             {p.clearsales_status ? (
-                              <p className="text-xs font-bold text-gray-700 mb-2">
+                              <p className="text-xs font-bold text-gray-700 mb-3">
                                 {p.clearsales_status}{p.clearsales_score ? ` (score ${p.clearsales_score})` : ''}
                               </p>
                             ) : (
                               <button
                                 disabled={acao[p.id + '_clearsale']}
                                 onClick={e => { e.stopPropagation(); enviarClearSales(p) }}
-                                className="w-full flex items-center gap-2 text-xs font-bold bg-orange-500 text-white px-3 py-2 rounded-lg hover:bg-orange-600 disabled:opacity-50 mb-2">
+                                className="w-full flex items-center gap-2 text-xs font-bold bg-orange-500 text-white px-3 py-2 rounded-lg hover:bg-orange-600 disabled:opacity-50 mb-3">
                                 <AlertTriangle size={13} />
                                 {acao[p.id + '_clearsale'] ? 'Enviando...' : 'Enviar p/ análise'}
                               </button>
                             )}
-                            {p.payment_status === 'paid' && (
-                              <button
-                                disabled={acao[p.id + '_capturar']}
-                                onClick={e => { e.stopPropagation(); capturarPagamento(p) }}
-                                className="w-full flex items-center gap-2 text-xs font-bold bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 mt-2">
-                                <CreditCard size={13} />
-                                {acao[p.id + '_capturar'] ? 'Capturando...' : 'Capturar Pagamento'}
-                              </button>
-                            )}
+
+                            {/* Estorno */}
                             {!['cancelled', 'refunded'].includes(p.status) && p.payment_status !== 'refunded' && (
-                              <div className="mt-3">
+                              <div className="mt-1">
                                 <p className="text-xs font-black text-gray-500 uppercase mb-1">Estorno</p>
                                 <input
                                   value={motivoEstorno[p.id] || ''}
