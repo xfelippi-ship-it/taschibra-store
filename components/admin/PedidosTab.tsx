@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { registrarAuditoria } from '@/lib/auditLog'
 import {
@@ -41,6 +41,19 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
 }
 
 const STATUS_FLOW = ['pending', 'confirmed', 'processing', 'shipped', 'delivered']
+
+// Máquina de estados: transições permitidas a partir de cada status
+const STATUS_TRANSITIONS: Record<string, string[]> = {
+  pending:    ['confirmed', 'cancelled'],
+  confirmed:  ['processing', 'cancelled'],
+  processing: ['shipped', 'cancelled'],
+  shipped:    ['delivered'],
+  delivered:  [],            // final — só refunded via estorno
+  cancelled:  [],            // final
+  refunded:   [],            // final
+}
+
+const STATUS_FINAIS = ['delivered', 'cancelled', 'refunded']
 
 const NOTIF_STATUS = ['confirmed', 'processing', 'shipped', 'delivered']
 
@@ -148,6 +161,11 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
 
   // ── Ações ─────────────────────────────────────────────────────────────────
   async function atualizarStatus(pedido: any, novoStatus: string) {
+    const permitidos = STATUS_TRANSITIONS[pedido.status] || []
+    if (!permitidos.includes(novoStatus)) {
+      showToast(`Transição inválida: ${STATUS_LABELS[pedido.status]?.label || pedido.status} → ${STATUS_LABELS[novoStatus]?.label || novoStatus}`, 'erro')
+      return
+    }
     if (!confirm(`Alterar status para "${STATUS_LABELS[novoStatus]?.label}"?`)) return
     setAcao(a => ({ ...a, [pedido.id + '_status']: true }))
     const res = await fetch(`/api/admin/pedidos/${pedido.id}/status`, {
@@ -427,9 +445,8 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
             </thead>
             <tbody>
               {pedidosFiltrados.map((p: any) => (
-                <>
+                <React.Fragment key={p.id}>
                   <tr
-                    key={p.id}
                     className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
                     onClick={() => toggleExpandir(p.id)}>
                     <td className="px-3 py-4 text-gray-400">
@@ -444,7 +461,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                       )}
                     </td>
                     <td className="px-4 py-4">
-                      <p className="font-bold text-sm text-gray-800">{p.customers?.name || '—'}</p>
+                      <p className="font-bold text-sm text-gray-800">{[p.customers?.first_name, p.customers?.last_name].filter(Boolean).join(' ') || '—'}</p>
                       <p className="text-xs text-gray-400">{p.customers?.email || ''}</p>
                       {p.customers?.cpf && <p className="text-xs text-gray-300 font-mono">{p.customers.cpf}</p>}
                     </td>
@@ -473,7 +490,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
 
                   {/* ── Detalhe expandido ─────────────────────────────────── */}
                   {expandido === p.id && (
-                    <tr key={p.id + '_detail'} className="bg-gray-50 border-b border-gray-200">
+                    <tr className="bg-gray-50 border-b border-gray-200">
                       <td colSpan={9} className="px-6 py-5">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
@@ -541,23 +558,21 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                           {/* Col 2: Ações de status */}
                           <div>
                             <p className="text-xs font-black text-gray-500 uppercase mb-2">Alterar Status</p>
-                            <div className="flex flex-wrap gap-1 mb-3">
-                              {STATUS_FLOW.filter(s => s !== p.status).map(s => (
-                                <button
-                                  key={s}
-                                  disabled={acao[p.id + '_status']}
-                                  onClick={e => { e.stopPropagation(); atualizarStatus(p, s) }}
-                                  className={`text-xs font-bold px-2 py-1 rounded border transition-colors ${STATUS_LABELS[s].bg} ${STATUS_LABELS[s].text} border-current hover:opacity-80 disabled:opacity-50`}>
-                                  → {STATUS_LABELS[s].label}
-                                </button>
-                              ))}
-                              <button
-                                disabled={acao[p.id + '_status']}
-                                onClick={e => { e.stopPropagation(); atualizarStatus(p, 'cancelled') }}
-                                className="text-xs font-bold px-2 py-1 rounded border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50">
-                                Cancelar
-                              </button>
-                            </div>
+                            {STATUS_FINAIS.includes(p.status) ? (
+                              <p className="text-xs text-gray-400 italic mb-3">Status final — não permite alteração.</p>
+                            ) : (
+                              <div className="flex flex-wrap gap-1 mb-3">
+                                {(STATUS_TRANSITIONS[p.status] || []).map(s => (
+                                  <button
+                                    key={s}
+                                    disabled={acao[p.id + '_status']}
+                                    onClick={e => { e.stopPropagation(); atualizarStatus(p, s) }}
+                                    className={`text-xs font-bold px-2 py-1 rounded border transition-colors ${STATUS_LABELS[s].bg} ${STATUS_LABELS[s].text} border-current hover:opacity-80 disabled:opacity-50`}>
+                                    → {STATUS_LABELS[s].label}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
 
                             {/* Capturar */}
                             {p.payment_status === 'paid' && (
@@ -667,7 +682,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                       </td>
                     </tr>
                   )}
-                </>
+                </React.Fragment>
               ))}
             </tbody>
 
