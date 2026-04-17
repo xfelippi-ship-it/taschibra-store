@@ -637,6 +637,11 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                               </button>
                               {menuAberto === p.id && (
                                 <div onClick={e => e.stopPropagation()} className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg min-w-[200px] py-1 z-10">
+                                  <button
+                                    onClick={() => { window.print(); setMenuAberto(null) }}
+                                    className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                    🖨 Imprimir pedido
+                                  </button>
                                   <button className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                     🖨 Imprimir etiqueta
                                   </button>
@@ -655,7 +660,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                                   )}
                                   {!['cancelled', 'refunded'].includes(p.status) && p.payment_status !== 'refunded' && (
                                     <button
-                                      onClick={() => { setMenuAberto(null) }}
+                                      onClick={() => { setMenuAberto(null); estornarPedido(p) }}
                                       className="w-full text-left px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2">
                                       <XCircle size={12} /> Estornar pagamento
                                     </button>
