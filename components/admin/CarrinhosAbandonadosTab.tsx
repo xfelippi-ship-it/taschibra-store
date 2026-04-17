@@ -69,20 +69,20 @@ function nextDisparo(c: any): number | null {
 
 type Settings = {
   mode: string
-  d1_enabled: boolean; d1_template: string; d1_subject: string; d1_body: string; d1_coupon_code: string
-  d2_enabled: boolean; d2_template: string; d2_subject: string; d2_body: string; d2_coupon_code: string
-  d3_enabled: boolean; d3_template: string; d3_subject: string; d3_body: string; d3_coupon_code: string
+  d1_enabled: boolean; d1_delay_hours: number; d1_template: string; d1_subject: string; d1_body: string; d1_coupon_code: string
+  d2_enabled: boolean; d2_delay_hours: number; d2_template: string; d2_subject: string; d2_body: string; d2_coupon_code: string
+  d3_enabled: boolean; d3_delay_hours: number; d3_template: string; d3_subject: string; d3_body: string; d3_coupon_code: string
 }
 
 const DEFAULT_SETTINGS: Settings = {
   mode: 'manual',
-  d1_enabled: true, d1_template: 'lembrete_simples', d1_subject: 'Você esqueceu algo no carrinho',
+  d1_enabled: true, d1_delay_hours: 1, d1_template: 'lembrete_simples', d1_subject: 'Você esqueceu algo no carrinho',
   d1_body: 'Olá {{nome}}, você deixou {{produtos}} no seu carrinho.\n\nFinalize agora: {{link_carrinho}}',
   d1_coupon_code: '',
-  d2_enabled: true, d2_template: 'urgencia_suave', d2_subject: 'Seu carrinho ainda está reservado',
+  d2_enabled: true, d2_delay_hours: 12, d2_template: 'urgencia_suave', d2_subject: 'Seu carrinho ainda está reservado',
   d2_body: '{{nome}}, seu carrinho expira em 24h.\n\nParcele em {{parcelas}} e finalize: {{link_carrinho}}',
   d2_coupon_code: '',
-  d3_enabled: true, d3_template: 'ultima_chance', d3_subject: 'Última chance — oferta exclusiva para você',
+  d3_enabled: true, d3_delay_hours: 24, d3_template: 'ultima_chance', d3_subject: 'Última chance — oferta exclusiva para você',
   d3_body: '{{nome}}, última chance! Use o cupom {{cupom}} e finalize.\n\nVálido só hoje: {{link_carrinho}}',
   d3_coupon_code: '',
 }
@@ -410,15 +410,26 @@ export default function CarrinhosAbandonadosTab() {
             </div>
 
             {[
-              { n: 1, label: 'Disparo #1', delay: '1h após abandono', color: 'bg-blue-100 text-blue-800', templates: TEMPLATES_D1, tKey: 'd1_template', sKey: 'd1_subject', bKey: 'd1_body', cKey: 'd1_coupon_code', eKey: 'd1_enabled', hint: 'Sem cupom recomendado — só lembrete' },
-              { n: 2, label: 'Disparo #2', delay: '12h após abandono', color: 'bg-amber-100 text-amber-800', templates: TEMPLATES_D2, tKey: 'd2_template', sKey: 'd2_subject', bKey: 'd2_body', cKey: 'd2_coupon_code', eKey: 'd2_enabled', hint: 'Urgência suave' },
-              { n: 3, label: 'Disparo #3', delay: '24h após abandono', color: 'bg-green-100 text-green-800', templates: TEMPLATES_D3, tKey: 'd3_template', sKey: 'd3_subject', bKey: 'd3_body', cKey: 'd3_coupon_code', eKey: 'd3_enabled', hint: 'Última chance + oferta' },
-            ].map(({ n, label, delay, color, templates, tKey, sKey, bKey, cKey, eKey, hint }) => (
+              { n: 1, label: 'Disparo #1', color: 'bg-blue-100 text-blue-800', templates: TEMPLATES_D1, tKey: 'd1_template', sKey: 'd1_subject', bKey: 'd1_body', cKey: 'd1_coupon_code', eKey: 'd1_enabled', dKey: 'd1_delay_hours', hint: 'Sem cupom recomendado — só lembrete' },
+              { n: 2, label: 'Disparo #2', color: 'bg-amber-100 text-amber-800', templates: TEMPLATES_D2, tKey: 'd2_template', sKey: 'd2_subject', bKey: 'd2_body', cKey: 'd2_coupon_code', eKey: 'd2_enabled', dKey: 'd2_delay_hours', hint: 'Urgência suave' },
+              { n: 3, label: 'Disparo #3', color: 'bg-green-100 text-green-800', templates: TEMPLATES_D3, tKey: 'd3_template', sKey: 'd3_subject', bKey: 'd3_body', cKey: 'd3_coupon_code', eKey: 'd3_enabled', dKey: 'd3_delay_hours', hint: 'Última chance + oferta' },
+            ].map(({ n, label, color, templates, tKey, sKey, bKey, cKey, eKey, dKey, hint }) => (
               <div key={n} className="border border-gray-200 rounded-xl p-4 mb-4">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${color}`}>{label} · {delay}</span>
-                    <span className="text-xs text-gray-400">{hint}</span>
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${color}`}>{label}</span>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        min={1}
+                        max={168}
+                        value={(settings as any)[dKey] ?? 1}
+                        onChange={e => setSettings(s => ({ ...s, [dKey]: Number(e.target.value) }))}
+                        className="w-14 border border-gray-200 rounded px-2 py-0.5 text-xs text-center outline-none focus:border-green-500"
+                      />
+                      <span className="text-xs text-gray-400">horas após abandono</span>
+                    </div>
+                    <span className="text-xs text-gray-400">· {hint}</span>
                   </div>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <span className="text-xs text-gray-500">Ativo</span>
