@@ -386,7 +386,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
     setAcao(a => ({ ...a, [pedidoId + '_nota']: false }))
     if (data.ok) {
       setNovaNota(n => ({ ...n, [pedidoId]: '' }))
-      carregarNotas(pedidoId)
+      carregarHistorico(pedidoId)
     }
   }
 
@@ -882,41 +882,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                             </div>
                           </div>
 
-                          {/* Col 4: Anotações internas */}
-                          <div>
-                            <p className="text-xs font-black text-gray-500 uppercase mb-2">Anotações Internas</p>
-                            <div className="space-y-2 mb-3 max-h-48 overflow-y-auto">
-                              {(notes[p.id] || []).length === 0 && (
-                                <p className="text-xs text-gray-400 italic">Nenhuma anotação ainda.</p>
-                              )}
-                              {(notes[p.id] || []).map((n: Note) => (
-                                <div key={n.id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 text-xs relative group">
-                                  <p className="text-gray-800 leading-relaxed">{n.note}</p>
-                                  <p className="text-gray-400 mt-1">{n.created_by} · {new Date(n.created_at).toLocaleString('pt-BR')}</p>
-                                  <button
-                                    onClick={() => deletarNota(p.id, n.id)}
-                                    className="absolute top-2 right-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Trash2 size={11} />
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                            <div className="flex gap-2">
-                              <textarea
-                                rows={2}
-                                placeholder="Nova anotação interna..."
-                                value={novaNota[p.id] || ''}
-                                onChange={e => setNovaNota(n => ({ ...n, [p.id]: e.target.value }))}
-                                className="flex-1 border border-gray-200 rounded px-2 py-1 text-xs outline-none focus:border-blue-400 resize-none"
-                              />
-                              <button
-                                disabled={!!acao[p.id + '_nota']}
-                                onClick={() => salvarNota(p.id)}
-                                className="shrink-0 self-end flex items-center gap-1 text-xs font-bold bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50">
-                                {acao[p.id + '_nota'] ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
-                              </button>
-                            </div>
-                          </div>
+
 
                         </div>
 
