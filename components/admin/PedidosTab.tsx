@@ -25,11 +25,16 @@ const STATUS_LABELS: Record<string, { label: string; bg: string; text: string }>
 }
 
 const PAYMENT_LABELS: Record<string, { label: string; bg: string; text: string }> = {
-  pending:   { label: 'Aguardando', bg: 'bg-yellow-100', text: 'text-yellow-700' },
-  paid:      { label: 'Pago',       bg: 'bg-green-100',  text: 'text-green-700'  },
-  failed:    { label: 'Falhou',     bg: 'bg-red-100',    text: 'text-red-700'    },
-  refunded:  { label: 'Estornado',  bg: 'bg-gray-100',   text: 'text-gray-500'   },
-  captured:  { label: 'Capturado',  bg: 'bg-green-100',  text: 'text-green-700'  },
+  pending:    { label: 'Aguardando', bg: 'bg-yellow-100', text: 'text-yellow-700' },
+  waiting:    { label: 'Aguardando', bg: 'bg-yellow-100', text: 'text-yellow-700' },
+  processing: { label: 'Processando', bg: 'bg-blue-100', text: 'text-blue-700'   },
+  authorized: { label: 'Autorizado', bg: 'bg-blue-100',  text: 'text-blue-700'   },
+  paid:       { label: 'Pago',       bg: 'bg-green-100', text: 'text-green-700'  },
+  captured:   { label: 'Capturado',  bg: 'bg-green-100', text: 'text-green-700'  },
+  failed:     { label: 'Falhou',     bg: 'bg-red-100',   text: 'text-red-700'    },
+  refused:    { label: 'Recusado',   bg: 'bg-red-100',   text: 'text-red-700'    },
+  refunded:   { label: 'Estornado',  bg: 'bg-gray-100',  text: 'text-gray-500'   },
+  chargedback:{ label: 'Chargeback', bg: 'bg-red-100',   text: 'text-red-700'    },
 }
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
@@ -497,15 +502,30 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                           {/* Col 1: Endereço + Valores */}
                           <div>
                             <p className="text-xs font-black text-gray-500 uppercase mb-2">Endereço de Entrega</p>
-                            {p.shipping_address ? (
-                              <div className="text-sm text-gray-700 space-y-0.5">
-                                <p className="font-bold">{p.shipping_address.logradouro}, {p.shipping_address.numero}</p>
-                                {p.shipping_address.complemento && <p>{p.shipping_address.complemento}</p>}
-                                <p>{p.shipping_address.bairro}</p>
-                                <p>{p.shipping_address.localidade} — {p.shipping_address.uf}</p>
-                                <p className="font-mono text-gray-500">{p.shipping_address.cep}</p>
-                              </div>
-                            ) : <p className="text-sm text-gray-400">Não informado</p>}
+                            {(() => {
+                              const e = p.shipping_address
+                              if (!e || typeof e !== 'object') return <p className="text-sm text-gray-400">Não informado</p>
+                              const logradouro = e.logradouro || e.street || e.endereco || ''
+                              const numero     = e.numero || e.number || ''
+                              const compl      = e.complemento || e.complement || ''
+                              const bairro     = e.bairro || e.neighborhood || ''
+                              const cidade     = e.localidade || e.city || e.cidade || ''
+                              const uf         = e.uf || e.state || ''
+                              const cep        = e.cep || e.zip || e.zipcode || ''
+                              const linha1     = [logradouro, numero].filter(Boolean).join(', ')
+                              const linhaCid   = [cidade, uf].filter(Boolean).join(' — ')
+                              const vazio      = !linha1 && !bairro && !linhaCid && !cep
+                              if (vazio) return <p className="text-sm text-gray-400 italic">Endereço incompleto</p>
+                              return (
+                                <div className="text-sm text-gray-700 space-y-0.5">
+                                  {linha1   && <p className="font-bold">{linha1}</p>}
+                                  {compl    && <p>{compl}</p>}
+                                  {bairro   && <p>{bairro}</p>}
+                                  {linhaCid && <p>{linhaCid}</p>}
+                                  {cep      && <p className="font-mono text-gray-500">{cep}</p>}
+                                </div>
+                              )
+                            })()}
                             {p.shipping_method && (
                               <p className="mt-2 text-xs text-gray-500">Frete: <span className="font-bold text-gray-700">{p.shipping_method}</span></p>
                             )}
