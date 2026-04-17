@@ -616,37 +616,53 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                             <Badge cfg={STATUS_LABELS[p.status] || { label: p.status, bg: 'bg-gray-100', text: 'text-gray-600' }} />
                             <Badge cfg={PAYMENT_LABELS[p.payment_status] || { label: p.payment_status || '—', bg: 'bg-gray-100', text: 'text-gray-500' }} />
                           </div>
-                          <div className="relative">
+                          <div className="flex items-center gap-2">
                             <button
-                              onClick={e => { e.stopPropagation(); setMenuAberto(menuAberto === p.id ? null : p.id) }}
-                              className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50">
-                              <MoreVertical size={12} />
-                              Mais ações
-                              <ChevronDown size={12} />
+                              onClick={e => { e.stopPropagation(); window.print() }}
+                              className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                              🖨 Imprimir
                             </button>
-                            {menuAberto === p.id && (
-                              <div onClick={e => e.stopPropagation()} className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg min-w-[200px] py-1 z-10">
-                                <button className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                                  Imprimir pedido
-                                </button>
-                                <button className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                                  Imprimir etiqueta
-                                </button>
-                                <button onClick={() => { navigator.clipboard.writeText(p.order_number); setMenuAberto(null) }} className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                                  <Copy size={12} /> Copiar número
-                                </button>
-                                {!STATUS_FINAIS.includes(p.status) && (
-                                  <>
-                                    <div className="h-px bg-gray-200 my-1" />
+                            <button
+                              onClick={e => { e.stopPropagation(); toggleExpandir(p.id) }}
+                              className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-600 hover:bg-gray-50">
+                              ↩ Voltar
+                            </button>
+                            <div className="relative">
+                              <button
+                                onClick={e => { e.stopPropagation(); setMenuAberto(menuAberto === p.id ? null : p.id) }}
+                                className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50">
+                                <MoreVertical size={12} />
+                                Mais ações
+                                <ChevronDown size={12} />
+                              </button>
+                              {menuAberto === p.id && (
+                                <div onClick={e => e.stopPropagation()} className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg min-w-[200px] py-1 z-10">
+                                  <button className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                    🖨 Imprimir etiqueta
+                                  </button>
+                                  <button
+                                    onClick={() => { navigator.clipboard.writeText(p.order_number); setMenuAberto(null) }}
+                                    className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                    <Copy size={12} /> Copiar número
+                                  </button>
+                                  <div className="h-px bg-gray-200 my-1" />
+                                  {!STATUS_FINAIS.includes(p.status) && (
                                     <button
                                       onClick={() => { setMenuAberto(null); atualizarStatus(p, 'cancelled') }}
                                       className="w-full text-left px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2">
                                       <XCircle size={12} /> Cancelar pedido
                                     </button>
-                                  </>
-                                )}
-                              </div>
-                            )}
+                                  )}
+                                  {!['cancelled', 'refunded'].includes(p.status) && p.payment_status !== 'refunded' && (
+                                    <button
+                                      onClick={() => { setMenuAberto(null) }}
+                                      className="w-full text-left px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                      <XCircle size={12} /> Estornar pagamento
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
 
