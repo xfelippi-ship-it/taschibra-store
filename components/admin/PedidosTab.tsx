@@ -317,6 +317,12 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
     await atualizarStatus(pedido, proximaNormal)
   }
 
+  // Formata uma data pra "DD/MM · HH:MM"
+  function fmtData(iso: string) {
+    const d = new Date(iso)
+    return `${d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} · ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+  }
+
   // ── Histórico unificado (status + notas) ─────────────────────────────────
   async function carregarHistorico(pedidoId: string) {
     // Busca status history
@@ -869,6 +875,65 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                           </div>
 
                         </div>
+
+                        {/* ══ Bloco 2: Timeline vertical (últimos 5 eventos) ══ */}
+                        <div className="mt-6 pt-4 border-t border-gray-200">
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="text-xs font-black text-gray-500 uppercase">Histórico</p>
+                            {(historico[p.id]?.length || 0) > 5 && (
+                              <span className="text-xs text-gray-400">
+                                mostrando 5 de {historico[p.id]?.length}
+                              </span>
+                            )}
+                          </div>
+                          {(historico[p.id]?.length || 0) === 0 ? (
+                            <p className="text-sm text-gray-400 italic">Sem eventos registrados ainda.</p>
+                          ) : (
+                            <div className="relative pl-5 space-y-3">
+                              {/* linha vertical */}
+                              <div className="absolute left-[5px] top-1.5 bottom-1.5 w-px bg-gray-200" />
+                              {(historico[p.id] || []).slice(0, 5).map((ev) => (
+                                <div key={ev.id} className="relative">
+                                  {ev.tipo === 'status' ? (
+                                    <>
+                                      <div className="absolute -left-[19px] top-1 w-[11px] h-[11px] rounded-full bg-indigo-500 border-2 border-white" />
+                                      <div className="flex justify-between items-baseline gap-3">
+                                        <p className="text-sm text-gray-800 leading-snug">
+                                          {ev.previous_status ? (
+                                            <>Status alterado: <span className="text-gray-500">{STATUS_LABELS[ev.previous_status]?.label || ev.previous_status}</span> → <span className="font-bold">{STATUS_LABELS[ev.new_status || '']?.label || ev.new_status}</span></>
+                                          ) : (
+                                            <><span className="font-bold">Pedido criado</span> com status: {STATUS_LABELS[ev.new_status || '']?.label || ev.new_status}</>
+                                          )}
+                                        </p>
+                                        <p className="text-[11px] text-gray-400 whitespace-nowrap">{fmtData(ev.created_at)}</p>
+                                      </div>
+                                      {ev.changed_by && ev.changed_by !== 'system' && ev.changed_by !== 'backfill' && (
+                                        <p className="text-[11px] text-gray-400 mt-0.5">por {ev.changed_by}</p>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div className="absolute -left-[19px] top-1 w-[11px] h-[11px] rounded-full bg-yellow-400 border-2 border-white" />
+                                      <div className="flex justify-between items-baseline gap-3">
+                                        <div className="flex-1">
+                                          <p className="text-sm text-gray-800 font-bold leading-snug">Anotação interna</p>
+                                          <div className="bg-yellow-50 border-l-2 border-yellow-400 px-2.5 py-1.5 mt-1 rounded-r">
+                                            <p className="text-xs text-gray-800 leading-relaxed">{ev.note}</p>
+                                          </div>
+                                        </div>
+                                        <p className="text-[11px] text-gray-400 whitespace-nowrap">{fmtData(ev.created_at)}</p>
+                                      </div>
+                                      {ev.created_by && (
+                                        <p className="text-[11px] text-gray-400 mt-1">por {ev.created_by}</p>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
                       </td>
                     </tr>
                   )}
