@@ -304,8 +304,9 @@ export default function ProdutoPage() {
     ? produto.category_slug.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
     : 'Produtos'
 
-  const estoqueAtual = variacaoSelecionada?.stock_qty ?? produto.stock_qty ?? null
+  const estoqueAtual = variacaoSelecionada?.stock_qty ?? (produto as any).stock_qty ?? null
   const semEstoque = estoqueAtual !== null && estoqueAtual <= 0
+  if (typeof window !== 'undefined') console.log('[DEBUG stock]', { stock_qty: (produto as any).stock_qty, estoqueAtual, semEstoque })
 
   function handleAdd() {
     if (semEstoque) return
