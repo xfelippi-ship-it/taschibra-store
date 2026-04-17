@@ -722,7 +722,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                           </div>
                         )}
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
 
                           {/* Col 1: Endereço + Valores */}
                           <div>
