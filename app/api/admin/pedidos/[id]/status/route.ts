@@ -8,10 +8,10 @@ const supabase = createClient(
 
 const STATUS_VALIDOS = [
   'pending',
-  'awaiting_payment',
-  'confirmed',
   'awaiting_shipment',
+  'processing',
   'shipped',
+  'awaiting_pickup',
   'delivered',
   'cancelled',
   'refunded',

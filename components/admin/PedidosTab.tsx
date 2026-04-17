@@ -15,13 +15,14 @@ const supabase = createClient(
 )
 
 const STATUS_LABELS: Record<string, { label: string; bg: string; text: string }> = {
-  pending:    { label: 'Aguardando Pagamento', bg: 'bg-yellow-100', text: 'text-yellow-700' },
-  confirmed:  { label: 'Confirmado',           bg: 'bg-blue-100',   text: 'text-blue-700'   },
-  processing: { label: 'Em Separação',         bg: 'bg-purple-100', text: 'text-purple-700' },
-  shipped:    { label: 'Enviado',              bg: 'bg-indigo-100', text: 'text-indigo-700' },
-  delivered:  { label: 'Entregue',             bg: 'bg-green-100',  text: 'text-green-700'  },
-  cancelled:  { label: 'Cancelado',            bg: 'bg-red-100',    text: 'text-red-700'    },
-  refunded:   { label: 'Estornado',            bg: 'bg-gray-100',   text: 'text-gray-500'   },
+  pending:           { label: 'Aguardando Pagamento', bg: 'bg-yellow-100', text: 'text-yellow-700' },
+  awaiting_shipment: { label: 'Aguardando Expedição', bg: 'bg-blue-100',   text: 'text-blue-700'   },
+  processing:        { label: 'Em Separação',         bg: 'bg-purple-100', text: 'text-purple-700' },
+  shipped:           { label: 'Aguardando Entrega',   bg: 'bg-indigo-100', text: 'text-indigo-700' },
+  awaiting_pickup:   { label: 'Aguardando Retirada',  bg: 'bg-teal-100',   text: 'text-teal-700'   },
+  delivered:         { label: 'Finalizado',           bg: 'bg-green-100',  text: 'text-green-700'  },
+  cancelled:         { label: 'Cancelado',            bg: 'bg-red-100',    text: 'text-red-700'    },
+  refunded:          { label: 'Estornado',            bg: 'bg-gray-100',   text: 'text-gray-500'   },
 }
 
 const PAYMENT_LABELS: Record<string, { label: string; bg: string; text: string }> = {
@@ -45,22 +46,23 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
   free:        'Gratuito',
 }
 
-const STATUS_FLOW = ['pending', 'confirmed', 'processing', 'shipped', 'delivered']
+const STATUS_FLOW = ['pending', 'awaiting_shipment', 'processing', 'shipped', 'awaiting_pickup', 'delivered']
 
 // Máquina de estados: transições permitidas a partir de cada status
 const STATUS_TRANSITIONS: Record<string, string[]> = {
-  pending:    ['confirmed', 'cancelled'],
-  confirmed:  ['processing', 'cancelled'],
-  processing: ['shipped', 'cancelled'],
-  shipped:    ['delivered'],
-  delivered:  [],            // final — só refunded via estorno
-  cancelled:  [],            // final
-  refunded:   [],            // final
+  pending:           ['awaiting_shipment', 'cancelled'],
+  awaiting_shipment: ['processing', 'cancelled'],
+  processing:        ['shipped', 'awaiting_pickup', 'cancelled'],
+  shipped:           ['delivered'],
+  awaiting_pickup:   ['delivered'],
+  delivered:         [],            // final — só refunded via estorno
+  cancelled:         [],            // final
+  refunded:          [],            // final
 }
 
 const STATUS_FINAIS = ['delivered', 'cancelled', 'refunded']
 
-const NOTIF_STATUS = ['confirmed', 'processing', 'shipped', 'delivered']
+const NOTIF_STATUS = ['awaiting_shipment', 'processing', 'shipped', 'awaiting_pickup', 'delivered']
 
 type Note = { id: string; note: string; created_by: string; created_at: string }
 
@@ -606,7 +608,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                             )}
 
                             {/* ClearSales */}
-                            {(p.status === 'confirmed' || p.status === 'pending') && !p.clearsales_status && (
+                            {(p.status === 'awaiting_shipment' || p.status === 'pending') && !p.clearsales_status && (
                               <button
                                 disabled={acao[p.id + '_clearsale']}
                                 onClick={e => { e.stopPropagation(); enviarClearSales(p) }}
