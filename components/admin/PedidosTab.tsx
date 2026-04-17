@@ -6,7 +6,7 @@ import { registrarAuditoria } from '@/lib/auditLog'
 import {
   ChevronDown, ChevronRight, Package, XCircle,
   CreditCard, RefreshCw, AlertTriangle, Filter, X,
-  Bell, Plus, Trash2, Loader2, Download,
+  Bell, Plus, Trash2, Loader2, Download, Copy, MoreVertical,
 } from 'lucide-react'
 
 const supabase = createClient(
@@ -113,6 +113,9 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
 
   // Histórico unificado (status + notas) por pedido
   const [historico, setHistorico] = useState<Record<string, HistoryEvent[]>>({})
+
+  // Dropdown Mais ações
+  const [menuAberto, setMenuAberto] = useState<string | null>(null)
 
   // ── Filtros ──────────────────────────────────────────────────────────────
   const [busca,          setBusca]          = useState('')
@@ -601,7 +604,50 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                   {/* ── Detalhe expandido ─────────────────────────────────── */}
                   {expandido === p.id && (
                     <tr className="bg-gray-50 border-b border-gray-200">
-                      <td colSpan={9} className="px-6 py-5">
+                      <td colSpan={9} className="px-0 py-0">
+
+                        {/* cabeçalho do expand */}
+                        <div className="bg-gray-100 border-b border-gray-200 px-6 py-3 flex justify-between items-center">
+                          <div className="flex items-center gap-3">
+                            <p className="text-sm font-black text-gray-800">{p.order_number}</p>
+                            <Badge cfg={STATUS_LABELS[p.status] || { label: p.status, bg: 'bg-gray-100', text: 'text-gray-600' }} />
+                            <Badge cfg={PAYMENT_LABELS[p.payment_status] || { label: p.payment_status || '—', bg: 'bg-gray-100', text: 'text-gray-500' }} />
+                          </div>
+                          <div className="relative">
+                            <button
+                              onClick={e => { e.stopPropagation(); setMenuAberto(menuAberto === p.id ? null : p.id) }}
+                              className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50">
+                              <MoreVertical size={12} />
+                              Mais ações
+                              <ChevronDown size={12} />
+                            </button>
+                            {menuAberto === p.id && (
+                              <div onClick={e => e.stopPropagation()} className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg min-w-[200px] py-1 z-10">
+                                <button className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                  Imprimir pedido
+                                </button>
+                                <button className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                  Imprimir etiqueta
+                                </button>
+                                <button onClick={() => { navigator.clipboard.writeText(p.order_number); setMenuAberto(null) }} className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                  <Copy size={12} /> Copiar número
+                                </button>
+                                {!STATUS_FINAIS.includes(p.status) && (
+                                  <>
+                                    <div className="h-px bg-gray-200 my-1" />
+                                    <button
+                                      onClick={() => { setMenuAberto(null); atualizarStatus(p, 'cancelled') }}
+                                      className="w-full text-left px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                      <XCircle size={12} /> Cancelar pedido
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="px-6 py-5">
 
                         {/* ══ Bloco 1: Etapas do pedido (cards horizontais) ══ */}
                         {!STATUS_FINAIS.includes(p.status) ? (
@@ -673,7 +719,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                           </div>
                         )}
 
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                           {/* Col 1: Endereço + Valores */}
                           <div>
@@ -749,73 +795,6 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                                 </button>
                               </div>
                             </div>
-                          </div>
-
-                          {/* Col 2: Ações de status */}
-                          <div>
-                            <p className="text-xs font-black text-gray-500 uppercase mb-2">Alterar Status</p>
-                            {STATUS_FINAIS.includes(p.status) ? (
-                              <p className="text-xs text-gray-400 italic mb-3">Status final — não permite alteração.</p>
-                            ) : (
-                              <div className="flex flex-wrap gap-1 mb-3">
-                                {(STATUS_TRANSITIONS[p.status] || []).map(s => (
-                                  <button
-                                    key={s}
-                                    disabled={acao[p.id + '_status']}
-                                    onClick={e => { e.stopPropagation(); atualizarStatus(p, s) }}
-                                    className={`text-xs font-bold px-2 py-1 rounded border transition-colors ${STATUS_LABELS[s].bg} ${STATUS_LABELS[s].text} border-current hover:opacity-80 disabled:opacity-50`}>
-                                    → {STATUS_LABELS[s].label}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Capturar */}
-                            {p.payment_status === 'paid' && (
-                              <button
-                                disabled={acao[p.id + '_capturar']}
-                                onClick={e => { e.stopPropagation(); capturarPagamento(p) }}
-                                className="w-full flex items-center gap-2 text-xs font-bold bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 mb-2">
-                                <CreditCard size={13} />
-                                {acao[p.id + '_capturar'] ? 'Capturando...' : 'Capturar Pagamento'}
-                              </button>
-                            )}
-
-                            {/* ClearSales */}
-                            {(p.status === 'awaiting_shipment' || p.status === 'pending') && !p.clearsales_status && (
-                              <button
-                                disabled={acao[p.id + '_clearsale']}
-                                onClick={e => { e.stopPropagation(); enviarClearSales(p) }}
-                                className="w-full flex items-center gap-2 text-xs font-bold bg-orange-500 text-white px-3 py-2 rounded-lg hover:bg-orange-600 disabled:opacity-50 mb-2">
-                                <AlertTriangle size={13} />
-                                {acao[p.id + '_clearsale'] ? 'Enviando...' : 'Enviar p/ ClearSales'}
-                              </button>
-                            )}
-                            {p.clearsales_status && (
-                              <p className="text-xs text-gray-500 mb-2">
-                                ClearSales: <span className="font-bold text-gray-700">{p.clearsales_status} {p.clearsales_score ? `(${p.clearsales_score})` : ''}</span>
-                              </p>
-                            )}
-
-                            {/* Estorno com motivo */}
-                            {!['cancelled', 'refunded'].includes(p.status) && p.payment_status !== 'refunded' && (
-                              <div className="mt-2">
-                                <p className="text-xs font-black text-gray-500 uppercase mb-1">Estorno</p>
-                                <input
-                                  value={motivoEstorno[p.id] || ''}
-                                  onChange={e => setMotivoEstorno(m => ({ ...m, [p.id]: e.target.value }))}
-                                  placeholder="Motivo obrigatório..."
-                                  className="w-full border border-gray-200 rounded px-2 py-1 text-xs outline-none focus:border-red-400 mb-1"
-                                />
-                                <button
-                                  disabled={acao[p.id + '_estorno']}
-                                  onClick={e => { e.stopPropagation(); estornarPedido(p) }}
-                                  className="w-full flex items-center justify-center gap-2 text-xs font-bold bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50">
-                                  <XCircle size={13} />
-                                  {acao[p.id + '_estorno'] ? 'Estornando...' : 'Estornar Pedido'}
-                                </button>
-                              </div>
-                            )}
                           </div>
 
                           {/* Col 3: Notificar cliente */}
@@ -934,6 +913,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                           )}
                         </div>
 
+                        </div>{/* fecha px-6 py-5 */}
                       </td>
                     </tr>
                   )}
