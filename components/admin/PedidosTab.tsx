@@ -66,6 +66,17 @@ const NOTIF_STATUS = ['awaiting_shipment', 'processing', 'shipped', 'awaiting_pi
 
 type Note = { id: string; note: string; created_by: string; created_at: string }
 
+type HistoryEvent = {
+  id: string
+  tipo: 'status' | 'nota'
+  previous_status?: string | null
+  new_status?: string
+  note?: string
+  changed_by?: string
+  created_by?: string
+  created_at: string
+}
+
 function Badge({ cfg }: { cfg: { label: string; bg: string; text: string } }) {
   return (
     <span className={`text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${cfg.bg} ${cfg.text}`}>
@@ -99,6 +110,9 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
   // Anotações
   const [notes, setNotes]       = useState<Record<string, Note[]>>({})
   const [novaNota, setNovaNota] = useState<Record<string, string>>({})
+
+  // Histórico unificado (status + notas) por pedido
+  const [historico, setHistorico] = useState<Record<string, HistoryEvent[]>>({})
 
   // ── Filtros ──────────────────────────────────────────────────────────────
   const [busca,          setBusca]          = useState('')
@@ -257,6 +271,43 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
     carregar()
   }
 
+  // ── Histórico unificado (status + notas) ─────────────────────────────────
+  async function carregarHistorico(pedidoId: string) {
+    // Busca status history
+    const { data: statusData } = await supabase
+      .from('order_status_history')
+      .select('*')
+      .eq('order_id', pedidoId)
+      .order('created_at', { ascending: false })
+
+    // Busca notas (mesma fonte que carregarNotas, mas reuso aqui)
+    const resNotas = await fetch(`/api/admin/pedidos/${pedidoId}/anotacao`)
+    const dataNotas = await resNotas.json()
+    const notas: Note[] = dataNotas.notes || []
+
+    // Unifica e ordena por created_at DESC
+    const eventos: HistoryEvent[] = [
+      ...((statusData as any[] | null) || []).map((s: any) => ({
+        id: `s_${s.id}`,
+        tipo: 'status' as const,
+        previous_status: s.previous_status,
+        new_status: s.new_status,
+        changed_by: s.changed_by,
+        created_at: s.created_at,
+      })),
+      ...notas.map((n) => ({
+        id: `n_${n.id}`,
+        tipo: 'nota' as const,
+        note: n.note,
+        created_by: n.created_by,
+        created_at: n.created_at,
+      })),
+    ].sort((a, b) => b.created_at.localeCompare(a.created_at))
+
+    setHistorico((h) => ({ ...h, [pedidoId]: eventos }))
+    setNotes((n) => ({ ...n, [pedidoId]: notas })) // mantém compat com UI antiga
+  }
+
   // ── Anotações ─────────────────────────────────────────────────────────────
   async function carregarNotas(pedidoId: string) {
     const res = await fetch(`/api/admin/pedidos/${pedidoId}/anotacao`)
@@ -295,7 +346,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
       setExpandido(null)
     } else {
       setExpandido(id)
-      carregarNotas(id)
+      carregarHistorico(id)
     }
   }
 
