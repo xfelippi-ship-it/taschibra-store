@@ -306,7 +306,6 @@ export default function ProdutoPage() {
 
   const estoqueAtual = variacaoSelecionada?.stock_qty ?? (produto as any).stock_qty ?? null
   const semEstoque = estoqueAtual !== null && estoqueAtual <= 0
-  if (typeof window !== 'undefined') console.log('[DEBUG stock]', { stock_qty: (produto as any).stock_qty, estoqueAtual, semEstoque })
 
   function handleAdd() {
     if (semEstoque) return
