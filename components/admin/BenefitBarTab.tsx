@@ -10,13 +10,13 @@ const supabase = createClient(
 
 interface Beneficio {
   id?: string
-  icon: string
+  icone: string
   texto: string
-  active: boolean
+  ativo: boolean
   sort_order: number
 }
 
-const VAZIO: Beneficio = { icon: '✅', texto: '', active: true, sort_order: 0 }
+const VAZIO: Beneficio = { icone: '✅', texto: '', ativo: true, sort_order: 0 }
 
 export default function BenefitBarTab() {
   const [itens, setItens] = useState<Beneficio[]>([])
@@ -60,8 +60,8 @@ export default function BenefitBarTab() {
   }
 
   async function toggleAtivo(item: Beneficio) {
-    await supabase.from('benefit_bar').update({ active: !item.active } as any).eq('id', item.id!)
-    setItens(prev => prev.map(x => x.id === item.id ? { ...x, active: !x.active } : x))
+    await supabase.from('benefit_bar').update({ ativo: !item.ativo } as any).eq('id', item.id!)
+    setItens(prev => prev.map(x => x.id === item.id ? { ...x, ativo: !x.ativo } : x))
   }
 
   const EMOJIS = ['🚚','💳','🔒','🏭','🎁','⭐','✅','🛡️','💰','📦','🔧','🌟','🎯','💡','🏆']
@@ -85,9 +85,9 @@ export default function BenefitBarTab() {
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5">
         <p className="text-xs font-bold text-gray-500 uppercase mb-2">Preview da barra</p>
         <div className="flex flex-wrap gap-4">
-          {itens.filter(x => x.active).map(x => (
+          {itens.filter(x => x.ativo).map(x => (
             <div key={x.id} className="flex items-center gap-2 text-sm text-gray-700">
-              <span>{x.icon}</span>
+              <span>{x.icone}</span>
               <span>{x.texto}</span>
             </div>
           ))}
@@ -114,13 +114,13 @@ export default function BenefitBarTab() {
             <tbody>
               {itens.map(item => (
                 <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="px-5 py-4 text-2xl">{item.icon}</td>
+                  <td className="px-5 py-4 text-2xl">{item.icone}</td>
                   <td className="px-5 py-4 font-bold text-gray-800">{item.texto}</td>
                   <td className="px-5 py-4 text-center text-gray-500">{item.sort_order}</td>
                   <td className="px-5 py-4 text-center">
                     <button onClick={() => toggleAtivo(item)}
-                      className={`text-xs font-bold px-3 py-1 rounded-full transition-colors ${item.active ? 'bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-600' : 'bg-gray-100 text-gray-500 hover:bg-green-100 hover:text-green-700'}`}>
-                      {item.active ? 'Ativo' : 'Inativo'}
+                      className={`text-xs font-bold px-3 py-1 rounded-full transition-colors ${item.ativo ? 'bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-600' : 'bg-gray-100 text-gray-500 hover:bg-green-100 hover:text-green-700'}`}>
+                      {item.ativo ? 'Ativo' : 'Inativo'}
                     </button>
                   </td>
                   <td className="px-5 py-4 text-center">
@@ -150,14 +150,14 @@ export default function BenefitBarTab() {
                 <label className="text-xs font-bold text-gray-600 mb-2 block">Ícone (emoji)</label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {EMOJIS.map(e => (
-                    <button key={e} onClick={() => setForm({ ...form, icon: e })}
-                      className={`text-xl w-9 h-9 rounded-lg border-2 transition-all ${form.icon === e ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                    <button key={e} onClick={() => setForm({ ...form, icone: e })}
+                      className={`text-xl w-9 h-9 rounded-lg border-2 transition-all ${form.icone === e ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
                       {e}
                     </button>
                   ))}
                 </div>
                 <input className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
-                  value={form.icon} onChange={e => setForm({ ...form, icon: e.target.value })}
+                  value={form.icone} onChange={e => setForm({ ...form, icone: e.target.value })}
                   placeholder="Ou cole qualquer emoji" />
               </div>
               <div>
@@ -175,8 +175,8 @@ export default function BenefitBarTab() {
                 </div>
                 <div className="flex items-end pb-1">
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={form.active}
-                      onChange={e => setForm({ ...form, active: e.target.checked })}
+                    <input type="checkbox" checked={form.ativo}
+                      onChange={e => setForm({ ...form, ativo: e.target.checked })}
                       className="w-4 h-4 accent-green-600" />
                     <span className="text-sm font-bold text-gray-700">Ativo</span>
                   </label>

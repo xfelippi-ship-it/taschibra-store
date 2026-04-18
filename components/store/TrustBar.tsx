@@ -15,7 +15,7 @@ export default function TrustBar() {
 
   useEffect(() => {
     supabase.from('benefit_bar' as any).select('icon,texto,sort_order')
-      .eq('active', true).order('sort_order')
+      .eq('ativo', true).order('sort_order')
       .then(({ data }: any) => {
         if (data && data.length > 0) setItems(data)
       })
@@ -26,7 +26,7 @@ export default function TrustBar() {
       <div className="max-w-7xl mx-auto grid grid-cols-2 md:flex md:justify-center gap-3 md:gap-12">
         {items.map((item, i) => (
           <div key={i} className="flex items-center gap-2 text-xs md:text-sm font-semibold text-green-800">
-            <span className="text-lg md:text-xl flex-shrink-0">{item.icon}</span>
+            <span className="text-lg md:text-xl flex-shrink-0">{(item as any).icone || (item as any).icon}</span>
             <span>{item.texto}</span>
           </div>
         ))}
