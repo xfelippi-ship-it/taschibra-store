@@ -74,7 +74,7 @@ export default function CheckoutPage() {
   const [cartaoParcelas, setCartaoParcelas] = useState(1)
 
   const desconto = cupom?.discount_amount || 0
-  const totalComFrete = total - desconto + freteEscolhido.preco
+  const totalComFrete = total - desconto + (freteEscolhido?.preco || 0)
 
   async function buscarCep() {
     if (cep.replace(/\D/g, '').length !== 8) return
@@ -134,7 +134,7 @@ export default function CheckoutPage() {
                 total_price: (i.promo_price || i.price) * i.quantity,
               })),
               subtotal: total - desconto,
-              frete: freteEscolhido.preco,
+              frete: freteEscolhido?.preco || 0,
               desconto,
               total: totalComFrete,
               metodo_pagamento: pagamento,
@@ -254,8 +254,8 @@ export default function CheckoutPage() {
             <p className="text-sm text-gray-500 mb-5">Entregando em: <strong>{endereco?.logradouro}, {numero} — {endereco?.localidade}/{endereco?.uf}</strong></p>
             <div className="space-y-3 mb-6">
               {freteOpcoes.map(op=>(
-                <label key={op.id} className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-colors ${freteEscolhido.id===op.id?'border-green-500 bg-green-50':'border-gray-200 hover:border-gray-300'}`}>
-                  <input type="radio" name="frete" checked={freteEscolhido.id===op.id} onChange={()=>setFreteEscolhido(op)} className="accent-green-600"/>
+                <label key={op.id} className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-colors ${freteEscolhido?.id===op.id?'border-green-500 bg-green-50':'border-gray-200 hover:border-gray-300'}`}>
+                  <input type="radio" name="frete" checked={freteEscolhido?.id===op.id} onChange={()=>setFreteEscolhido(op)} className="accent-green-600"/>
                   <span className="text-2xl">{op.icon}</span>
                   <div className="flex-1"><div className="font-black text-gray-800 text-sm">{op.nome}</div><div className="text-xs text-gray-500">{op.prazo}</div></div>
                   <div className="font-black text-green-700">R$ {op.preco.toFixed(2).replace('.',',')}</div>
@@ -328,7 +328,7 @@ export default function CheckoutPage() {
           <div className="border-t border-gray-100 pt-4 space-y-2">
             <div className="flex justify-between text-sm text-gray-600"><span>Subtotal</span><span>R$ {total.toFixed(2).replace('.',',')}</span></div>
             {cupom&&<div className="flex justify-between text-sm text-green-600 font-semibold"><span>Cupom ({cupom.code})</span><span>- R$ {desconto.toFixed(2).replace('.',',')}</span></div>}
-            <div className="flex justify-between text-sm text-gray-600"><span>Frete ({freteEscolhido.nome})</span><span>R$ {freteEscolhido.preco.toFixed(2).replace('.',',')}</span></div>
+            <div className="flex justify-between text-sm text-gray-600"><span>Frete ({freteEscolhido?.nome || '—'})</span><span>R$ {(freteEscolhido?.preco || 0).toFixed(2).replace('.',',')}</span></div>
             <div className="flex justify-between font-black text-gray-800 pt-2 border-t border-gray-100"><span>Total</span><span className="text-green-700 text-lg">R$ {totalComFrete.toFixed(2).replace('.',',')}</span></div>
           </div>
         </div>
