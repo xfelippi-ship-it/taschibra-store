@@ -9,11 +9,7 @@ import { ChevronRight, MapPin, Truck, CreditCard, CheckCircle, Copy, User } from
 
 type Step = 'endereco' | 'frete' | 'pagamento' | 'confirmado'
 
-const freteOpcoes = [
-  { id: 'pac', nome: 'PAC', prazo: '8 a 12 dias úteis', preco: 18.90, icon: '📦' },
-  { id: 'sedex', nome: 'SEDEX', prazo: '2 a 4 dias úteis', preco: 34.50, icon: '⚡' },
-  { id: 'sedex10', nome: 'SEDEX 10', prazo: 'Até 10h do dia seguinte', preco: 52.00, icon: '🚀' },
-]
+
 
 function formatCPF(v: string) {
   return v.replace(/\D/g,'').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2').substring(0,14)
@@ -31,7 +27,35 @@ export default function CheckoutPage() {
   const [loadingCep, setLoadingCep] = useState(false)
   const [numero, setNumero] = useState('')
   const [complemento, setComplemento] = useState('')
-  const [freteEscolhido, setFreteEscolhido] = useState(freteOpcoes[0])
+  const [freteOpcoes, setFreteOpcoes] = useState<any[]>([])
+  const [freteEscolhido, setFreteEscolhido] = useState<any>(null)
+  const [loadingFrete, setLoadingFrete] = useState(false)
+  const [erroFrete, setErroFrete] = useState<string|null>(null)
+
+  async function buscarFrete(cepDestino: string) {
+    setLoadingFrete(true)
+    setErroFrete(null)
+    setFreteOpcoes([])
+    setFreteEscolhido(null)
+    try {
+      const produtos = items.map(i => ({ peso: 0.3, quantity: i.quantity }))
+      const res = await fetch('/api/frete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cep_destino: cepDestino, produtos })
+      })
+      const data = await res.json()
+      if (data.opcoes && data.opcoes.length > 0) {
+        setFreteOpcoes(data.opcoes)
+        setFreteEscolhido(data.opcoes[0])
+      } else {
+        setErroFrete('Não foi possível calcular o frete para este CEP.')
+      }
+    } catch {
+      setErroFrete('Erro ao calcular frete. Tente novamente.')
+    }
+    setLoadingFrete(false)
+  }
   const [pagamento, setPagamento] = useState<'pix' | 'cartao'>('pix')
   const [pixCopiado, setPixCopiado] = useState(false)
   const [processando, setProcessando] = useState(false)
@@ -215,7 +239,7 @@ export default function CheckoutPage() {
                     <div><label className="text-sm font-bold text-gray-700 mb-1.5 block">Cidade</label><input value={endereco.localidade} readOnly className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm bg-gray-50 outline-none"/></div>
                     <div><label className="text-sm font-bold text-gray-700 mb-1.5 block">Estado</label><input value={endereco.uf} readOnly className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm bg-gray-50 outline-none"/></div>
                   </div>
-                  <button onClick={()=>setStep('frete')} disabled={!numero||!nome||!email||!cpf||!telefone} className="w-full bg-green-600 hover:bg-green-700 text-white font-black py-3.5 rounded-lg transition-colors mt-2 disabled:opacity-50">Continuar para Frete →</button>
+                  <button onClick={async ()=>{ await buscarFrete(cep); setStep('frete') }} disabled={!numero||!nome||!email||!cpf||!telefone||!cep} className="w-full bg-green-600 hover:bg-green-700 text-white font-black py-3.5 rounded-lg transition-colors mt-2 disabled:opacity-50">Continuar para Frete →</button>
                 </>)}
               </div>
             </div>
@@ -225,6 +249,8 @@ export default function CheckoutPage() {
         {step==='frete'&&(
           <div className="bg-white border border-gray-200 rounded-xl p-6">
             <h2 className="text-lg font-black text-gray-800 mb-2 flex items-center gap-2"><Truck size={18} className="text-green-600"/>Opções de entrega</h2>
+            {loadingFrete && <div className="flex items-center gap-3 py-8 text-gray-400 text-sm"><div className="animate-spin w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full"/>&nbsp;Calculando frete...</div>}
+            {erroFrete && <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-600 mb-3">{erroFrete}</div>}
             <p className="text-sm text-gray-500 mb-5">Entregando em: <strong>{endereco?.logradouro}, {numero} — {endereco?.localidade}/{endereco?.uf}</strong></p>
             <div className="space-y-3 mb-6">
               {freteOpcoes.map(op=>(
