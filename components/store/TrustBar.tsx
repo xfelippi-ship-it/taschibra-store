@@ -1,15 +1,16 @@
 'use client'
+import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
-const FALLBACK = [
-  { icon: '🚚', texto: 'Enviamos para todo o Brasil' },
-  { icon: '💳', texto: 'Parcele em até 10x sem juros' },
-  { icon: '🔒', texto: 'Compra 100% segura' },
-  { icon: '🏭', texto: 'Fábrica própria em Indaial/SC' },
-]
-
 export default function TrustBar() {
+  const { parcelas } = useEmpresaConfig()
+  const FALLBACK = [
+    { icon: '🚚', texto: 'Enviamos para todo o Brasil' },
+    { icon: '💳', texto: `Parcele em até ${parcelas}x sem juros` },
+    { icon: '🔒', texto: 'Compra 100% segura' },
+    { icon: '🏭', texto: 'Fábrica própria em Indaial/SC' },
+  ]
   const [items, setItems] = useState(FALLBACK)
 
   useEffect(() => {

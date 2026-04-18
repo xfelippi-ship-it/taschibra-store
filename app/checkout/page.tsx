@@ -1,4 +1,5 @@
 'use client'
+import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
 import { useState } from 'react'
 import { useCart } from '@/contexts/CartContext'
 import Header from '@/components/store/Header'
@@ -22,6 +23,7 @@ function formatTel(v: string) {
 }
 
 export default function CheckoutPage() {
+  const { parcelas } = useEmpresaConfig()
   const { items, total, count, clearCart, cupom } = useCart()
   const [step, setStep] = useState<Step>('endereco')
   const [cep, setCep] = useState('')
@@ -246,7 +248,7 @@ export default function CheckoutPage() {
             <h2 className="text-lg font-black text-gray-800 mb-5 flex items-center gap-2"><CreditCard size={18} className="text-green-600"/>Forma de pagamento</h2>
             <div className="flex gap-3 mb-6">
               <button onClick={()=>setPagamento('pix')} className={`flex-1 py-3 rounded-xl border-2 font-bold text-sm transition-colors ${pagamento==='pix'?'border-green-500 bg-green-50 text-green-700':'border-gray-200 text-gray-600'}`}>📱 PIX<span className="text-xs font-normal block">aprovação imediata</span></button>
-              <button onClick={()=>setPagamento('cartao')} className={`flex-1 py-3 rounded-xl border-2 font-bold text-sm transition-colors ${pagamento==='cartao'?'border-green-500 bg-green-50 text-green-700':'border-gray-200 text-gray-600'}`}>💳 Cartão de Crédito<span className="text-xs font-normal block">até 10x sem juros</span></button>
+              <button onClick={()=>setPagamento('cartao')} className={`flex-1 py-3 rounded-xl border-2 font-bold text-sm transition-colors ${pagamento==='cartao'?'border-green-500 bg-green-50 text-green-700':'border-gray-200 text-gray-600'}`}>💳 Cartão de Crédito<span className="text-xs font-normal block">{`até ${parcelas}x sem juros`}</span></button>
             </div>
             {erro&&<div className="bg-red-50 border border-red-200 text-red-700 text-sm font-semibold px-4 py-3 rounded-lg mb-4">⚠️ {erro}</div>}
             {pagamento==='pix'&&(
@@ -272,7 +274,7 @@ export default function CheckoutPage() {
                 </div>
                 <div><label className="text-sm font-bold text-gray-700 mb-1.5 block">Parcelas</label>
                   <select value={cartaoParcelas} onChange={e=>setCartaoParcelas(Number(e.target.value))} className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500 bg-white">
-                    {Array.from({length:10},(_,i)=>i+1).map(n=><option key={n} value={n}>{n}x de R$ {(totalComFrete/n).toFixed(2).replace('.',',')} {n===1?'(à vista)':'sem juros'}</option>)}
+                    {Array.from({length:parcelas},(_,i)=>i+1).map(n=><option key={n} value={n}>{n}x de R$ {(totalComFrete/n).toFixed(2).replace('.',',')} {n===1?'(à vista)':'sem juros'}</option>)}
                   </select>
                 </div>
                 <div className="flex gap-3 mt-2">
