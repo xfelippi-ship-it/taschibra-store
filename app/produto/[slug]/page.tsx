@@ -67,7 +67,7 @@ function CardProduto({ p }: { p: ProdCard }) {
         )}
         {p.main_image
           ? <img src={p.main_image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-          : <span className="text-5xl opacity-20">💡</span>}
+          : <div className="flex items-center justify-center w-full h-full"><span className="text-5xl">💡</span></div>}
       </div>
       <div className="p-3 flex flex-col flex-1">
         <p className="text-xs font-semibold text-gray-700 leading-tight line-clamp-2 mb-auto pb-2">{p.name}</p>
@@ -121,7 +121,7 @@ function CompreJunto({ categorySlug, produtoAtual }: {
           <div className="bg-gray-50 border border-gray-200 rounded-xl w-full aspect-square flex items-center justify-center overflow-hidden">
             {produtoAtual.main_image
               ? <img src={produtoAtual.main_image} alt={produtoAtual.name} className="w-full h-full object-cover" />
-              : <span className="text-4xl opacity-20">💡</span>}
+              : <div className="flex items-center justify-center w-full h-full"><span className="text-5xl">💡</span></div>}
           </div>
           <p className="text-[11px] text-gray-600 text-center leading-tight line-clamp-2">{produtoAtual.name}</p>
           <p className="text-xs font-black text-green-700">R$ {brl(produtoAtual.promo_price > 0 ? produtoAtual.promo_price : produtoAtual.price)}</p>
@@ -139,7 +139,7 @@ function CompreJunto({ categorySlug, produtoAtual }: {
                   {sel && <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center text-white text-[10px]">✓</span>}
                   {p.main_image
                     ? <img src={p.main_image} alt={p.name} className="w-full h-full object-cover" />
-                    : <span className="text-4xl opacity-20">💡</span>}
+                    : <div className="flex items-center justify-center w-full h-full"><span className="text-5xl">💡</span></div>}
                 </div>
                 <p className="text-[11px] text-gray-600 text-center leading-tight line-clamp-2">{p.name}</p>
                 <p className="text-xs font-black text-green-700">R$ {brl(preco)}</p>
@@ -351,7 +351,7 @@ export default function ProdutoPage() {
               ? imagens[imgAtiva]?.match(/\.(mp4|webm|mov)/i)
                 ? <video src={imagens[imgAtiva]} controls className="w-full aspect-square object-contain" />
                 : <ProdutoZoom src={imagens[imgAtiva]} alt={produto.name} className="w-full aspect-square" />
-              : <span className="text-8xl md:text-9xl">💡</span>}
+              : <div className="flex items-center justify-center w-full h-full"><span className="text-8xl">💡</span></div>}
           </div>
           {imagens.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
@@ -472,7 +472,7 @@ export default function ProdutoPage() {
                 <div className="bg-gray-50 h-32 flex items-center justify-center">
                   {f.image_url
                     ? <img src={f.image_url} alt={f.title} className="h-24 object-contain" />
-                    : <span className="text-4xl opacity-20">💡</span>}
+                    : <div className="flex items-center justify-center w-full h-full"><span className="text-5xl">💡</span></div>}
                 </div>
                 <div className="p-3">
                   <p className="text-xs font-bold text-gray-800 mb-1">{f.title}</p>

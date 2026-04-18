@@ -75,7 +75,9 @@ function ProdCard({ p }: { p: Produto }) {
         {p.main_image ? (
           <img src={p.main_image} alt={nome} className="h-40 object-contain" />
         ) : (
-          <span className="text-7xl">💡</span>
+          <div className="flex items-center justify-center w-full h-40">
+            <span className="text-6xl">💡</span>
+          </div>
         )}
       </div>
       <div className="p-4 flex flex-col">
