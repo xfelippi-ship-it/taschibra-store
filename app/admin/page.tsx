@@ -26,6 +26,7 @@ import RetiradaLojaTab from '@/components/admin/RetiradaLojaTab'
 import BadgesTab from '@/components/admin/BadgesTab'
 import BenefitBarTab from '@/components/admin/BenefitBarTab'
 import MotivosTab from '@/components/admin/MotivosTab'
+import MonitoramentoPrecoTab from '@/components/admin/MonitoramentoPrecoTab'
 import FaturamentoDiretoTab from '@/components/admin/FaturamentoDiretoTab'
 import AvaliacoesTab from '@/components/admin/AvaliacoesTab'
 import MarcasTab from '@/components/admin/MarcasTab'
@@ -36,7 +37,7 @@ import PopupTab from '@/components/admin/PopupTab'
 import BlogTab from '@/components/admin/BlogTab'
 import PromoBannerTab from '@/components/admin/PromoBannerTab'
 import { useState, useEffect } from 'react'
-import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2, FileText, Search, Star, MapPin, CreditCard, Sliders, AlertCircle } from 'lucide-react'
+import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2, FileText, Search, Star, MapPin, CreditCard, Sliders, AlertCircle, TrendingDown } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { registrarAuditoria } from '@/lib/auditLog'
 
@@ -80,6 +81,7 @@ const TODOS_MODULOS = [
   { id: 'retirada',      label: 'Retirada na Loja',    grupo: 'Loja' },
   { id: 'beneficios',    label: 'Barra de Benefícios', grupo: 'Loja' },
   { id: 'motivos',       label: 'Motivos Cancelamento', grupo: 'Vendas' },
+  { id: 'monitor-preco',  label: 'Monitoramento Preços', grupo: 'Vendas' },
   { id: 'popup',         label: 'Popup Promocional',   grupo: 'Loja' },
   { id: 'faturamento',   label: 'Faturamento Direto',  grupo: 'Loja' },
   { id: 'seo',           label: 'SEO',                  grupo: 'Administração' },
@@ -755,7 +757,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'cores' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup' | 'blog' | 'caracteristicas' | 'canais' | 'badges' | 'beneficios' | 'motivos'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'cores' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup' | 'blog' | 'caracteristicas' | 'canais' | 'badges' | 'beneficios' | 'motivos' | 'monitor-preco'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -1006,6 +1008,7 @@ export default function AdminPage() {
             {tem([], 'frete') && <BtnItem id="frete"      label="Frete Grátis" icon={<Truck size={15} />} />}
             {tem([], 'relatorios') && <BtnItem id="relatorios" label="Relatórios" icon={<BarChart3 size={15} />} />}
             <BtnItem id="motivos"    label="Motivos Cancel." icon={<AlertCircle size={15} />} />
+            <BtnItem id="monitor-preco" label="Monitor Preços" icon={<TrendingDown size={15} />} />
           </Grupo>
         )}
 
@@ -1093,6 +1096,7 @@ export default function AdminPage() {
         {aba === 'badges' && <BadgesTab />}
         {aba === 'beneficios' && <BenefitBarTab />}
         {aba === 'motivos' && <MotivosTab />}
+        {aba === 'monitor-preco' && <MonitoramentoPrecoTab />}
         {aba === 'faturamento' && <FaturamentoDiretoTab />}
         {aba === 'avaliacoes' && <AvaliacoesTab />}
         {aba === 'marcas' && <MarcasTab />}
