@@ -3,17 +3,28 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
 export default function Footer() {
-  const [company, setCompany] = useState<any>(null)
+  const [cfg, setCfg] = useState<Record<string,string>>({})
 
   useEffect(() => {
-    supabase.from('company_settings').select('*').single()
-      .then(({ data }) => { if (data) setCompany(data) })
+    const keys = ['empresa_razao_social','empresa_cnpj','empresa_endereco','empresa_cidade',
+      'empresa_estado','empresa_cep','empresa_telefone','empresa_email',
+      'empresa_slogan','empresa_descricao','empresa_nome_fantasia']
+    ;(supabase.from as any)('site_config').select('key,value').in('key', keys)
+      .then(({ data }) => {
+        const map: Record<string,string> = {}
+        for (const r of (data || [])) map[r.key] = r.value
+        setCfg(map)
+      })
   }, [])
 
-  const razaoSocial = company?.razao_social || 'Taschibra S.A.'
-  const cnpj        = company?.cnpj         || '83.475.913/0001-91'
-  const endereco    = company?.endereco      || 'Rodovia BR 470 KM 65,931 - Indaial/SC - CEP 89085-144'
-  const telefone    = company?.telefone      || '(47) 3281-7640'
+  const razaoSocial = cfg.empresa_razao_social  || 'Blumenox Iluminação LTDA'
+  const cnpj        = cfg.empresa_cnpj          || '02.477.605/0001-01'
+  const endereco    = cfg.empresa_endereco      || 'Rodovia BR 470 KM 65,931 nº 2135'
+  const cidade      = cfg.empresa_cidade        || 'Indaial'
+  const estado      = cfg.empresa_estado        || 'SC'
+  const cep         = cfg.empresa_cep           || '89085-144'
+  const telefone    = cfg.empresa_telefone      || '(47) 3281-7640'
+  const descricao   = cfg.empresa_descricao     || 'Uma das maiores indústrias de iluminação da América Latina. Fábrica própria em Indaial/SC.'
   const ano         = new Date().getFullYear()
 
   return (
@@ -22,7 +33,7 @@ export default function Footer() {
         <div>
           <img src="/images/logo.png" alt="Taschibra Store" className="h-10 object-contain mb-3" />
           <p style={{fontSize:'13px', color:'#6aab7a', lineHeight:'1.6', margin:0}}>
-            Uma das maiores industrias de iluminacao da America Latina. Sede em Indaial/SC. Mais de 30 anos iluminando o Brasil.
+            {descricao}
           </p>
         </div>
         <div>

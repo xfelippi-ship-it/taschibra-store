@@ -3,16 +3,19 @@ import { useState, useEffect } from 'react'
 import { Building2, Save } from 'lucide-react'
 
 const CAMPOS = [
-  { key: 'empresa_razao_social',  label: 'Razão Social',    placeholder: 'Ex: Taschibra S.A.' },
-  { key: 'empresa_nome_fantasia', label: 'Nome Fantasia',   placeholder: 'Ex: Taschibra Store' },
-  { key: 'empresa_cnpj',         label: 'CNPJ',            placeholder: 'Ex: 83.174.274/0001-40' },
-  { key: 'empresa_endereco',     label: 'Endereço',        placeholder: 'Rua, número' },
-  { key: 'empresa_cidade',       label: 'Cidade',          placeholder: 'Ex: Indaial' },
-  { key: 'empresa_estado',       label: 'Estado (UF)',     placeholder: 'Ex: SC' },
-  { key: 'empresa_cep',          label: 'CEP',             placeholder: 'Ex: 89085-144' },
-  { key: 'empresa_telefone',     label: 'Telefone',        placeholder: 'Ex: (47) 3397-9200' },
-  { key: 'empresa_whatsapp',     label: 'WhatsApp',        placeholder: 'Ex: (47) 99149-3270' },
-  { key: 'empresa_email',        label: 'E-mail',          placeholder: 'Ex: contato@taschibra.com.br' },
+  { key: 'empresa_razao_social',  label: 'Razão Social',       placeholder: 'Ex: Blumenox Iluminação LTDA' },
+  { key: 'empresa_nome_fantasia', label: 'Nome Fantasia',      placeholder: 'Ex: Taschibra Store' },
+  { key: 'empresa_cnpj',         label: 'CNPJ',               placeholder: 'Ex: 02.477.605/0001-01' },
+  { key: 'empresa_endereco',     label: 'Endereço',           placeholder: 'Rua, número' },
+  { key: 'empresa_cidade',       label: 'Cidade',             placeholder: 'Ex: Indaial' },
+  { key: 'empresa_estado',       label: 'Estado (UF)',        placeholder: 'Ex: SC' },
+  { key: 'empresa_cep',          label: 'CEP',                placeholder: 'Ex: 89085-144' },
+  { key: 'empresa_telefone',     label: 'Telefone',           placeholder: 'Ex: (47) 3281-7640' },
+  { key: 'empresa_whatsapp',     label: 'WhatsApp',           placeholder: 'Ex: (47) 99149-3270' },
+  { key: 'empresa_email',        label: 'E-mail',             placeholder: 'Ex: contato@taschibra.com.br' },
+  { key: 'empresa_slogan',       label: 'Slogan',             placeholder: 'Ex: Mais de 30 anos iluminando o Brasil' },
+  { key: 'empresa_descricao',    label: 'Descrição (rodapé)', placeholder: 'Texto institucional exibido no rodapé' },
+  { key: 'empresa_parcelas',     label: 'Parcelas sem juros', placeholder: 'Ex: 10' },
 ]
 
 export default function DadosEmpresaTab() {
