@@ -102,7 +102,7 @@ function ProdCard({ p }: { p: Produto }) {
             disabled
             className="w-full bg-gray-100 text-gray-400 font-black text-xs py-2.5 rounded-md mt-auto cursor-not-allowed border border-gray-200"
           >
-            CONSULTAR PREÇO
+            EM ATUALIZAÇÃO
           </button>
         ) : (
           <button

@@ -206,7 +206,7 @@ function ProdutosContent() {
                             </button>
                           ) : (
                             <button disabled className="w-full bg-gray-100 text-gray-400 font-black text-xs py-2.5 rounded-lg cursor-not-allowed border border-gray-200">
-                              CONSULTAR PREÇO
+                              EM ATUALIZAÇÃO
                             </button>
                           )}
                         </>

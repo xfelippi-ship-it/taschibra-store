@@ -421,7 +421,7 @@ export default function ProdutoPage() {
               </div>
             ) : semPreco ? (
               <div className="flex-1 border-2 border-gray-200 rounded-lg py-3 flex items-center justify-center text-sm font-black text-gray-400 bg-gray-50 cursor-not-allowed">
-                Consultar Preço
+                Em Atualização
               </div>
             ) : (
               <button onClick={handleAdd}
@@ -626,7 +626,7 @@ export default function ProdutoPage() {
           </div>
         ) : semPreco ? (
           <div className="flex-1 border-2 border-gray-200 rounded-lg py-3 flex items-center justify-center text-sm font-black text-gray-400 bg-gray-50 cursor-not-allowed">
-            Consultar Preço
+            Em Atualização
           </div>
         ) : (
         <button onClick={handleAdd}
