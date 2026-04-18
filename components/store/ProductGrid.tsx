@@ -50,6 +50,7 @@ function ProdCard({ p }: { p: Produto }) {
       ? Math.round((1 - p.promo_price / preco) * 100)
       : 0
   const semEstoque = p.stock_qty !== null && p.stock_qty !== undefined && p.stock_qty <= 0
+  const semPreco = !preco || preco <= 0
 
   const badgeCat = p.category_slug ? badgeMap[p.category_slug] : null
   const badges = p.badges && p.badges.length > 0 ? p.badges : badgeCat ? [badgeCat] : []
@@ -96,7 +97,14 @@ function ProdCard({ p }: { p: Produto }) {
         <p className="text-xs text-gray-500 mb-3">
           ou <strong>R$ {formatPrice(preco)}</strong> no cartao
         </p>
-        {!semEstoque && (
+        {semEstoque ? null : semPreco ? (
+          <button
+            disabled
+            className="w-full bg-gray-100 text-gray-400 font-black text-xs py-2.5 rounded-md mt-auto cursor-not-allowed border border-gray-200"
+          >
+            CONSULTAR PREÇO
+          </button>
+        ) : (
           <button
             onClick={handleAdd}
             className="w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-black text-xs py-2.5 rounded-md transition-colors mt-auto"

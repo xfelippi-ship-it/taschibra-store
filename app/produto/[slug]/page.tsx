@@ -306,6 +306,7 @@ export default function ProdutoPage() {
 
   const estoqueAtual = variacaoSelecionada?.stock_qty ?? (produto as any).stock_qty ?? null
   const semEstoque = estoqueAtual !== null && estoqueAtual <= 0
+  const semPreco = !precoCartao || precoCartao <= 0
 
   function handleAdd() {
     if (semEstoque) return
@@ -417,6 +418,10 @@ export default function ProdutoPage() {
             {semEstoque ? (
               <div className="flex-1 border-2 border-gray-200 rounded-lg py-3 flex items-center justify-center text-sm font-black text-gray-400 bg-gray-50">
                 Produto Indisponível
+              </div>
+            ) : semPreco ? (
+              <div className="flex-1 border-2 border-gray-200 rounded-lg py-3 flex items-center justify-center text-sm font-black text-gray-400 bg-gray-50 cursor-not-allowed">
+                Consultar Preço
               </div>
             ) : (
               <button onClick={handleAdd}
@@ -618,6 +623,10 @@ export default function ProdutoPage() {
         {semEstoque ? (
           <div className="flex-1 border-2 border-gray-200 rounded-lg py-3 flex items-center justify-center text-sm font-black text-gray-400 bg-gray-50">
             Produto Indisponível
+          </div>
+        ) : semPreco ? (
+          <div className="flex-1 border-2 border-gray-200 rounded-lg py-3 flex items-center justify-center text-sm font-black text-gray-400 bg-gray-50 cursor-not-allowed">
+            Consultar Preço
           </div>
         ) : (
         <button onClick={handleAdd}
