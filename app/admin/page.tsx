@@ -36,7 +36,7 @@ import PopupTab from '@/components/admin/PopupTab'
 import BlogTab from '@/components/admin/BlogTab'
 import PromoBannerTab from '@/components/admin/PromoBannerTab'
 import { useState, useEffect } from 'react'
-import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2, FileText, Search, Star, MapPin, CreditCard, Sliders } from 'lucide-react'
+import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2, FileText, Search, Star, MapPin, CreditCard, Sliders, AlertCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { registrarAuditoria } from '@/lib/auditLog'
 
@@ -1005,6 +1005,7 @@ export default function AdminPage() {
             {tem([], 'carrinhos') && <BtnItem id="carrinhos"  label="Carrinhos"  icon={<ShoppingBag size={15} />} />}
             {tem([], 'frete') && <BtnItem id="frete"      label="Frete Grátis" icon={<Truck size={15} />} />}
             {tem([], 'relatorios') && <BtnItem id="relatorios" label="Relatórios" icon={<BarChart3 size={15} />} />}
+            <BtnItem id="motivos"    label="Motivos Cancel." icon={<AlertCircle size={15} />} />
           </Grupo>
         )}
 
@@ -1027,6 +1028,7 @@ export default function AdminPage() {
             {tem([], 'frete') && <BtnItem id="frete"        label="Frete Grátis"       icon={<Truck size={15} />} />}
             <BtnItem id="retirada"      label="Retirada na Loja"   icon={<MapPin size={15} />} />
             <BtnItem id="faturamento"   label="Faturamento Direto" icon={<CreditCard size={15} />} />
+            <BtnItem id="beneficios"    label="Barra Benefícios"   icon={<Star size={15} />} />
             <BtnItem id="cms"           label="Páginas e Blocos"   icon={<FileText size={15} />} />
           </Grupo>
         )}
