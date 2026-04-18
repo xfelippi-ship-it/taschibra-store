@@ -3,6 +3,10 @@
     {
       "path": "/api/health",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/carrinhos-abandonados",
+      "schedule": "0 * * * *"
     }
   ],
   "build": {
