@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
-import { User, Package, LogOut, ChevronRight } from 'lucide-react'
+import { User, Package, LogOut, ChevronRight, Heart } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
@@ -117,6 +117,17 @@ export default function MinhaContaPage() {
                 <div>
                   <p className="font-bold text-gray-800 text-sm">Meus Pedidos</p>
                   <p className="text-xs text-gray-500">Acompanhe seus pedidos e rastreamento</p>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-gray-400" />
+            </Link>
+            <Link href="/minha-conta/favoritos"
+              className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-colors">
+              <div className="flex items-center gap-3">
+                <Heart size={20} className="text-green-600" />
+                <div>
+                  <p className="font-bold text-gray-800 text-sm">Meus Favoritos</p>
+                  <p className="text-xs text-gray-500">Produtos salvos para comprar depois</p>
                 </div>
               </div>
               <ChevronRight size={18} className="text-gray-400" />

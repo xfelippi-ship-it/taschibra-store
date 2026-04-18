@@ -230,6 +230,41 @@ export default function ProdutoPage() {
   const [reviewText, setReviewText] = useState('')
   const [reviewSent, setReviewSent] = useState(false)
   const { addItem, items } = useCart()
+  const [isFavorito, setIsFavorito] = useState(false)
+  const [favLoading, setFavLoading] = useState(false)
+  const [clienteId, setClienteId] = useState<string|null>(null)
+
+  useEffect(() => {
+    const salvo = localStorage.getItem('cliente_logado')
+    if (salvo) {
+      const c = JSON.parse(salvo)
+      setClienteId(c.id)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!clienteId || !produto) return
+    ;(supabase.from as any)('favorites').select('id')
+      .eq('customer_id', clienteId)
+      .eq('product_id', produto.id)
+      .maybeSingle()
+      .then(({ data }: any) => setIsFavorito(!!data))
+  }, [clienteId, produto])
+
+  async function toggleFavorito() {
+    if (!clienteId) { window.location.href = '/minha-conta'; return }
+    if (!produto) return
+    setFavLoading(true)
+    if (isFavorito) {
+      await (supabase.from as any)('favorites').delete()
+        .eq('customer_id', clienteId).eq('product_id', produto.id)
+      setIsFavorito(false)
+    } else {
+      await (supabase.from as any)('favorites').insert({ customer_id: clienteId, product_id: produto.id })
+      setIsFavorito(true)
+    }
+    setFavLoading(false)
+  }
 
   useEffect(() => {
     async function load() {
@@ -432,8 +467,12 @@ export default function ProdutoPage() {
             )}
           </div>
           <div className="hidden md:flex gap-3 mb-4">
-            <button className="flex-1 border border-gray-200 rounded-lg py-2.5 text-sm font-semibold text-gray-600 hover:border-green-500 hover:text-green-600 flex items-center justify-center gap-2 transition-colors">
-              <Heart size={15} /> Favoritar
+            <button
+              onClick={toggleFavorito}
+              disabled={favLoading}
+              className={`flex-1 border rounded-lg py-2.5 text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${isFavorito ? 'border-red-300 text-red-500 bg-red-50 hover:bg-red-100' : 'border-gray-200 text-gray-600 hover:border-green-500 hover:text-green-600'}`}>
+              <Heart size={15} fill={isFavorito ? 'currentColor' : 'none'} />
+              {isFavorito ? 'Favoritado ✓' : 'Favoritar'}
             </button>
           </div>
 
@@ -635,8 +674,11 @@ export default function ProdutoPage() {
           {adicionado ? 'Adicionado! ✓' : 'Comprar'}
         </button>
         )}
-        <button className="border border-gray-200 rounded-lg px-3 flex items-center justify-center text-gray-500 hover:text-red-500 transition-colors">
-          <Heart size={18} />
+        <button
+          onClick={toggleFavorito}
+          disabled={favLoading}
+          className={`border rounded-lg px-3 flex items-center justify-center transition-colors ${isFavorito ? 'border-red-300 text-red-500 bg-red-50' : 'border-gray-200 text-gray-500 hover:text-red-500'}`}>
+          <Heart size={18} fill={isFavorito ? 'currentColor' : 'none'} />
         </button>
       </div>
 
