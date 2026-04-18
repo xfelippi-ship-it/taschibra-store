@@ -71,7 +71,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  function removeItem(id: string) { setItems(prev => prev.filter(i => i.id !== id)) }
+  function removeItem(id: string) {
+    setItems(prev => {
+      const next = prev.filter(i => i.id !== id)
+      if (next.length === 0) setCupons([])
+      return next
+    })
+  }
 
   function updateQty(id: string, qty: number) {
     if (qty <= 0) return removeItem(id)
