@@ -67,14 +67,14 @@ function ProdCard({ p }: { p: Produto }) {
       href={`/produto/${slug}`}
       className={`border rounded-xl overflow-hidden transition-all relative group block bg-white ${semEstoque ? "border-gray-100 grayscale opacity-60" : "border-gray-200 hover:border-green-500 hover:shadow-md hover:-translate-y-1"}`}
     >
-      <div className="bg-gray-50 flex items-center justify-center h-44 group-hover:scale-105 transition-transform relative">
+      <div className="bg-gray-50 flex items-center justify-center aspect-square overflow-hidden group-hover:scale-105 transition-transform relative">
         {badge && badgeColors[badge] && (
           <span className={`absolute top-2 left-2 z-10 text-white text-xs font-black px-2 py-0.5 rounded ${badgeColors[badge]}`}>
             {badgeLabels[badge] || badge}
           </span>
         )}
         {p.main_image ? (
-          <img src={p.main_image} alt={nome} className="h-40 object-contain" />
+          <img src={p.main_image} alt={nome} className="w-full h-full object-cover" />
         ) : (
           <div className="flex items-center justify-center w-full h-40">
             <span className="text-6xl">💡</span>
