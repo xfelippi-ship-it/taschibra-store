@@ -107,6 +107,22 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
         <span className="text-xs font-normal text-gray-400 ml-2">até 8 fotos · arraste para reordenar</span>
       </label>
 
+      {/* Instruções para o operador */}
+      <details className="mb-2 text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded-lg">
+        <summary className="cursor-pointer px-3 py-2 font-medium text-blue-600 select-none">
+          ℹ️ Como subir imagens e vídeos
+        </summary>
+        <ul className="px-4 pb-3 pt-1 space-y-1 list-disc list-inside text-gray-600">
+          <li><strong>1 arquivo:</strong> clique no slot desejado (1 a 8) e selecione o arquivo</li>
+          <li><strong>Várias fotos de uma vez:</strong> arraste múltiplos arquivos para a área abaixo ou clique nela</li>
+          <li><strong>ZIP deste produto:</strong> arraste um .zip com as fotos — o sistema descompacta e preenche os slots em ordem alfabética</li>
+          <li><strong>URL externa:</strong> cole a URL no campo "Cole URL..." abaixo de cada slot vazio e pressione Enter</li>
+          <li><strong>Vídeo:</strong> arraste ou selecione arquivos .mp4 ou .webm — serão salvos nos slots normalmente</li>
+          <li><strong>Reordenar:</strong> use as setas ← → abaixo de cada imagem para mudar a ordem</li>
+          <li><strong>Nomenclatura:</strong> não precisa renomear — o sistema usa o SKU do produto automaticamente</li>
+        </ul>
+      </details>
+
       {/* Drop zone múltiplo */}
       <div
         onDragOver={e => { e.preventDefault(); setDragOverZone(true) }}
