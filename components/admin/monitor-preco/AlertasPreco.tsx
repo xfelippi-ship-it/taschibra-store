@@ -2,8 +2,14 @@
 import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Plus, Trash2, Bell, X } from 'lucide-react'
+import { createClient } from '@supabase/supabase-js'
 import { Alerta } from './types'
 import { CANAIS_LIST, CANAIS, fmt } from './constants'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,6 +33,25 @@ export default function AlertasPreco({ alertas, credenciais = [], onUpdate, show
   const [modal, setModal] = useState(false)
   const [form, setForm] = useState(FORM_VAZIO)
   const [salvando, setSalvando] = useState(false)
+  const [produtos, setProdutos] = useState<{sku: string; name: string}[]>([])
+  const [buscaProduto, setBuscaProduto] = useState('')
+
+  async function carregarProdutos() {
+    if (produtos.length) return
+    const { data } = await supabase
+      .from('products' as any)
+      .select('sku,name')
+      .eq('active', true)
+      .order('name')
+      .limit(2000)
+    setProdutos(((data || []) as any[]).filter((p: any) => p.sku))
+  }
+
+  function handleAbrirModal() {
+    setBuscaProduto('')
+    carregarProdutos()
+    setModal(true)
+  }
 
   async function salvar() {
     if (!form.sku || !form.threshold || !form.email_notificar) {
@@ -67,7 +92,7 @@ export default function AlertasPreco({ alertas, credenciais = [], onUpdate, show
             Receba e-mail quando um produto for vendido abaixo do MAP ou fora do limite configurado.
           </p>
         </div>
-        <button onClick={() => setModal(true)}
+        <button onClick={handleAbrirModal}
           className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white font-black text-xs px-4 py-2 rounded-lg">
           <Plus size={13} /> Novo Alerta
         </button>
@@ -165,10 +190,40 @@ export default function AlertasPreco({ alertas, credenciais = [], onUpdate, show
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-gray-600 mb-1 block">SKU *</label>
-                <input value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })}
-                  placeholder="Ex: TKL225"
+                <label className="text-xs font-bold text-gray-600 mb-1 block">Produto *</label>
+                <input value={buscaProduto} onChange={e => {
+                    setBuscaProduto(e.target.value)
+                    setForm({ ...form, sku: '' })
+                  }}
+                  placeholder="Buscar produto por nome ou SKU..."
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500" />
+                {buscaProduto && !form.sku && (
+                  <div className="border border-gray-200 rounded-lg mt-1 max-h-40 overflow-y-auto bg-white shadow-sm">
+                    {produtos
+                      .filter(p =>
+                        p.sku.toLowerCase().includes(buscaProduto.toLowerCase()) ||
+                        p.name.toLowerCase().includes(buscaProduto.toLowerCase())
+                      )
+                      .slice(0, 20)
+                      .map(p => (
+                        <button key={p.sku} type="button"
+                          onClick={() => { setForm({ ...form, sku: p.sku }); setBuscaProduto(`${p.sku} — ${p.name}`) }}
+                          className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 border-b border-gray-100 last:border-0">
+                          <span className="font-mono font-bold text-gray-700">{p.sku}</span>
+                          <span className="text-gray-500 ml-2">{p.name}</span>
+                        </button>
+                      ))}
+                    {produtos.filter(p =>
+                      p.sku.toLowerCase().includes(buscaProduto.toLowerCase()) ||
+                      p.name.toLowerCase().includes(buscaProduto.toLowerCase())
+                    ).length === 0 && (
+                      <p className="px-3 py-2 text-xs text-gray-400">Nenhum produto encontrado</p>
+                    )}
+                  </div>
+                )}
+                {form.sku && (
+                  <p className="text-xs text-green-600 font-bold mt-1">✓ SKU: {form.sku}</p>
+                )}
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-600 mb-1 block">Canal (vazio = todos)</label>
