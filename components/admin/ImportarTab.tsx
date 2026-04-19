@@ -253,10 +253,13 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
         for (const campo of CAMPOS) {
           if (!camposSelecionados.includes(campo.id)) continue
           const raw = (row[campo.id] || row[campo.col] || '').trim()
-          const val = raw.toUpperCase() === 'NULL' || raw === '-' ? '' : raw
-          if (val === '') continue
+          if (raw === '') continue  // vazio = mantém banco intacto
+          const isNullCmd = raw.toUpperCase() === 'NULL'  // NULL escrito = apaga campo
+          const val = raw
 
-          if (['price','promo_price','weight_kg'].includes(campo.id)) {
+          if (isNullCmd) {
+            payload[campo.col] = null  // NULL escrito = apaga o campo no banco
+          } else if (['price','promo_price','weight_kg'].includes(campo.id)) {
             payload[campo.col] = parseFloat(val.replace(',', '.')) || 0
           } else if (['stock_qty', 'sort_order'].includes(campo.id)) {
             payload[campo.col] = parseInt(val) || 0
@@ -265,7 +268,6 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
           } else if (campo.id === 'badges') {
             payload[campo.col] = val.split('|').map((b: string) => b.trim()).filter(Boolean)
           } else if (campo.id === 'images') {
-            // Aceita pipe-separated ou array JSON
             if (val.startsWith('[')) {
               try { payload[campo.col] = JSON.parse(val) } catch { payload[campo.col] = [val] }
             } else {
