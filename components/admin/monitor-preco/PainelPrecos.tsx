@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { TrendingDown, TrendingUp, Minus, ExternalLink, AlertTriangle } from 'lucide-react'
-import { Snapshot, Competitor, SOURCES, fmt } from './index'
+import { Snapshot, Competitor, SOURCES, fmt } from './types'
 
 interface Props {
   snapshots: Snapshot[]

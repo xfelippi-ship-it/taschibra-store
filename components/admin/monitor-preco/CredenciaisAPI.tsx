@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Plus, Trash2, Eye, EyeOff, CheckCircle, XCircle, X } from 'lucide-react'
-import { Credencial } from './index'
+import { Credencial } from './types'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

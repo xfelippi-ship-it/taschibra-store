@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Plus, Trash2, Bell, X } from 'lucide-react'
-import { Alerta, SOURCES, fmt } from './index'
+import { Alerta, SOURCES, fmt } from './types'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

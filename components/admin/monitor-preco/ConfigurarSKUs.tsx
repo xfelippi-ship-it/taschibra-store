@@ -1,17 +1,22 @@
 'use client'
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Plus, Trash2, Search, X, Check } from 'lucide-react'
-import { Competitor, SOURCES, fmt } from './index'
+import { Competitor } from './types'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+function fmt(v: number) { return v.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }
+
 const ALL_SOURCES = [
-  ...SOURCES,
-  { id: 'site', label: 'Site/Scraping', cor: 'bg-gray-100 text-gray-700' },
+  { id: 'mercadolivre', label: 'Mercado Livre' },
+  { id: 'shopee',       label: 'Shopee'        },
+  { id: 'amazon',       label: 'Amazon'        },
+  { id: 'magalu',       label: 'Magalu'        },
+  { id: 'site',         label: 'Site/Scraping' },
 ]
 
 interface Props {
@@ -46,7 +51,7 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
       .eq('active', true)
       .order('name')
       .limit(2000)
-    setProdutos(((data || []) as any[]).filter(p => p.sku))
+    setProdutos(((data || []) as any[]).filter((p: any) => p.sku))
   }
 
   const produtosFiltrados = produtos.filter(p =>
@@ -56,10 +61,6 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
   )
 
   const totalSelecionados = Object.values(selecionados).filter(Boolean).length
-
-  function toggleSelecionado(sku: string) {
-    setSelecionados(prev => ({ ...prev, [sku]: !prev[sku] }))
-  }
 
   async function salvarSelecionados() {
     const skus = Object.entries(selecionados).filter(([, v]) => v).map(([k]) => k)
@@ -120,7 +121,6 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
         </button>
       </div>
 
-      {/* Tabela */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         {competitors.length === 0 ? (
           <div className="text-center py-12 text-gray-400 text-sm">Nenhum SKU configurado.</div>
@@ -184,12 +184,9 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
         )}
       </div>
 
-      {/* Modal — sem overlay clicável, fecha só pelo X e Cancelar */}
       {modal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl">
-
-            {/* Header */}
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
               <div>
                 <h2 className="text-lg font-black text-gray-800">Selecionar SKUs</h2>
@@ -198,7 +195,6 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
               <button onClick={() => setModal(false)} className="text-gray-400 hover:text-gray-600 p-1"><X size={20} /></button>
             </div>
 
-            {/* Canal + MAP */}
             <div className="px-6 py-3 border-b border-gray-100 flex gap-4 bg-gray-50 flex-shrink-0">
               <div className="flex-1">
                 <label className="text-xs font-bold text-gray-600 mb-1 block">Canal</label>
@@ -215,7 +211,6 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
               </div>
             </div>
 
-            {/* Busca */}
             <div className="px-6 py-3 border-b border-gray-100 flex gap-3 items-center flex-shrink-0">
               <div className="flex-1 relative">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -223,17 +218,16 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
                   placeholder="Buscar por SKU ou nome..."
                   className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-green-500" />
               </div>
-              <button type="button" onClick={() => { const n: Record<string,boolean> = {}; produtosFiltrados.forEach(p => { n[p.sku] = true }); setSelecionados(prev => ({...prev,...n})) }}
+              <button type="button"
+                onClick={() => { const n: Record<string,boolean> = {}; produtosFiltrados.forEach(p => { n[p.sku] = true }); setSelecionados(prev => ({...prev,...n})) }}
                 className="text-xs font-bold text-green-600 hover:text-green-700 whitespace-nowrap">Selecionar todos</button>
               <button type="button" onClick={() => setSelecionados({})}
                 className="text-xs font-bold text-gray-400 hover:text-gray-600 whitespace-nowrap">Desmarcar</button>
             </div>
 
-            {/* Lista */}
             <div className="overflow-y-auto flex-1 px-2 py-1">
               {produtosFiltrados.map(p => (
-                <div key={p.sku}
-                  onClick={() => toggleSelecionado(p.sku)}
+                <div key={p.sku} onClick={() => setSelecionados(prev => ({...prev, [p.sku]: !prev[p.sku]}))}
                   className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer rounded-lg select-none">
                   <input type="checkbox" readOnly checked={!!selecionados[p.sku]}
                     className="w-4 h-4 accent-green-600 flex-shrink-0 pointer-events-none" />
@@ -249,7 +243,6 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
               )}
             </div>
 
-            {/* Footer */}
             <div className="px-6 py-4 border-t border-gray-100 flex gap-3 flex-shrink-0">
               <button onClick={() => setModal(false)}
                 className="flex-1 border border-gray-200 text-gray-600 font-bold py-2.5 rounded-lg text-sm">Cancelar</button>
