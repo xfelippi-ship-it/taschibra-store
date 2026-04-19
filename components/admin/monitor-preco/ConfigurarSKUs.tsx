@@ -4,6 +4,11 @@ import { createClient } from '@supabase/supabase-js'
 import { Plus, Trash2, Search, X, Check } from 'lucide-react'
 import { Competitor, SOURCES, fmt } from './index'
 
+const ALL_SOURCES = [
+  ...SOURCES,
+  { id: 'site', label: 'Site/Scraping', cor: 'bg-gray-100 text-gray-700' },
+]
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -162,10 +167,7 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
                       value={c.source}
                       onChange={e => trocarCanal(c.id, e.target.value)}
                       className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white outline-none focus:border-green-500">
-                      {SOURCES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-                      {!SOURCES.find(s => s.id === c.source) && (
-                        <option value={c.source}>{c.source}</option>
-                      )}
+                      {ALL_SOURCES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
                     </select>
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-xs">{c.search_term}</td>
@@ -214,7 +216,7 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
 
       {/* Modal seleção múltipla */}
       {modal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4" onMouseDown={e => e.stopPropagation()}>
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
             {/* Header modal */}
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -231,7 +233,7 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
                 <label className="text-xs font-bold text-gray-600 mb-1 block">Canal de monitoramento</label>
                 <select value={canalModal} onChange={e => setCanalModal(e.target.value)}
                   className="w-full text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white outline-none focus:border-green-500">
-                  {SOURCES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                  {ALL_SOURCES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
                 </select>
               </div>
               <div className="w-36">
