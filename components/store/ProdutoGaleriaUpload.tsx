@@ -167,12 +167,40 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
                 </div>
               </>
             ) : (
-              <button type="button" onClick={() => inputRefs.current[idx]?.click()} disabled={uploading === idx}
-                className="w-full h-full flex flex-col items-center justify-center text-gray-300 hover:text-green-500 transition-colors">
-                {uploading === idx
-                  ? <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
-                  : <><Upload size={18} /><span className="text-[10px] mt-1 font-medium">{idx + 1}</span></>}
-              </button>
+              <div className="w-full h-full flex flex-col">
+                <button type="button" onClick={() => inputRefs.current[idx]?.click()} disabled={uploading === idx}
+                  className="flex-1 flex flex-col items-center justify-center text-gray-300 hover:text-green-500 transition-colors">
+                  {uploading === idx
+                    ? <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                    : <><Upload size={18} /><span className="text-[10px] mt-1 font-medium">{idx + 1}</span></>}
+                </button>
+                <input
+                  type="text"
+                  placeholder="Cole URL..."
+                  className="w-full text-[9px] px-1 py-0.5 border-t border-gray-100 text-gray-500 outline-none focus:text-green-600 bg-transparent text-center truncate"
+                  onClick={e => e.stopPropagation()}
+                  onBlur={e => {
+                    const val = e.target.value.trim()
+                    if (val) {
+                      const novo = [...grid]
+                      novo[idx] = val
+                      onChange(novo.filter(Boolean))
+                      e.target.value = ''
+                    }
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      const val = (e.target as HTMLInputElement).value.trim()
+                      if (val) {
+                        const novo = [...grid]
+                        novo[idx] = val
+                        onChange(novo.filter(Boolean))
+                        ;(e.target as HTMLInputElement).value = ''
+                      }
+                    }
+                  }}
+                />
+              </div>
             )}
           </div>
         ))}
