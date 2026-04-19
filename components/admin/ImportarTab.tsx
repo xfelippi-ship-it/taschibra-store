@@ -252,7 +252,8 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
 
         for (const campo of CAMPOS) {
           if (!camposSelecionados.includes(campo.id)) continue
-          const val = (row[campo.id] || row[campo.col] || '').trim()
+          const raw = (row[campo.id] || row[campo.col] || '').trim()
+          const val = raw.toUpperCase() === 'NULL' || raw === '-' ? '' : raw
           if (val === '') continue
 
           if (['price','promo_price','weight_kg'].includes(campo.id)) {
