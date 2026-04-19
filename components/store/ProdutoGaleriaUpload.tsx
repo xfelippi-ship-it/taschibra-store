@@ -23,7 +23,7 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
   const grid = Array.from({ length: slots }, (_, i) => images[i] || '')
 
   async function uploadSlot(file: File, idx: number) {
-    if (!file.type.startsWith('image/')) return
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) return
     setUploading(idx)
     try {
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
@@ -40,7 +40,7 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
   }
 
   async function uploadMultiplos(files: File[]) {
-    const imgs = files.filter(f => f.type.startsWith('image/'))
+    const imgs = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'))
     if (!imgs.length) return
     setUploadingZip(true)
     const prefix = sku ? `produtos/${sku}` : 'produtos'
@@ -121,7 +121,7 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
         onClick={() => !uploadingZip && multiInputRef.current?.click()}
         className={`mb-3 border-2 border-dashed rounded-xl p-3 text-center cursor-pointer transition-all ${dragOverZone ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'}`}
       >
-        <input ref={multiInputRef} type="file" accept="image/*" multiple className="hidden"
+        <input ref={multiInputRef} type="file" accept="image/*,video/mp4,video/webm" multiple className="hidden"
           onChange={e => { const files = Array.from(e.target.files || []); uploadMultiplos(files) }} />
         <input ref={zipInputRef} type="file" accept=".zip" className="hidden"
           onChange={e => { const f = e.target.files?.[0]; if (f) handleZip(f) }} />
@@ -151,7 +151,7 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
             onDrop={e => { e.preventDefault(); setDragOverIdx(null); const f = e.dataTransfer.files?.[0]; if (f) uploadSlot(f, idx) }}
             className={`relative aspect-square rounded-lg border-2 transition-all ${dragOverIdx === idx ? 'border-green-500 bg-green-50' : url ? 'border-gray-200' : 'border-dashed border-gray-300 bg-gray-50'}`}
           >
-            <input ref={el => { inputRefs.current[idx] = el }} type="file" accept="image/*" className="hidden"
+            <input ref={el => { inputRefs.current[idx] = el }} type="file" accept="image/*,video/mp4,video/webm" className="hidden"
               onChange={e => { const f = e.target.files?.[0]; if (f) uploadSlot(f, idx) }} />
             {url ? (
               <>
