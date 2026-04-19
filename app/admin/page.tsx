@@ -38,7 +38,7 @@ import PopupTab from '@/components/admin/PopupTab'
 import BlogTab from '@/components/admin/BlogTab'
 import PromoBannerTab from '@/components/admin/PromoBannerTab'
 import { useState, useEffect } from 'react'
-import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2, FileText, Search, Star, MapPin, CreditCard, Sliders, AlertCircle, TrendingDown } from 'lucide-react'
+import { Package, ShoppingBag, Upload, Tag, BarChart3, Plus, Pencil, Trash2, LogOut, X, Eye, EyeOff, Users, ImageIcon, Megaphone, Truck, HelpCircle, Mail, MessageSquare, Settings2, FileText, Search, Star, MapPin, CreditCard, Sliders, AlertCircle, TrendingDown, FolderArchive } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { registrarAuditoria } from '@/lib/auditLog'
 
@@ -995,6 +995,7 @@ export default function AdminPage() {
             {tem([], 'caracteristicas') && <BtnItem id="caracteristicas" label="Características" icon={<Sliders size={15} />} />}
             {tem([], 'canais') && <BtnItem id="canais" label="Canais de Venda" icon={<ShoppingBag size={15} />} />}
             {tem([], 'importar') && <BtnItem id="importar"   label="Importar CSV" icon={<Upload size={15} />} />}
+            {tem([], 'upload-massa') && <BtnItem id="upload-massa" label="Upload em Massa" icon={<FolderArchive size={15} />} />}
             {tem([], 'marcas') && <BtnItem id="marcas"     label="Marcas"       icon={<Tag size={15} />} />}
             {tem([], 'badges') && <BtnItem id="badges"     label="Badges"       icon={<Tag size={15} />} />}
             {tem([], 'cores') && <BtnItem id="cores"      label="Cores"        icon={<Tag size={15} />} />}
