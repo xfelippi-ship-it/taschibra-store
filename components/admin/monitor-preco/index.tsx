@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { RefreshCw, Bell } from 'lucide-react'
+import { RefreshCw, Bell, Zap } from 'lucide-react'
 import PainelPrecos from './PainelPrecos'
 import ConfigurarSKUs from './ConfigurarSKUs'
 import CredenciaisAPI from './CredenciaisAPI'
@@ -35,11 +35,34 @@ export default function MonitoramentoPrecoTab() {
   const [credenciais, setCredenciais] = useState<Credencial[]>([])
   const [loading, setLoading]         = useState(true)
   const [msg, setMsg]                 = useState<string | null>(null)
+  const [forcandoColeta, setForcandoColeta] = useState(false)
 
   const showMsg = useCallback((t: string) => {
     setMsg(t)
     setTimeout(() => setMsg(null), 3000)
   }, [])
+
+  async function forcarColetaGeral() {
+    if (!confirm('Disparar coleta imediata no N8n? Aguarde 1-2 minutos para ver os novos dados.')) return
+    setForcandoColeta(true)
+    try {
+      const res = await fetch('/api/n8n/trigger-collect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sku: 'ALL', trigger: 'manual' })
+      })
+      const data = await res.json()
+      if (data.ok) {
+        showMsg('Coleta iniciada! Aguarde 1-2 minutos e clique em Atualizar tela.')
+      } else {
+        showMsg(data.error || 'Erro ao iniciar coleta')
+      }
+    } catch (e: any) {
+      showMsg('Erro: ' + e.message)
+    } finally {
+      setForcandoColeta(false)
+    }
+  }
 
   const carregar = useCallback(async () => {
     setLoading(true)
@@ -89,6 +112,11 @@ export default function MonitoramentoPrecoTab() {
                 {alertas.length}
               </span>
             )}
+          </button>
+          <button onClick={forcarColetaGeral} disabled={forcandoColeta}
+            title="Dispara coleta imediata no N8n (usa creditos). Aguarde 1-2 minutos."
+            className="flex items-center gap-1.5 text-xs font-bold text-amber-700 border border-amber-200 bg-amber-50 px-3 py-2 rounded-lg hover:bg-amber-100 disabled:opacity-50">
+            <Zap size={13} /> {forcandoColeta ? 'Disparando...' : 'Forçar coleta'}
           </button>
           <button onClick={carregar}
             title="Recarrega dados da tela. Coleta automatica do N8n roda 1x/dia."
