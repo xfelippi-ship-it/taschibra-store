@@ -4,11 +4,6 @@ import { createClient } from '@supabase/supabase-js'
 import { Plus, Trash2, Search, X, Check } from 'lucide-react'
 import { Competitor, SOURCES, fmt } from './index'
 
-const ALL_SOURCES = [
-  ...SOURCES,
-  { id: 'site', label: 'Site/Scraping', cor: 'bg-gray-100 text-gray-700' },
-]
-
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -32,6 +27,11 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
   const [salvando, setSalvando] = useState(false)
   const [editandoMap, setEditandoMap] = useState<string | null>(null)
   const [mapTemp, setMapTemp] = useState('')
+
+  const ALL_SOURCES = [
+    ...SOURCES,
+    { id: 'site', label: 'Site/Scraping', cor: 'bg-gray-100 text-gray-700' },
+  ]
 
   async function abrirModal() {
     setSelecionados({})
