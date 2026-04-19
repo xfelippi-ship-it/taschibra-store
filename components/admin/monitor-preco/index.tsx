@@ -1,0 +1,122 @@
+'use client'
+import { useState, useEffect, useCallback } from 'react'
+import { createClient } from '@supabase/supabase-js'
+import { RefreshCw } from 'lucide-react'
+import PainelPrecos from './PainelPrecos'
+import ConfigurarSKUs from './ConfigurarSKUs'
+import CredenciaisAPI from './CredenciaisAPI'
+import AlertasPreco from './AlertasPreco'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+export type Snapshot = {
+  id: string; sku: string; source: string; price: number
+  title?: string; url?: string; seller?: string
+  condition?: string; listing_id?: string; captured_at: string
+}
+export type Competitor = {
+  id: string; sku: string; product_name?: string
+  source: string; search_term: string
+  map_price?: number; notas?: string
+}
+export type Alerta = {
+  id: string; sku: string; source?: string
+  tipo: string; threshold: number
+  email_notificar: string; ultimo_disparo?: string
+}
+export type Credencial = {
+  id: string; canal: string; label: string
+  app_id?: string; app_secret?: string
+  extra_config?: Record<string, string>
+  tipo: string; ativo: boolean; created_at: string
+}
+
+export const SOURCES = [
+  { id: 'mercadolivre', label: 'Mercado Livre', cor: 'bg-yellow-100 text-yellow-800' },
+  { id: 'shopee',       label: 'Shopee',        cor: 'bg-orange-100 text-orange-800' },
+  { id: 'amazon',       label: 'Amazon',        cor: 'bg-blue-100 text-blue-800'    },
+  { id: 'magalu',       label: 'Magalu',        cor: 'bg-blue-100 text-blue-700'    },
+  { id: 'site',         label: 'Site',          cor: 'bg-gray-100 text-gray-700'    },
+]
+
+export function fmt(v: number) {
+  return v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+}
+
+type Aba = 'painel' | 'skus' | 'credenciais' | 'alertas'
+
+const ABAS: { id: Aba; label: string; icon: string }[] = [
+  { id: 'painel',      label: 'Painel',          icon: '📊' },
+  { id: 'skus',        label: 'Configurar SKUs',  icon: '⚙️' },
+  { id: 'credenciais', label: 'Credenciais de API', icon: '🔑' },
+  { id: 'alertas',     label: 'Alertas',          icon: '🔔' },
+]
+
+export default function MonitoramentoPrecoTab() {
+  const [aba, setAba] = useState<Aba>('painel')
+  const [snapshots, setSnapshots]     = useState<Snapshot[]>([])
+  const [competitors, setCompetitors] = useState<Competitor[]>([])
+  const [alertas, setAlertas]         = useState<Alerta[]>([])
+  const [credenciais, setCredenciais] = useState<Credencial[]>([])
+  const [loading, setLoading]         = useState(true)
+  const [msg, setMsg]                 = useState<string | null>(null)
+
+  const showMsg = useCallback((t: string) => {
+    setMsg(t)
+    setTimeout(() => setMsg(null), 3000)
+  }, [])
+
+  const carregar = useCallback(async () => {
+    setLoading(true)
+    const [s, c, a, cr] = await Promise.all([
+      supabase.from('market_price_snapshots' as any).select('*').order('captured_at', { ascending: false }).limit(1000),
+      supabase.from('market_competitors' as any).select('*').order('sku'),
+      supabase.from('market_alerts' as any).select('*').order('sku'),
+      supabase.from('market_api_credentials' as any).select('*').order('label'),
+    ])
+    setSnapshots(s.data || [])
+    setCompetitors(c.data || [])
+    setAlertas(a.data || [])
+    setCredenciais(cr.data || [])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { carregar() }, [carregar])
+
+  return (
+    <div className="space-y-4">
+      {msg && (
+        <div className="fixed top-4 right-4 z-50 bg-green-600 text-white px-4 py-3 rounded-lg text-sm font-bold shadow-lg animate-fade-in">
+          {msg}
+        </div>
+      )}
+
+      {/* Navegação */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex gap-1 bg-gray-100 p-1 rounded-xl flex-wrap">
+          {ABAS.map(a => (
+            <button key={a.id} onClick={() => setAba(a.id)}
+              className={`text-xs font-bold px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${
+                aba === a.id ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              }`}>
+              {a.icon} {a.label}
+            </button>
+          ))}
+        </div>
+        <button onClick={carregar}
+          className="flex items-center gap-1.5 text-xs font-bold text-gray-500 border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50">
+          <RefreshCw size={13} /> Atualizar
+        </button>
+      </div>
+
+      {/* Conteúdo das abas */}
+      {aba === 'painel'      && <PainelPrecos      snapshots={snapshots} competitors={competitors} loading={loading} />}
+      {aba === 'skus'        && <ConfigurarSKUs    competitors={competitors} onUpdate={carregar} showMsg={showMsg} />}
+      {aba === 'credenciais' && <CredenciaisAPI    credenciais={credenciais} onUpdate={carregar} showMsg={showMsg} />}
+      {aba === 'alertas'     && <AlertasPreco      alertas={alertas} onUpdate={carregar} showMsg={showMsg} />}
+    </div>
+  )
+}
