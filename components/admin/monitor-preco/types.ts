@@ -9,7 +9,7 @@ export type Competitor = {
   map_price?: number; notas?: string
 }
 export type Alerta = {
-  id: string; sku: string; source?: string
+  id: string; sku: string; product_name?: string; source?: string
   tipo: string; threshold: number
   email_notificar: string; ultimo_disparo?: string
 }

@@ -53,8 +53,10 @@ export default function AlertasPreco({ alertas, credenciais = [], onUpdate, show
       return
     }
     setSalvando(true)
+    const prod = produtos.find(p => p.sku === form.sku)
     const { error } = await supabase.from('market_alerts' as any).insert({
       sku: form.sku,
+      product_name: prod?.name || null,
       source: form.source || null,
       tipo: form.tipo,
       threshold: parseFloat(form.threshold),
@@ -130,8 +132,11 @@ export default function AlertasPreco({ alertas, credenciais = [], onUpdate, show
             </thead>
             <tbody>
               {alertas.map(a => (
-                <tr key={a.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3 font-bold text-gray-800 font-mono text-xs">{a.sku}</td>
+                <tr key={a.id} className={`border-b border-gray-100 hover:bg-gray-50 ${a.ultimo_disparo ? "bg-red-50" : ""}`}>
+                  <td className="px-4 py-3">
+                    <p className="font-bold text-gray-800 font-mono text-xs">{a.sku}</p>
+                    {(a as any).product_name && <p className="text-xs text-gray-400 truncate max-w-[160px]">{(a as any).product_name}</p>}
+                  </td>
                   <td className="px-4 py-3">
                     {a.source
                       ? <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${CANAIS_DISPONIVEIS.find(s => s.id === a.source)?.cor || 'bg-gray-100 text-gray-600'}`}>
@@ -156,10 +161,14 @@ export default function AlertasPreco({ alertas, credenciais = [], onUpdate, show
                   <td className="px-4 py-3 text-xs text-gray-500 max-w-[150px] truncate">
                     {a.email_notificar}
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-400">
-                    {a.ultimo_disparo
-                      ? new Date(a.ultimo_disparo).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
-                      : '—'}
+                  <td className="px-4 py-3">
+                    {a.ultimo_disparo ? (
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+                        🔔 {new Date(a.ultimo_disparo).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-300">Nunca disparado</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <button onClick={() => excluir(a.id)} className="text-red-400 hover:text-red-600">

@@ -284,7 +284,15 @@ export default function PainelPrecos({ snapshots, competitors, credenciais = [],
           {/* Box informativo */}
           <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-700">
             <p className="font-bold mb-1">💡 Sobre os dados</p>
-            <p>Coleta automática 1x/dia via N8n. Use "Atualizar tela" para recarregar.</p>
+            <p>Coleta automática às <strong>6h da manhã</strong> via N8n.</p>
+            {snapshots.length > 0 && (
+              <p className="mt-1 font-bold text-blue-800">
+                🕐 Última coleta: {new Date(snapshots[0].captured_at).toLocaleString('pt-BR', {
+                  day: '2-digit', month: '2-digit', year: '2-digit',
+                  hour: '2-digit', minute: '2-digit'
+                })}
+              </p>
+            )}
           </div>
         </div>
 
