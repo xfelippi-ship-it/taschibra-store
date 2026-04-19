@@ -99,10 +99,10 @@ export default function MonitoramentoPrecoTab() {
       </div>
 
       {/* Conteúdo das abas */}
-      {aba === 'painel'      && <PainelPrecos      snapshots={snapshots} competitors={competitors} loading={loading} />}
-      {aba === 'skus'        && <ConfigurarSKUs    competitors={competitors} onUpdate={carregar} showMsg={showMsg} />}
+      {aba === 'painel'      && <PainelPrecos      snapshots={snapshots} competitors={competitors} credenciais={credenciais} loading={loading} />}
+      {aba === 'skus'        && <ConfigurarSKUs    competitors={competitors} credenciais={credenciais} onUpdate={carregar} showMsg={showMsg} />}
       {aba === 'credenciais' && <CredenciaisAPI    credenciais={credenciais} onUpdate={carregar} showMsg={showMsg} />}
-      {aba === 'alertas'     && <AlertasPreco      alertas={alertas} onUpdate={carregar} showMsg={showMsg} />}
+      {aba === 'alertas'     && <AlertasPreco      alertas={alertas} credenciais={credenciais} onUpdate={carregar} showMsg={showMsg} />}
       {aba === 'ia'          && <RecomendacoesIA   competitors={competitors} showMsg={showMsg} />}
     </div>
   )

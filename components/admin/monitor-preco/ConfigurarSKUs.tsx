@@ -13,13 +13,19 @@ const supabase = createClient(
 
 interface Props {
   competitors: Competitor[]
+  credenciais?: any[]
   onUpdate: () => void
   showMsg: (t: string) => void
 }
 
 type Produto = { id: string; sku: string; name: string; price: number }
 
-export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props) {
+export default function ConfigurarSKUs({ competitors, credenciais = [], onUpdate, showMsg }: Props) {
+  // Canais dinamicos: 4 oficiais + customizados ativos
+  const canaisCustomizados = credenciais
+    .filter(c => c.ativo && (c.tipo === 'api' || c.tipo === 'coletor') && !CANAIS_LIST.find(ofc => ofc.id === c.canal))
+    .map(c => ({ id: c.canal, label: c.label, cor: 'bg-gray-100 text-gray-700' }))
+  const CANAIS_DISPONIVEIS = [...CANAIS_LIST, ...canaisCustomizados]
   const [open, setOpen] = useState(false)
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [busca, setBusca] = useState('')
@@ -141,7 +147,7 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
                   <label className="text-xs font-bold text-gray-600 mb-1 block">Canal</label>
                   <select value={canalSelecionado} onChange={e => setCanalSelecionado(e.target.value)}
                     className="w-full text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white outline-none focus:border-green-500">
-                    {CANAIS_LIST.map(c => (
+                    {CANAIS_DISPONIVEIS.map(c => (
                       <option key={c.id} value={c.id}>{c.label}</option>
                     ))}
                   </select>
@@ -229,7 +235,7 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
                   <td className="px-4 py-3">
                     <select value={c.source} onChange={e => trocarCanal(c.id, e.target.value)}
                       className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white outline-none focus:border-green-500">
-                      {CANAIS_LIST.map(canal => (
+                      {CANAIS_DISPONIVEIS.map(canal => (
                         <option key={canal.id} value={canal.id}>{canal.label}</option>
                       ))}
                     </select>

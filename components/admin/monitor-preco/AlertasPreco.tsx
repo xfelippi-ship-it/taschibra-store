@@ -12,13 +12,18 @@ const supabase = createClient(
 
 interface Props {
   alertas: Alerta[]
+  credenciais?: any[]
   onUpdate: () => void
   showMsg: (t: string) => void
 }
 
 const FORM_VAZIO = { sku: '', source: '', tipo: 'preco_abaixo', threshold: '', email_notificar: '', is_map: false }
 
-export default function AlertasPreco({ alertas, onUpdate, showMsg }: Props) {
+export default function AlertasPreco({ alertas, credenciais = [], onUpdate, showMsg }: Props) {
+  const canaisCustomizados = credenciais
+    .filter(cc => cc.ativo && (cc.tipo === 'api' || cc.tipo === 'coletor') && !CANAIS_LIST.find(ofc => ofc.id === cc.canal))
+    .map(cc => ({ id: cc.canal, label: cc.label, cor: 'bg-gray-100 text-gray-700' }))
+  const CANAIS_DISPONIVEIS = [...CANAIS_LIST, ...canaisCustomizados]
   const [modal, setModal] = useState(false)
   const [form, setForm] = useState(FORM_VAZIO)
   const [salvando, setSalvando] = useState(false)
@@ -110,8 +115,8 @@ export default function AlertasPreco({ alertas, onUpdate, showMsg }: Props) {
                   <td className="px-4 py-3 font-bold text-gray-800 font-mono text-xs">{a.sku}</td>
                   <td className="px-4 py-3">
                     {a.source
-                      ? <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${CANAIS_LIST.find(s => s.id === a.source)?.cor || 'bg-gray-100 text-gray-600'}`}>
-                          {CANAIS_LIST.find(s => s.id === a.source)?.label || a.source}
+                      ? <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${CANAIS_DISPONIVEIS.find(s => s.id === a.source)?.cor || 'bg-gray-100 text-gray-600'}`}>
+                          {CANAIS_DISPONIVEIS.find(s => s.id === a.source)?.label || a.source}
                         </span>
                       : <span className="text-xs text-gray-400">Todos</span>}
                   </td>
@@ -170,7 +175,7 @@ export default function AlertasPreco({ alertas, onUpdate, showMsg }: Props) {
                 <select value={form.source} onChange={e => setForm({ ...form, source: e.target.value })}
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:border-green-500">
                   <option value="">Todos os canais</option>
-                  {CANAIS_LIST.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                  {CANAIS_DISPONIVEIS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
                 </select>
               </div>
               <div>

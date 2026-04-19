@@ -7,10 +7,16 @@ import { CANAIS_LIST, CANAIS, fmt } from './constants'
 interface Props {
   snapshots: Snapshot[]
   competitors: Competitor[]
+  credenciais?: any[]
   loading: boolean
 }
 
-export default function PainelPrecos({ snapshots, competitors, loading }: Props) {
+export default function PainelPrecos({ snapshots, competitors, credenciais = [], loading }: Props) {
+  // Canais dinamicos: 4 oficiais + customizados ativos
+  const canaisCustomizados = credenciais
+    .filter(c => c.ativo && (c.tipo === 'api' || c.tipo === 'coletor') && !CANAIS_LIST.find(ofc => ofc.id === c.canal))
+    .map(c => ({ id: c.canal, label: c.label, cor: 'bg-gray-100 text-gray-700' }))
+  const CANAIS_DISPONIVEIS = [...CANAIS_LIST, ...canaisCustomizados]
   const [skuFiltro, setSkuFiltro] = useState('')
   const [sourceFiltro, setSourceFiltro] = useState('todos')
 
@@ -65,7 +71,7 @@ export default function PainelPrecos({ snapshots, competitors, loading }: Props)
       const comp = competitors.find(c => c.sku === sku)
       const mapPrice = comp?.map_price
 
-      const porSource = CANAIS_LIST.map(src => {
+      const porSource = CANAIS_DISPONIVEIS.map(src => {
         const srcItens = itens.filter(s => s.source === src.id)
         if (!srcItens.length) return null
         const precos = srcItens.map(s => s.price).filter(p => p > 0)
@@ -165,7 +171,7 @@ export default function PainelPrecos({ snapshots, competitors, loading }: Props)
             <select value={sourceFiltro} onChange={e => setSourceFiltro(e.target.value)}
               className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:border-green-500">
               <option value="todos">Todos os canais</option>
-              {CANAIS_LIST.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+              {CANAIS_DISPONIVEIS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
             </select>
           </div>
 
