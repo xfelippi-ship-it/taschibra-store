@@ -29,6 +29,8 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
   const [mapTemp, setMapTemp] = useState('')
 
   async function abrirModal() {
+    setSelecionados({})
+    setBusca('')
     setModal(true)
     if (produtos.length) return
     const { data } = await supabase
