@@ -6,6 +6,7 @@ import PainelPrecos from './PainelPrecos'
 import ConfigurarSKUs from './ConfigurarSKUs'
 import CredenciaisAPI from './CredenciaisAPI'
 import AlertasPreco from './AlertasPreco'
+import RecomendacoesIA from './RecomendacoesIA'
 import type { Snapshot, Competitor, Alerta, Credencial } from './types'
 
 const supabase = createClient(
@@ -16,13 +17,14 @@ const supabase = createClient(
 export type { Snapshot, Competitor, Alerta, Credencial } from './types'
 export { SOURCES, fmt } from './types'
 
-type Aba = 'painel' | 'skus' | 'credenciais' | 'alertas'
+type Aba = 'painel' | 'skus' | 'credenciais' | 'alertas' | 'ia'
 
 const ABAS: { id: Aba; label: string; icon: string }[] = [
   { id: 'painel',      label: 'Painel',          icon: '📊' },
   { id: 'skus',        label: 'Configurar SKUs',  icon: '⚙️' },
   { id: 'credenciais', label: 'Credenciais de API', icon: '🔑' },
   { id: 'alertas',     label: 'Alertas',          icon: '🔔' },
+  { id: 'ia',          label: 'Recomendações IA',   icon: '✨' },
 ]
 
 export default function MonitoramentoPrecoTab() {
@@ -87,6 +89,7 @@ export default function MonitoramentoPrecoTab() {
       {aba === 'skus'        && <ConfigurarSKUs    competitors={competitors} onUpdate={carregar} showMsg={showMsg} />}
       {aba === 'credenciais' && <CredenciaisAPI    credenciais={credenciais} onUpdate={carregar} showMsg={showMsg} />}
       {aba === 'alertas'     && <AlertasPreco      alertas={alertas} onUpdate={carregar} showMsg={showMsg} />}
+      {aba === 'ia'          && <RecomendacoesIA   competitors={competitors} showMsg={showMsg} />}
     </div>
   )
 }
