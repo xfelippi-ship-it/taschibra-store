@@ -161,6 +161,9 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
                       onChange={e => trocarCanal(c.id, e.target.value)}
                       className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white outline-none focus:border-green-500">
                       {SOURCES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                      {!SOURCES.find(s => s.id === c.source) && (
+                        <option value={c.source}>{c.source}</option>
+                      )}
                     </select>
                   </td>
                   <td className="px-4 py-3 text-gray-600 text-xs">{c.search_term}</td>
@@ -256,7 +259,7 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
             {/* Lista de produtos */}
             <div className="overflow-y-auto flex-1 px-2">
               {produtosFiltrados.map(p => (
-                <label key={p.sku} className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer rounded-lg">
+                <label key={p.sku} onClick={e => e.stopPropagation()} className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer rounded-lg">
                   <input type="checkbox" checked={!!selecionados[p.sku]} onChange={() => toggleSelecionado(p.sku)}
                     className="w-4 h-4 accent-green-600 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
