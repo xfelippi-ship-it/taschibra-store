@@ -1034,7 +1034,6 @@ export default function AdminPage() {
         {/* LOJA */}
         {tem([], 'loja') && (
           <Grupo id="loja" label="Loja">
-            {tem([], 'frete') && <BtnItem id="frete"        label="Frete Grátis"       icon={<Truck size={15} />} />}
             <BtnItem id="retirada"      label="Retirada na Loja"   icon={<MapPin size={15} />} />
             <BtnItem id="faturamento"   label="Faturamento Direto" icon={<CreditCard size={15} />} />
             <BtnItem id="beneficios"    label="Barra Benefícios"   icon={<Star size={15} />} />
