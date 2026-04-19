@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import * as Dialog from '@radix-ui/react-dialog'
 import { Plus, Trash2, Search, X, Check } from 'lucide-react'
 import { Competitor } from './types'
-import { CANAIS, CANAIS_LIST, fmt } from './constants'
+import { CANAIS_LIST, fmt } from './constants'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -141,7 +141,7 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
                   <label className="text-xs font-bold text-gray-600 mb-1 block">Canal</label>
                   <select value={canalSelecionado} onChange={e => setCanalSelecionado(e.target.value)}
                     className="w-full text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white outline-none focus:border-green-500">
-                    {CANAIS_LIST.filter(c => c.tipo === 'api').map(c => (
+                    {CANAIS_LIST.map(c => (
                       <option key={c.id} value={c.id}>{c.label}</option>
                     ))}
                   </select>
@@ -229,7 +229,7 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
                   <td className="px-4 py-3">
                     <select value={c.source} onChange={e => trocarCanal(c.id, e.target.value)}
                       className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white outline-none focus:border-green-500">
-                      {CANAIS_LIST.filter(canal => canal.tipo === 'api').map(canal => (
+                      {CANAIS_LIST.map(canal => (
                         <option key={canal.id} value={canal.id}>{canal.label}</option>
                       ))}
                     </select>

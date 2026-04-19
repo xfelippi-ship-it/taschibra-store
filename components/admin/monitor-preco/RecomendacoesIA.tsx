@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Sparkles, RefreshCw, AlertCircle, Brain, ChevronDown, ChevronUp } from 'lucide-react'
 import { Competitor } from './types'
+import { IAS_LIST } from './constants'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,6 +27,8 @@ type Analise = {
 
 export default function RecomendacoesIA({ competitors, showMsg }: Props) {
   const [skuSelecionado, setSkuSelecionado] = useState('')
+  const [iaSelecionada, setIaSelecionada] = useState('anthropic')
+  const [iasDisponiveis, setIasDisponiveis] = useState<string[]>([])
   const [gerando, setGerando] = useState(false)
   const [analises, setAnalises] = useState<Analise[]>([])
   const [expandido, setExpandido] = useState<string | null>(null)
@@ -36,10 +39,13 @@ export default function RecomendacoesIA({ competitors, showMsg }: Props) {
       .select('*').order('created_at', { ascending: false }).limit(50)
     setAnalises((data || []) as Analise[])
 
-    // Verificar se Anthropic está configurado
-    const { data: cred } = await supabase.from('market_api_credentials' as any)
-      .select('id').eq('canal', 'anthropic').eq('ativo', true).maybeSingle()
-    setApiConfigurada(!!cred)
+    // Verificar quais IAs estao configuradas
+    const { data: creds } = await supabase.from('market_api_credentials' as any)
+      .select('canal').eq('tipo', 'ia').eq('ativo', true)
+    const ids = (creds || []).map((c: any) => c.canal)
+    setIasDisponiveis(ids)
+    setApiConfigurada(ids.length > 0)
+    if (ids.length > 0 && !ids.includes(iaSelecionada)) setIaSelecionada(ids[0])
   }
 
   useEffect(() => { carregar() }, [])
@@ -51,7 +57,7 @@ export default function RecomendacoesIA({ competitors, showMsg }: Props) {
       const res = await fetch('/api/ai/analyze-price', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sku: skuSelecionado })
+        body: JSON.stringify({ sku: skuSelecionado, ia: iaSelecionada })
       })
       const data = await res.json()
 
@@ -87,10 +93,9 @@ export default function RecomendacoesIA({ competitors, showMsg }: Props) {
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-3">
           <AlertCircle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="text-sm font-bold text-amber-900">API da Anthropic não configurada</p>
+            <p className="text-sm font-bold text-amber-900">Nenhuma IA configurada</p>
             <p className="text-xs text-amber-700 mt-0.5">
-              Vá em <strong>Credenciais de API</strong> → clique no card <strong>Claude IA</strong> e cole sua API key (sk-ant-...).
-              Custo estimado: ~$0.03 por análise (R$ 0,15).
+              Vá em <strong>Credenciais de API</strong> → seção <strong>IAs de Análise</strong> e configure pelo menos uma (Claude, GPT ou Gemini).
             </p>
           </div>
         </div>
@@ -108,10 +113,11 @@ export default function RecomendacoesIA({ competitors, showMsg }: Props) {
           </div>
         </div>
 
-        <label className="text-xs font-bold mb-1 block">Selecione o produto</label>
-        <div className="flex gap-3">
-          <select value={skuSelecionado} onChange={e => setSkuSelecionado(e.target.value)}
-            className="flex-1 text-sm border-0 rounded-lg px-3 py-2.5 text-gray-800 outline-none">
+        <div className="grid grid-cols-3 gap-3 mb-3">
+          <div className="col-span-2">
+            <label className="text-xs font-bold mb-1 block">Produto</label>
+            <select value={skuSelecionado} onChange={e => setSkuSelecionado(e.target.value)}
+              className="w-full text-sm border-0 rounded-lg px-3 py-2.5 text-gray-800 outline-none">
             <option value="">Escolha um SKU...</option>
             {competitors.map(c => (
               <option key={c.id} value={c.sku}>
@@ -119,12 +125,27 @@ export default function RecomendacoesIA({ competitors, showMsg }: Props) {
                 {c.map_price && ` (MAP: R$ ${c.map_price.toFixed(2)})`}
               </option>
             ))}
-          </select>
-          <button onClick={gerarAnalise} disabled={!skuSelecionado || gerando}
-            className="bg-white text-green-700 font-black px-5 py-2.5 rounded-lg text-sm hover:bg-green-50 disabled:opacity-50 flex items-center gap-2">
-            {gerando ? <><RefreshCw size={14} className="animate-spin" /> Analisando...</> : <><Sparkles size={14} /> Gerar Análise</>}
-          </button>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-bold mb-1 block">IA</label>
+            <select value={iaSelecionada} onChange={e => setIaSelecionada(e.target.value)}
+              disabled={iasDisponiveis.length === 0}
+              className="w-full text-sm border-0 rounded-lg px-3 py-2.5 text-gray-800 outline-none disabled:opacity-50">
+              {iasDisponiveis.length === 0 ? (
+                <option value="">Nenhuma</option>
+              ) : (
+                IAS_LIST.filter(i => iasDisponiveis.includes(i.id)).map(i => (
+                  <option key={i.id} value={i.id}>{i.label}</option>
+                ))
+              )}
+            </select>
+          </div>
         </div>
+        <button onClick={gerarAnalise} disabled={!skuSelecionado || gerando}
+          className="bg-white text-green-700 font-black px-5 py-2.5 rounded-lg text-sm hover:bg-green-50 disabled:opacity-50 flex items-center gap-2">
+          {gerando ? <><RefreshCw size={14} className="animate-spin" /> Analisando...</> : <><Sparkles size={14} /> Gerar Análise</>}
+        </button>
       </div>
 
       {/* Lista de análises */}

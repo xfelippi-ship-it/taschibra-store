@@ -2,7 +2,8 @@
 import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Plus, Trash2, Bell, X } from 'lucide-react'
-import { Alerta, SOURCES, fmt } from './types'
+import { Alerta } from './types'
+import { CANAIS_LIST, CANAIS, fmt } from './constants'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -109,8 +110,8 @@ export default function AlertasPreco({ alertas, onUpdate, showMsg }: Props) {
                   <td className="px-4 py-3 font-bold text-gray-800 font-mono text-xs">{a.sku}</td>
                   <td className="px-4 py-3">
                     {a.source
-                      ? <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${SOURCES.find(s => s.id === a.source)?.cor || 'bg-gray-100 text-gray-600'}`}>
-                          {SOURCES.find(s => s.id === a.source)?.label || a.source}
+                      ? <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${CANAIS_LIST.find(s => s.id === a.source)?.cor || 'bg-gray-100 text-gray-600'}`}>
+                          {CANAIS_LIST.find(s => s.id === a.source)?.label || a.source}
                         </span>
                       : <span className="text-xs text-gray-400">Todos</span>}
                   </td>
@@ -169,7 +170,7 @@ export default function AlertasPreco({ alertas, onUpdate, showMsg }: Props) {
                 <select value={form.source} onChange={e => setForm({ ...form, source: e.target.value })}
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:border-green-500">
                   <option value="">Todos os canais</option>
-                  {SOURCES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                  {CANAIS_LIST.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
                 </select>
               </div>
               <div>
