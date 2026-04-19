@@ -214,7 +214,7 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
 
       {/* Modal seleção múltipla */}
       {modal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4" onClick={() => setModal(false)}>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
             {/* Header modal */}
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -261,7 +261,7 @@ export default function ConfigurarSKUs({ competitors, onUpdate, showMsg }: Props
             {/* Lista de produtos */}
             <div className="overflow-y-auto flex-1 px-2">
               {produtosFiltrados.map(p => (
-                <label key={p.sku} onClick={e => e.stopPropagation()} className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer rounded-lg">
+                <label key={p.sku} className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer rounded-lg">
                   <input type="checkbox" checked={!!selecionados[p.sku]} onChange={() => toggleSelecionado(p.sku)}
                     className="w-4 h-4 accent-green-600 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
