@@ -19,7 +19,7 @@ export type CanalId = keyof typeof CANAIS
 export const INSTRUCOES = {
   mercadolivre: {
     titulo: 'Como configurar Mercado Livre',
-    custo: 'Gratuito',
+    custo: 'Gratuito (API oficial)',
     passos: [
       'Acesse developers.mercadolivre.com.br e faça login com a conta da Taschibra',
       'Crie um novo app em "Suas aplicações" → "Criar aplicação"',
@@ -34,7 +34,7 @@ export const INSTRUCOES = {
   },
   amazon: {
     titulo: 'Como configurar Amazon',
-    custo: 'Gratuito',
+    custo: 'Gratuito (API oficial)',
     passos: [
       'Acesse Seller Central da Taschibra → Configurações → Credenciais SP-API',
       'Solicite acesso à API SP-API se ainda não tiver',
@@ -48,7 +48,7 @@ export const INSTRUCOES = {
   },
   shopee: {
     titulo: 'Como configurar Shopee',
-    custo: 'Gratuito',
+    custo: 'Gratuito (API oficial)',
     passos: [
       'Acesse Open Platform da Shopee (open.shopee.com.br)',
       'Crie um app → copie Partner ID e Partner Key',
@@ -60,7 +60,7 @@ export const INSTRUCOES = {
   },
   magalu: {
     titulo: 'Como configurar Magalu',
-    custo: 'Gratuito',
+    custo: 'Gratuito (API oficial)',
     passos: [
       'Acesse o Portal de Parceiros Magalu',
       'Solicite credenciais de API ao gerente de conta da Taschibra',
@@ -72,7 +72,7 @@ export const INSTRUCOES = {
   },
   apify: {
     titulo: 'Como configurar Apify (Scraping de sites)',
-    custo: 'A partir de US$ 49/mês (plano Starter)',
+    custo: 'Pago — consulte apify.com/pricing',
     passos: [
       'Acesse apify.com e assine o plano Starter ($49/mês)',
       'Vá em Settings → Integrations → API tokens',
@@ -89,7 +89,7 @@ export const INSTRUCOES = {
   },
   anthropic: {
     titulo: 'Como configurar Anthropic Claude (IA)',
-    custo: '~US$ 10-30/mês (uso esporádico)',
+    custo: 'Pago por uso — consulte console.anthropic.com',
     passos: [
       'Acesse console.anthropic.com e crie uma conta',
       'Vá em Settings → API Keys → Create Key',
@@ -105,7 +105,7 @@ export const INSTRUCOES = {
   },
   site: {
     titulo: 'Como configurar Site Customizado',
-    custo: 'Depende do método (Apify recomendado)',
+    custo: 'Recomendado: usar via Apify',
     passos: [
       'Configure a URL de busca do site (ex: https://www.havan.com.br/busca?q={TERMO})',
       'Use {TERMO} como placeholder para o nome do produto',

@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, Bell } from 'lucide-react'
 import PainelPrecos from './PainelPrecos'
 import ConfigurarSKUs from './ConfigurarSKUs'
 import CredenciaisAPI from './CredenciaisAPI'
@@ -78,10 +78,24 @@ export default function MonitoramentoPrecoTab() {
             </button>
           ))}
         </div>
-        <button onClick={carregar}
-          className="flex items-center gap-1.5 text-xs font-bold text-gray-500 border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50">
-          <RefreshCw size={13} /> Atualizar
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Sino de alertas com badge */}
+          <button onClick={() => setAba('alertas')}
+            title="Ver alertas configurados"
+            className="relative flex items-center justify-center w-9 h-9 text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50">
+            <Bell size={15} />
+            {alertas.length > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+                {alertas.length}
+              </span>
+            )}
+          </button>
+          <button onClick={carregar}
+            title="Recarrega dados da tela. Coleta automatica do N8n roda 1x/dia."
+            className="flex items-center gap-1.5 text-xs font-bold text-gray-500 border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50">
+            <RefreshCw size={13} /> Atualizar tela
+          </button>
+        </div>
       </div>
 
       {/* Conteúdo das abas */}

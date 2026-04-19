@@ -74,7 +74,7 @@ export default function RecomendacoesIA({ competitors, showMsg }: Props) {
       {/* Header */}
       <div>
         <p className="text-sm text-gray-600 font-medium flex items-center gap-2">
-          <Sparkles size={16} className="text-emerald-500" />
+          <Sparkles size={16} className="text-green-500" />
           Análise inteligente de precificação com Claude AI
         </p>
         <p className="text-xs text-gray-400 mt-0.5">
@@ -97,14 +97,14 @@ export default function RecomendacoesIA({ competitors, showMsg }: Props) {
       )}
 
       {/* Painel de geração */}
-      <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-5 text-white">
+      <div className="bg-green-600 rounded-2xl p-5 text-white">
         <div className="flex items-start gap-3 mb-4">
           <div className="bg-white/20 rounded-lg p-2">
             <Brain size={20} />
           </div>
           <div>
             <h3 className="text-base font-black">Gerar Nova Análise</h3>
-            <p className="text-xs text-emerald-100 mt-0.5">A IA analisa os dados de mercado e sugere o preço ideal</p>
+            <p className="text-xs text-green-100 mt-0.5">A IA analisa os dados de mercado e sugere o preço ideal</p>
           </div>
         </div>
 
@@ -121,7 +121,7 @@ export default function RecomendacoesIA({ competitors, showMsg }: Props) {
             ))}
           </select>
           <button onClick={gerarAnalise} disabled={!skuSelecionado || gerando}
-            className="bg-white text-emerald-700 font-black px-5 py-2.5 rounded-lg text-sm hover:bg-emerald-50 disabled:opacity-50 flex items-center gap-2">
+            className="bg-white text-green-700 font-black px-5 py-2.5 rounded-lg text-sm hover:bg-green-50 disabled:opacity-50 flex items-center gap-2">
             {gerando ? <><RefreshCw size={14} className="animate-spin" /> Analisando...</> : <><Sparkles size={14} /> Gerar Análise</>}
           </button>
         </div>
@@ -149,7 +149,7 @@ export default function RecomendacoesIA({ competitors, showMsg }: Props) {
                 <button onClick={() => setExpandido(expandido === a.id ? null : a.id)}
                   className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 text-left">
                   <div className="flex items-center gap-3">
-                    <Sparkles size={14} className="text-emerald-500 flex-shrink-0" />
+                    <Sparkles size={14} className="text-green-500 flex-shrink-0" />
                     <div>
                       <p className="text-xs font-bold text-gray-800">
                         <span className="font-mono">{a.sku}</span> — {a.product_name}
