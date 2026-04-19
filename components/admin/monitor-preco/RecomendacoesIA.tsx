@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { Sparkles, RefreshCw, AlertCircle, Brain, ChevronDown, ChevronUp } from 'lucide-react'
+import { Sparkles, RefreshCw, AlertCircle, Brain, ChevronDown, ChevronUp, Zap } from 'lucide-react'
 import { Competitor } from './types'
 import { IAS_LIST } from './constants'
 
@@ -29,6 +29,8 @@ export default function RecomendacoesIA({ competitors, showMsg }: Props) {
   const [skuSelecionado, setSkuSelecionado] = useState('')
   const [iaSelecionada, setIaSelecionada] = useState('anthropic')
   const [iasDisponiveis, setIasDisponiveis] = useState<string[]>([])
+  const [erroSemDados, setErroSemDados] = useState(false)
+  const [forcandoColeta, setForcandoColeta] = useState(false)
   const [gerando, setGerando] = useState(false)
   const [analises, setAnalises] = useState<Analise[]>([])
   const [expandido, setExpandido] = useState<string | null>(null)
@@ -50,6 +52,29 @@ export default function RecomendacoesIA({ competitors, showMsg }: Props) {
 
   useEffect(() => { carregar() }, [])
 
+  async function forcarColeta() {
+    if (!skuSelecionado) return
+    setForcandoColeta(true)
+    try {
+      const res = await fetch('/api/n8n/trigger-collect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sku: skuSelecionado })
+      })
+      const data = await res.json()
+      if (data.ok) {
+        showMsg('Coleta iniciada! Aguarde 1-2 minutos.')
+        setErroSemDados(false)
+      } else {
+        showMsg(data.error || 'Erro ao iniciar coleta')
+      }
+    } catch (e: any) {
+      showMsg('Erro: ' + e.message)
+    } finally {
+      setForcandoColeta(false)
+    }
+  }
+
   async function gerarAnalise() {
     if (!skuSelecionado) { showMsg('Selecione um SKU'); return }
     setGerando(true)
@@ -63,7 +88,9 @@ export default function RecomendacoesIA({ competitors, showMsg }: Props) {
 
       if (data.error && !data.modo_demo) {
         showMsg(data.error)
+        if (data.error.includes('Sem dados de preço')) setErroSemDados(true)
       } else {
+        setErroSemDados(false)
         showMsg(data.modo_demo ? 'Configure API Key da Anthropic' : 'Análise gerada com sucesso!')
         setExpandido(data.id)
         carregar()
@@ -147,6 +174,23 @@ export default function RecomendacoesIA({ competitors, showMsg }: Props) {
           {gerando ? <><RefreshCw size={14} className="animate-spin" /> Analisando...</> : <><Sparkles size={14} /> Gerar Análise</>}
         </button>
       </div>
+
+      {/* Aviso "sem dados" com botão de forçar coleta */}
+      {erroSemDados && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-3">
+          <AlertCircle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-bold text-amber-900">Sem dados de preço para este SKU</p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              O N8n coleta dados 1x/dia automaticamente. Você pode forçar uma coleta agora.
+            </p>
+          </div>
+          <button onClick={forcarColeta} disabled={forcandoColeta}
+            className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 whitespace-nowrap disabled:opacity-50">
+            {forcandoColeta ? <><RefreshCw size={11} className="animate-spin" /> Coletando...</> : <><Zap size={11} /> Forçar coleta</>}
+          </button>
+        </div>
+      )}
 
       {/* Lista de análises */}
       <div>
