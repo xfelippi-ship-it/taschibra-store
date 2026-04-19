@@ -206,8 +206,7 @@ export default function CredenciaisAPI({ credenciais, onUpdate, showMsg }: Props
                       <select value={form.tipo} onChange={e => setForm({ ...form, tipo: e.target.value })}
                         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:border-green-500">
                         <option value="api">API oficial</option>
-                        <option value="site">Scraping de site</option>
-                        <option value="service">Serviço (Apify, Anthropic)</option>
+                        <option value="service">Serviço externo (Apify, Anthropic)</option>
                       </select>
                     </div>
                   </>
