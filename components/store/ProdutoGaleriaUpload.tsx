@@ -1,7 +1,8 @@
 'use client'
 import { useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Upload, X } from 'lucide-react'
+import { Upload, X, FolderArchive } from 'lucide-react'
+import JSZip from 'jszip'
 
 interface Props {
   images: string[]
@@ -11,8 +12,13 @@ interface Props {
 
 export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
   const [uploading, setUploading] = useState<number | null>(null)
+  const [uploadingZip, setUploadingZip] = useState(false)
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null)
+  const [dragOverZone, setDragOverZone] = useState(false)
+  const [progress, setProgress] = useState('')
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+  const multiInputRef = useRef<HTMLInputElement>(null)
+  const zipInputRef = useRef<HTMLInputElement>(null)
   const slots = 8
   const grid = Array.from({ length: slots }, (_, i) => images[i] || '')
 
@@ -31,6 +37,54 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
       onChange(novo.filter(Boolean))
     } catch { alert('Erro no upload') }
     finally { setUploading(null) }
+  }
+
+  async function uploadMultiplos(files: File[]) {
+    const imgs = files.filter(f => f.type.startsWith('image/'))
+    if (!imgs.length) return
+    setUploadingZip(true)
+    const prefix = sku ? `produtos/${sku}` : 'produtos'
+    const novoGrid = [...grid]
+    let slotIdx = novoGrid.findIndex(v => !v)
+    if (slotIdx === -1) slotIdx = 0
+    let count = 0
+    for (const file of imgs) {
+      if (slotIdx >= slots) break
+      setProgress(`Subindo ${++count}/${imgs.length}...`)
+      try {
+        const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+        const nome = `${prefix}/${slotIdx + 1}-${Date.now()}.${ext}`
+        const { error } = await supabase.storage.from('midias').upload(nome, file, { upsert: true, contentType: file.type })
+        if (error) throw error
+        const { data } = supabase.storage.from('midias').getPublicUrl(nome)
+        novoGrid[slotIdx] = data.publicUrl
+        slotIdx++
+      } catch { /* pula arquivo com erro */ }
+    }
+    onChange(novoGrid.filter(Boolean))
+    setProgress('')
+    setUploadingZip(false)
+  }
+
+  async function handleZip(file: File) {
+    if (!file.name.endsWith('.zip')) return
+    setUploadingZip(true)
+    setProgress('Lendo ZIP...')
+    try {
+      const zip = await JSZip.loadAsync(file)
+      const arquivos: File[] = []
+      for (const [name, entry] of Object.entries(zip.files)) {
+        if (entry.dir) continue
+        const ext = name.split('.').pop()?.toLowerCase() || ''
+        if (!['jpg','jpeg','png','webp','gif'].includes(ext)) continue
+        const blob = await entry.async('blob')
+        arquivos.push(new File([blob], name, { type: `image/${ext === 'jpg' ? 'jpeg' : ext}` }))
+      }
+      if (!arquivos.length) { alert('Nenhuma imagem encontrada no ZIP'); setUploadingZip(false); setProgress(''); return }
+      arquivos.sort((a, b) => a.name.localeCompare(b.name))
+      await uploadMultiplos(arquivos)
+    } catch { alert('Erro ao ler ZIP') }
+    finally { setUploadingZip(false); setProgress('') }
   }
 
   function removeSlot(idx: number) {
@@ -52,6 +106,43 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
         Galeria de Imagens
         <span className="text-xs font-normal text-gray-400 ml-2">até 8 fotos · arraste para reordenar</span>
       </label>
+
+      {/* Drop zone múltiplo */}
+      <div
+        onDragOver={e => { e.preventDefault(); setDragOverZone(true) }}
+        onDragLeave={() => setDragOverZone(false)}
+        onDrop={e => {
+          e.preventDefault(); setDragOverZone(false)
+          const files = Array.from(e.dataTransfer.files)
+          const zip = files.find(f => f.name.endsWith('.zip'))
+          if (zip) { handleZip(zip); return }
+          uploadMultiplos(files)
+        }}
+        onClick={() => !uploadingZip && multiInputRef.current?.click()}
+        className={`mb-3 border-2 border-dashed rounded-xl p-3 text-center cursor-pointer transition-all ${dragOverZone ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'}`}
+      >
+        <input ref={multiInputRef} type="file" accept="image/*" multiple className="hidden"
+          onChange={e => { const files = Array.from(e.target.files || []); uploadMultiplos(files) }} />
+        <input ref={zipInputRef} type="file" accept=".zip" className="hidden"
+          onChange={e => { const f = e.target.files?.[0]; if (f) handleZip(f) }} />
+        {uploadingZip ? (
+          <div className="flex items-center justify-center gap-2 text-green-600 text-sm py-1">
+            <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+            {progress || 'Processando...'}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-3 text-gray-400 text-xs py-1">
+            <div className="flex items-center gap-1"><Upload size={14} /><span>Arraste várias fotos aqui</span></div>
+            <span className="text-gray-200">|</span>
+            <button type="button" onClick={e => { e.stopPropagation(); zipInputRef.current?.click() }}
+              className="flex items-center gap-1 text-blue-500 hover:text-blue-600 font-medium">
+              <FolderArchive size={14} /><span>ou solte um ZIP</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Grid de slots */}
       <div className="grid grid-cols-4 gap-2">
         {grid.map((url, idx) => (
           <div key={idx}
@@ -66,17 +157,17 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
               <>
                 <img src={url} alt={`Img ${idx + 1}`} className="w-full h-full object-contain rounded-lg p-1" />
                 <span className="absolute top-1 left-1 bg-black/50 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">{idx + 1}</span>
-                <button onClick={() => removeSlot(idx)}
+                <button type="button" onClick={() => removeSlot(idx)}
                   className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600">
                   <X size={10} />
                 </button>
                 <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-1">
-                  {idx > 0 && <button onClick={() => moveSlot(idx, idx-1)} className="bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded hover:bg-black/60">←</button>}
-                  {idx < grid.filter(Boolean).length - 1 && <button onClick={() => moveSlot(idx, idx+1)} className="bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded hover:bg-black/60">→</button>}
+                  {idx > 0 && <button type="button" onClick={() => moveSlot(idx, idx-1)} className="bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded hover:bg-black/60">←</button>}
+                  {idx < grid.filter(Boolean).length - 1 && <button type="button" onClick={() => moveSlot(idx, idx+1)} className="bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded hover:bg-black/60">→</button>}
                 </div>
               </>
             ) : (
-              <button onClick={() => inputRefs.current[idx]?.click()} disabled={uploading === idx}
+              <button type="button" onClick={() => inputRefs.current[idx]?.click()} disabled={uploading === idx}
                 className="w-full h-full flex flex-col items-center justify-center text-gray-300 hover:text-green-500 transition-colors">
                 {uploading === idx
                   ? <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
