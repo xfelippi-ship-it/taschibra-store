@@ -13,13 +13,14 @@ const supabase = createClient(
 interface Props {
   alertas: Alerta[]
   credenciais?: any[]
+  competitors?: any[]
   onUpdate: () => void
   showMsg: (t: string) => void
 }
 
 const FORM_VAZIO = { sku: '', source: '', tipo: 'preco_abaixo', threshold: '', email_notificar: '', is_map: false }
 
-export default function AlertasPreco({ alertas, credenciais = [], onUpdate, showMsg }: Props) {
+export default function AlertasPreco({ alertas, credenciais = [], competitors = [], onUpdate, showMsg }: Props) {
   const canaisCustomizados = credenciais
     .filter(cc => cc.ativo && (cc.tipo === 'api' || cc.tipo === 'coletor') && !CANAIS_LIST.find(ofc => ofc.id === cc.canal))
     .map(cc => ({ id: cc.canal, label: cc.label, cor: 'bg-gray-100 text-gray-700' }))
@@ -135,7 +136,9 @@ export default function AlertasPreco({ alertas, credenciais = [], onUpdate, show
                 <tr key={a.id} className={`border-b border-gray-100 hover:bg-gray-50 ${a.ultimo_disparo ? "bg-red-50" : ""}`}>
                   <td className="px-4 py-3">
                     <p className="font-bold text-gray-800 font-mono text-xs">{a.sku}</p>
-                    {(a as any).product_name && <p className="text-xs text-gray-400 truncate max-w-[160px]">{(a as any).product_name}</p>}
+                    <p className="text-xs text-gray-400 truncate max-w-[200px]">
+                      {a.product_name || competitors.find((cc: any) => cc.sku === a.sku)?.product_name || ''}
+                    </p>
                   </td>
                   <td className="px-4 py-3">
                     {a.source
