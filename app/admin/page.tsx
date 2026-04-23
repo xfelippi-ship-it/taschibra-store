@@ -780,7 +780,7 @@ export default function AdminPage() {
     if (error || !data.user) {
       setErroLogin('E-mail ou senha incorretos.')
     } else {
-      const { data: adminData, error: adminError } = await supabase.from('admin_users').select('id, papeis, papel').eq('user_id', data.user.id).single()
+      const { data: adminData, error: adminError } = await supabase.from('admin_users').select('id, papeis, papel, trocar_senha, modulos').eq('user_id', data.user.id).single()
       if (!adminData || adminError) {
         await supabase.auth.signOut()
         setErroLogin('Você não tem permissão de acesso.')
