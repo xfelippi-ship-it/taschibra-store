@@ -60,6 +60,22 @@ export async function PATCH(
       created_at: new Date().toISOString(),
     })
 
+    // Disparar notificacao automatica para status que tem template
+    const STATUS_NOTIFICAVEIS = ['confirmed', 'processing', 'awaiting_shipment', 'shipped', 'awaiting_pickup', 'delivered', 'cancelled']
+    if (STATUS_NOTIFICAVEIS.includes(status)) {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://taschibra-store.vercel.app'
+        await fetch(`${baseUrl}/api/admin/pedidos/${id}/notificar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status, executedBy: executedBy || 'auto' }),
+        })
+      } catch (notifErr) {
+        console.error('[status/route] Erro ao notificar:', notifErr)
+        // Nao quebra o fluxo — status ja foi atualizado
+      }
+    }
+
     return NextResponse.json({
       ok: true,
       pedido_id: id,
