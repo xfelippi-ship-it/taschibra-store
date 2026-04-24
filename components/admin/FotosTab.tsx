@@ -168,7 +168,7 @@ export default function FotosTab({ produtoId }: { produtoId: string }) {
         <p>• <strong>2ª foto:</strong> embalagem original do produto</p>
         <p>• <strong>3ª foto:</strong> produto instalado ou em ambiente real</p>
         <p>• <strong>4ª foto:</strong> diagrama técnico com dimensões</p>
-        <p>• Resolução mínima recomendada: 800×800px — formato quadrado (1:1)</p>
+        <p>• Resolução mínima recomendada: 1200×1200px — formato quadrado (1:1)</p>
       </div>
 
       {/* Lista */}
