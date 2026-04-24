@@ -321,7 +321,7 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
   return (
     <div className="max-w-4xl">
       <h1 className="text-2xl font-black text-gray-800 mb-2">Importar / Exportar Produtos</h1>
-      <p className="text-sm text-gray-500 mb-6">Exporte o catálogo para conferir ou editar em massa. Reimporte para atualizar. Identificação por SKU.</p>
+      <p className="text-sm text-gray-500 mb-6">Exporte o catálogo para conferir ou editar em massa. Reimporte para atualizar. Identificação por EAN.</p>
 
       {/* EXPORTAR */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
