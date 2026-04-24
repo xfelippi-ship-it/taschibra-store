@@ -117,7 +117,7 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
           <li><strong>1 arquivo:</strong> clique no slot desejado (1 a 8) e selecione o arquivo</li>
           <li><strong>Várias fotos de uma vez:</strong> arraste múltiplos arquivos para a área abaixo ou clique nela</li>
           <li><strong>ZIP deste produto:</strong> arraste um .zip com as fotos — o sistema descompacta e preenche os slots em ordem alfabética</li>
-          <li><strong>URL externa:</strong> cole a URL no campo "Cole URL..." abaixo de cada slot vazio e pressione Enter</li>
+          <li><strong>URL externa:</strong> cole no campo "Cole URL..." e pressione Enter — aceita imagens, vídeos diretos (.mp4/.webm) e links do <strong>YouTube</strong> ou <strong>Vimeo</strong> (rodam embutidos no site)</li>
           <li><strong>Vídeo:</strong> arraste arquivos .mp4 ou .webm, OU cole o link de um vídeo do YouTube/Vimeo no campo "Cole URL..."</li>
           <li><strong>Reordenar:</strong> use as setas ← → abaixo de cada imagem para mudar a ordem</li>
           <li><strong>Nomenclatura:</strong> não precisa renomear — o sistema usa o EAN do produto automaticamente</li>

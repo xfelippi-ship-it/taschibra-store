@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import ProductJsonLd from '@/components/store/ProductJsonLd'
 import ProdutoZoom from '@/components/store/ProdutoZoom'
+import { detectMediaType, getYouTubeEmbedUrl, getVimeoEmbedUrl, getYouTubeThumbnail } from '@/lib/media-helpers'
 import { ProdutoDatasheetDownload } from '@/components/store/ProdutoDatasheet'
 
 
@@ -402,21 +403,46 @@ export default function ProdutoPage() {
         <div className="mb-4 md:mb-0">
           <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden mb-3 w-full" style={{ aspectRatio: "1/1" }}>
             {imagens.length > 0
-              ? imagens[imgAtiva]?.match(/\.(mp4|webm|mov)/i)
-                ? <video src={imagens[imgAtiva]} controls className="w-full aspect-square object-contain" />
-                : <ProdutoZoom src={imagens[imgAtiva]} alt={produto.name} className="w-full aspect-square" />
+              ? (() => {
+                  const url = imagens[imgAtiva]
+                  const tipo = detectMediaType(url)
+                  if (tipo === 'youtube') {
+                    const embed = getYouTubeEmbedUrl(url)
+                    return <iframe src={embed || ''} className="w-full aspect-square" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                  }
+                  if (tipo === 'vimeo') {
+                    const embed = getVimeoEmbedUrl(url)
+                    return <iframe src={embed || ''} className="w-full aspect-square" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
+                  }
+                  if (tipo === 'video') {
+                    return <video src={url} controls className="w-full aspect-square object-contain" />
+                  }
+                  return <ProdutoZoom src={url} alt={produto.name} className="w-full aspect-square" />
+                })()
               : <div className="flex items-center justify-center w-full h-full"><span className="text-8xl">💡</span></div>}
           </div>
           {imagens.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
               {imagens.map((img, i) => {
-                const isVideo = img.match(/\.(mp4|webm|mov)/i)
+                const tipo = detectMediaType(img)
+                const ytThumb = tipo === 'youtube' ? getYouTubeThumbnail(img) : null
                 return (
                   <button key={i} onClick={() => setImgAtiva(i)}
-                    className={`flex-shrink-0 w-16 h-16 border-2 rounded-lg overflow-hidden transition-colors bg-white ${imgAtiva === i ? 'border-green-500' : 'border-gray-200'}`}>
-                    {isVideo
-                      ? <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-lg">▶</div>
-                      : <img src={img} alt="" className="w-full h-full object-cover" />}
+                    className={`relative flex-shrink-0 w-16 h-16 border-2 rounded-lg overflow-hidden transition-colors bg-white ${imgAtiva === i ? 'border-green-500' : 'border-gray-200'}`}>
+                    {tipo === 'youtube' && ytThumb ? (
+                      <>
+                        <img src={ytThumb} alt="" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <div className="bg-red-600 rounded-full w-6 h-6 flex items-center justify-center"><svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
+                        </div>
+                      </>
+                    ) : tipo === 'vimeo' ? (
+                      <div className="w-full h-full bg-cyan-50 flex items-center justify-center"><svg width="20" height="20" viewBox="0 0 24 24" fill="#1ab7ea"><path d="M8 5v14l11-7z"/></svg></div>
+                    ) : tipo === 'video' ? (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-lg">▶</div>
+                    ) : (
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    )}
                   </button>
                 )
               })}
