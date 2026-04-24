@@ -33,17 +33,18 @@ export async function POST(req: Request) {
 
     const senhaTemp = gerarSenhaTemporaria()
 
-    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
     const existingUser = existingUsers?.users?.find((u: any) => u.email === email)
 
     let userId: string
 
     if (existingUser) {
       userId = existingUser.id
-      await supabaseAdmin.auth.admin.updateUserById(userId, {
+      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
         password: senhaTemp,
         email_confirm: true,
       })
+      if (updateError) return NextResponse.json({ error: updateError.message }, { status: 400 })
     } else {
       const { data, error } = await supabaseAdmin.auth.admin.createUser({
         email,
