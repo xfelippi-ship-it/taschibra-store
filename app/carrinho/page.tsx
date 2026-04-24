@@ -265,7 +265,7 @@ export default function CarrinhoPage() {
               {!freeShipping && items.length > 0 && (
                 <>
                   <CalculaFrete produtoId={items[0].id} />
-                  <RetiradaLoja />
+                  <RetiradaLoja modoInfo />
                 </>
               )}
 

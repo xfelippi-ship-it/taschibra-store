@@ -37,8 +37,12 @@ export default function RetiradaLoja({ modoInfo = false }: { modoInfo?: boolean 
   const valorTexto = loja.valor > 0
     ? `R$ ${loja.valor.toFixed(2).replace('.', ',')}`
     : 'Grátis'
+  const prazoTexto = `${loja.prazo_dias} dia${loja.prazo_dias > 1 ? 's' : ''} útil${loja.prazo_dias > 1 ? 'is' : ''}`
+  const locaisTexto = lojas.length > 1
+    ? `${lojas.length} lojas disponíveis`
+    : `${loja.cidade}/${loja.estado}`
 
-  // Modo informativo — PDP
+  // Modo informativo — PDP e Carrinho
   if (modoInfo) {
     return (
       <div className="flex items-start gap-2.5 py-3 px-3 bg-green-50 border border-green-100 rounded-xl mb-4">
@@ -48,7 +52,7 @@ export default function RetiradaLoja({ modoInfo = false }: { modoInfo?: boolean 
             Retire na loja — {valorTexto} · <span className="font-normal text-green-700">Selecione esta opção no checkout.</span>
           </p>
           <p className="text-xs text-green-700 mt-0.5">
-            Disponível para retirada em <strong>{loja.prazo_dias} dia{loja.prazo_dias > 1 ? 's' : ''} útil{loja.prazo_dias > 1 ? 'is' : ''}</strong> após confirmação do pedido.
+            Disponível para retirada em <strong>{prazoTexto}</strong> após confirmação — <strong>{locaisTexto}</strong>
           </p>
         </div>
       </div>
