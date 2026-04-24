@@ -478,16 +478,18 @@ export default function ProdutoPage() {
                 Em Atualização
               </div>
             ) : (
-              <button onClick={handleComprarAgora}
-                className="flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all bg-green-600 hover:bg-green-700 text-white">
-                <ShoppingCart size={18} />
-                COMPRAR AGORA
-              </button>
-              <button onClick={handleAdd}
-                className={`flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all border-2 ${adicionado ? 'border-green-700 bg-green-50 text-green-700' : 'border-green-600 text-green-600 hover:bg-green-50'}`}>
-                <ShoppingCart size={16} />
-                {adicionado ? 'ADICIONADO! ✓' : 'ADICIONAR AO CARRINHO'}
-              </button>
+              <>
+                <button onClick={handleComprarAgora}
+                  className="flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all bg-green-600 hover:bg-green-700 text-white">
+                  <ShoppingCart size={18} />
+                  COMPRAR AGORA
+                </button>
+                <button onClick={handleAdd}
+                  className={`flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all border-2 ${adicionado ? 'border-green-700 bg-green-50 text-green-700' : 'border-green-600 text-green-600 hover:bg-green-50'}`}>
+                  <ShoppingCart size={16} />
+                  {adicionado ? 'ADICIONADO! ✓' : 'ADICIONAR AO CARRINHO'}
+                </button>
+              </>
             )}
           </div>
           <div className="hidden md:flex gap-3 mb-4">
@@ -692,16 +694,18 @@ export default function ProdutoPage() {
             Em Atualização
           </div>
         ) : (
-        <button onClick={handleComprarAgora}
-          className="flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all bg-green-600 hover:bg-green-700 text-white">
-          <ShoppingCart size={16} />
-          Comprar agora
-        </button>
-        <button onClick={handleAdd}
-          className={`px-3 py-3 rounded-lg border-2 flex items-center justify-center transition-all ${adicionado ? 'border-green-700 bg-green-50 text-green-700' : 'border-green-600 text-green-600 hover:bg-green-50'}`}
-          title="Adicionar ao carrinho">
-          <ShoppingCart size={16} />
-        </button>
+        <>
+          <button onClick={handleComprarAgora}
+            className="flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all bg-green-600 hover:bg-green-700 text-white">
+            <ShoppingCart size={16} />
+            Comprar agora
+          </button>
+          <button onClick={handleAdd}
+            className={`px-3 py-3 rounded-lg border-2 flex items-center justify-center transition-all ${adicionado ? 'border-green-700 bg-green-50 text-green-700' : 'border-green-600 text-green-600 hover:bg-green-50'}`}
+            title="Adicionar ao carrinho">
+            <ShoppingCart size={16} />
+          </button>
+        </>
         )}
         <button
           onClick={toggleFavorito}
