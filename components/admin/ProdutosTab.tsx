@@ -643,57 +643,13 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                   <label htmlFor="ativo_prod" className="text-sm font-bold text-gray-700">Produto ativo</label>
                 </div>
 
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Imagem Principal</label>
-                  <input type="file" ref={fileInputRef} accept="image/*" className="hidden"
-                    onChange={e => { const f = e.target.files?.[0]; if(f) uploadImagem(f) }} />
-                  <div
-                    onDragOver={e => { e.preventDefault(); setDragOver(true) }}
-                    onDragLeave={() => setDragOver(false)}
-                    onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if(f) uploadImagem(f) }}
-                    onClick={() => !uploadingImg && fileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed rounded-xl p-3 text-center cursor-pointer transition-all ${dragOver ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'}`}
-                  >
-                    {uploadingImg ? (
-                      <div className="flex items-center justify-center gap-2 py-2">
-                        <div className="animate-spin w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full" />
-                        <span className="text-xs text-gray-500">Enviando...</span>
-                      </div>
-                    ) : produtoEdit.main_image ? (
-                      <div onClick={e => e.stopPropagation()} className="flex items-center gap-3">
-                        <img src={produtoEdit.main_image} alt="Preview"
-                          className="h-16 w-16 object-contain rounded-lg border border-gray-100 flex-shrink-0"
-                          onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
-                        <div className="flex gap-2">
-                          <button type="button" onClick={() => fileInputRef.current?.click()}
-                            className="text-xs font-bold text-green-600 border border-green-200 px-2 py-1 rounded-lg hover:bg-green-50 flex items-center gap-1">
-                            <Upload size={10} /> Trocar
-                          </button>
-                          <button type="button" onClick={() => setProdutoEdit(p => ({ ...p, main_image: '' }))}
-                            className="text-xs font-bold text-red-500 border border-red-200 px-2 py-1 rounded-lg hover:bg-red-50">
-                            <X size={10} />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 py-1">
-                        <ImageIcon size={20} className="text-gray-300 flex-shrink-0" />
-                        <div className="text-left">
-                          <p className="text-xs font-bold text-gray-500">Clique ou arraste</p>
-                          <p className="text-xs text-gray-400">JPG, PNG, WEBP</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <input value={produtoEdit.main_image || ''} onChange={e => setProdutoEdit({ ...produtoEdit, main_image: e.target.value })}
-                    placeholder="Ou cole uma URL aqui..."
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2 text-xs text-gray-400 outline-none focus:border-green-500 mt-1" />
-                </div>
-
-                {/* Galeria de imagens */}
+                {/* Galeria de imagens — slot 1 = imagem principal automaticamente */}
                 <ProdutoGaleriaUpload
                   images={produtoEdit.images || []}
-                  onChange={imgs => setProdutoEdit(prev => ({ ...prev, images: imgs }))}
+                  onChange={imgs => {
+                    const primeiraImagem = imgs.find(u => u && !['youtube.com','youtu.be','vimeo.com'].some(d => u.includes(d)) && !u.match(/\.(mp4|webm|mov)/i))
+                    setProdutoEdit(prev => ({ ...prev, images: imgs, main_image: primeiraImagem || prev.main_image || '' }))
+                  }}
                   sku={produtoEdit.sku}
                 />
 
