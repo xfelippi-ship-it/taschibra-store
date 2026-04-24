@@ -32,11 +32,18 @@ const typeLabel: Record<string, string> = {
 }
 
 const tempColor: Record<string, string> = {
-  '2700K': 'bg-amber-200 border-amber-400',
-  '3000K': 'bg-amber-100 border-amber-300',
-  '4000K': 'bg-yellow-50 border-yellow-300',
-  '5000K': 'bg-blue-50 border-blue-200',
-  '6500K': 'bg-blue-100 border-blue-300',
+  '2700K': 'bg-amber-100 border-gray-200',
+  '3000K': 'bg-amber-100 border-gray-200',
+  '4000K': 'bg-green-100 border-gray-200',
+  '5000K': 'bg-blue-50 border-gray-200',
+  '6500K': 'bg-blue-100 border-gray-200',
+}
+
+const tempDot: Record<string, string> = {
+  '2700K': '#f59e0b',
+  '3000K': '#fbbf24',
+  '4000K': '#4ade80',
+  '6500K': '#60a5fa',
 }
 
 export default function VariacoesProduto({ produtoId, onSelect }: Props) {
@@ -94,7 +101,10 @@ export default function VariacoesProduto({ produtoId, onSelect }: Props) {
   return (
     <div className="space-y-4 mb-5">
       {tipos.map(tipo => {
-        const opcoes = variacoes.filter(v => v.type === tipo && v.stock_qty > 0)
+        const opcoesBruto = variacoes.filter(v => v.type === tipo && v.stock_qty > 0)
+        const opcoes = tipo === 'temperatura'
+          ? [...opcoesBruto].sort((a, b) => parseInt(a.value) - parseInt(b.value))
+          : opcoesBruto
         const selecionado = selecionados[tipo]
         const isCor = tipo === 'cor' || tipo === 'cor_peca'
 
@@ -137,10 +147,10 @@ export default function VariacoesProduto({ produtoId, onSelect }: Props) {
                     `}
                   >
                     {isTemp && (
-                      <span className={`inline-block w-3 h-3 rounded-full mr-1.5 border ${
-                        v.value.includes('2700') || v.value.includes('3000') ? 'bg-amber-300' :
-                        v.value.includes('4000') ? 'bg-yellow-200' : 'bg-blue-200'
-                      }`} />
+                      <span
+                        className="inline-block w-3 h-3 rounded-full mr-1.5 border border-gray-300"
+                        style={{ backgroundColor: tempDot[v.value] || '#94a3b8' }}
+                      />
                     )}
                     {v.value}
                   </button>
