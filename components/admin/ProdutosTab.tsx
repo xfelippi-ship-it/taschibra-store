@@ -728,9 +728,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
 
             </div>
           )}
-          {abaModal === 'fotos' && produtoEdit.id && (
 
-          )}
           {abaModal === 'variacoes' && produtoEdit.id && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
