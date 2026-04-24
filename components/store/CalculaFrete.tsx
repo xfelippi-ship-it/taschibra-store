@@ -104,14 +104,14 @@ export default function CalculaFrete({ produtoId }: { produtoId: string }) {
           {loading ? '...' : 'OK'}
         </button>
       </div>
-      <div className="flex items-center justify-between mb-2">
+      <div className="mb-2">
         <a href="https://buscacepinter.correios.com.br" target="_blank" className="text-xs text-green-600 underline">
           Não sei meu CEP
         </a>
         {freteGratis.elegivel && (
-          <span className="text-xs text-red-500">
+          <p className="text-xs text-red-500 mt-1">
             APROVEITE! PARA SUA REGIÃO, FRETE GRÁTIS NAS COMPRAS ACIMA DE R${freteGratis.minimo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}.
-          </span>
+          </p>
         )}
       </div>
       {erro && <p className="text-xs text-red-500 mb-2">{erro}</p>}
