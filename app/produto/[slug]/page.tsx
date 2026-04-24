@@ -480,12 +480,12 @@ export default function ProdutoPage() {
             ) : (
               <>
                 <button onClick={handleAdd}
-                  className={`flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all ${adicionado ? 'bg-green-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}>
-                  <ShoppingCart size={18} />
+                  className={`flex-1 font-black text-xs py-3 rounded-lg flex items-center justify-center gap-1.5 transition-all ${adicionado ? 'bg-green-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}>
+                  <ShoppingCart size={14} />
                   {adicionado ? 'ADICIONADO! ✓' : 'ADICIONAR AO CARRINHO'}
                 </button>
                 <button onClick={handleComprarAgora}
-                  className="flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all border-2 border-green-600 text-green-600 hover:bg-green-50 bg-white">
+                  className="flex-1 font-black text-xs py-3 rounded-lg flex items-center justify-center transition-all border-2 border-green-600 text-green-600 hover:bg-green-50 bg-white">
                   COMPRAR AGORA
                 </button>
               </>
