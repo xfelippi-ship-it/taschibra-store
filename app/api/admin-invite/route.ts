@@ -83,7 +83,7 @@ export async function POST(req: Request) {
           papeis: papeis || ['custom'],
           modulos: modulos || ['dashboard', 'pedidos', 'relatorios'],
           ativo: true,
-          status: 'ativo',
+          status: 'aguardando',
           trocar_senha: true,
         })
     }
