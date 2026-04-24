@@ -106,6 +106,7 @@ function UsuariosTab() {
   const [msg, setMsg] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null)
   const [editandoId, setEditandoId] = useState<string | null>(null)
   const [modulosEdicao, setModulosEdicao] = useState<string[]>([])
+  const [senhaResetada, setSenhaResetada] = useState<{ email: string; senha: string } | null>(null)
 
   useEffect(() => { carregarUsuarios() }, [])
 
@@ -159,16 +160,16 @@ function UsuariosTab() {
     const res = await fetch('/api/admin-update-modulos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, modulos: modulosEdicao, executedBy: meuEmail })
+      body: JSON.stringify({ id, modulos: modulosEdicao })
     })
     const data = await res.json()
     if (!data.ok) {
-      alert('Erro ao salvar módulos: ' + (data.error || 'Tente novamente'))
+      setMsg({ tipo: 'erro', texto: 'Erro ao salvar módulos: ' + (data.error || 'Tente novamente') })
       return
     }
     setEditandoId(null)
     carregarUsuarios()
-    alert('Módulos atualizados. O usuário precisa fazer logout e login novamente para ver as mudanças.')
+    setMsg({ tipo: 'ok', texto: '✅ Módulos atualizados com sucesso. O usuário precisa fazer logout e login novamente para ver as mudanças.' })
   }
 
   async function desabilitarUsuario(id: string, emailUsuario: string, ativo: boolean) {
@@ -183,14 +184,19 @@ function UsuariosTab() {
   }
 
   async function resetarSenha(emailUsuario: string) {
-    if (!confirm(`Enviar e-mail de redefinição de senha para ${emailUsuario}?`)) return
-    const { error } = await supabase.auth.resetPasswordForEmail(emailUsuario)
-    if (error) { alert('Erro: ' + error.message); return }
-    await supabase.from('audit_log').insert({
-      user_email: emailUsuario, acao: 'reset_senha', entidade: 'admin_users',
-      detalhe: `E-mail de redefinição enviado`
+    if (!confirm(`Resetar senha de ${emailUsuario}? Uma nova senha temporária será gerada e exibida aqui.`)) return
+    const res = await fetch('/api/admin-reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: emailUsuario })
     })
-    alert(`E-mail enviado para ${emailUsuario}`)
+    const data = await res.json()
+    if (data.ok) {
+      setSenhaResetada({ email: emailUsuario, senha: data.senhaTemporaria })
+      setMsg({ tipo: 'ok', texto: `✅ Senha de ${emailUsuario} resetada. Copie a senha abaixo e envie ao usuário.` })
+    } else {
+      setMsg({ tipo: 'erro', texto: 'Erro ao resetar senha: ' + (data.error || 'Tente novamente') })
+    }
   }
 
   // Agrupa módulos por grupo
@@ -267,6 +273,24 @@ function UsuariosTab() {
           </p>
           <CheckboxModulos lista={modulosSelecionados} setLista={setModulosSelecionados} />
         </div>
+
+        {senhaResetada && (
+          <div className="mt-3 p-4 bg-orange-50 border border-orange-200 rounded-xl">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-black text-orange-800">🔑 Nova senha temporária gerada</p>
+              <button onClick={() => setSenhaResetada(null)} className="text-orange-400 hover:text-orange-600 text-xs font-bold">✕ Fechar</button>
+            </div>
+            <p className="text-xs text-orange-700 mb-2">Usuário: <strong>{senhaResetada.email}</strong></p>
+            <div className="flex items-center gap-2 bg-white border border-orange-200 rounded-lg px-3 py-2">
+              <code className="text-sm font-black text-orange-800 flex-1">{senhaResetada.senha}</code>
+              <button onClick={() => { navigator.clipboard.writeText(senhaResetada.senha); setMsg({ tipo: 'ok', texto: '✅ Senha copiada!' }) }}
+                className="text-xs bg-orange-500 hover:bg-orange-600 text-white font-bold px-2 py-1 rounded">
+                Copiar
+              </button>
+            </div>
+            <p className="text-xs text-orange-600 mt-2">⚠️ Copie e envie ao usuário. No próximo acesso ele será obrigado a trocar a senha.</p>
+          </div>
+        )}
 
         {msg && (
           <p className={`mt-3 text-sm font-bold px-4 py-2 rounded-lg ${msg.tipo === 'ok' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
