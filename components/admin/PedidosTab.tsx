@@ -570,6 +570,11 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                     </td>
                     <td className="px-4 py-4">
                       <p className="font-black text-sm text-gray-800">{p.order_number}</p>
+                      {p.shipping_method?.toLowerCase().includes('retirada') && (
+                        <span className="text-xs font-bold text-orange-700 bg-orange-100 px-1.5 py-0.5 rounded mt-0.5 inline-block">
+                          📍 RETIRADA
+                        </span>
+                      )}
                       {p.coupon_code && (
                         <span className="text-xs font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded mt-0.5 inline-block">
                           🏷️ {p.coupon_code}
