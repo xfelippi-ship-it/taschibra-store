@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { Upload, FolderArchive, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 import JSZip from 'jszip'
 
-type ResultadoItem = { sku: string; arquivo: string; status: 'ok' | 'erro' | 'sku_nao_encontrado'; msg?: string }
+type ResultadoItem = { identificador: string; arquivo: string; status: 'ok' | 'erro' | 'nao_encontrado'; msg?: string }
 
 export default function UploadMassaTab() {
   const [processando, setProcessando] = useState(false)
@@ -22,54 +22,88 @@ export default function UploadMassaTab() {
     setResultados([])
     const novos: ResultadoItem[] = []
 
-    // Buscar todos os SKUs do banco uma vez só
-    setProgresso('Carregando SKUs...')
-    const { data: produtos } = await supabase.from('products').select('sku').not('sku', 'is', null)
-    const skusValidos = new Set((produtos || []).map((p: any) => p.sku.toUpperCase()))
+    // Carrega produtos (sku + ean) e variações (ean + product_id) de uma vez
+    setProgresso('Carregando catálogo...')
+    const { data: produtos } = await supabase.from('products').select('id, sku, ean, images, main_image').not('sku', 'is', null)
+    const { data: variacoes } = await supabase.from('product_variants').select('id, product_id, sku, ean, images').not('id', 'is', null)
+
+    // Mapas de lookup: identificador -> produto ou variacao
+    const porSku = new Map<string, any>()
+    const porEanProduto = new Map<string, any>()
+    const porEanVariacao = new Map<string, any>()
+
+    for (const p of (produtos || [])) {
+      if (p.sku) porSku.set(p.sku.toUpperCase(), p)
+      if (p.ean) porEanProduto.set(String(p.ean).trim(), p)
+    }
+    for (const v of (variacoes || [])) {
+      if (v.ean) porEanVariacao.set(String(v.ean).trim(), v)
+    }
 
     let count = 0
     for (const file of imagens) {
       count++
       setProgresso(`Processando ${count}/${imagens.length}: ${file.name}`)
 
-      // Formato esperado: SKU-slot.ext ou SKU_slot.ext ex: TKL225-1.jpg ou TKL225_1.jpg
       const nomeSemExt = file.name.replace(/\.[^.]+$/, '')
       const match = nomeSemExt.match(/^(.+?)[-_](\d+)$/)
 
       if (!match) {
-        novos.push({ sku: '?', arquivo: file.name, status: 'erro', msg: 'Nome inválido — use SKU-slot.ext (ex: TKL225-1.jpg)' })
+        novos.push({ identificador: '?', arquivo: file.name, status: 'erro', msg: 'Nome inválido — use EAN-slot.ext ou SKU-slot.ext' })
         continue
       }
 
-      const sku = match[1].toUpperCase()
+      const ident = match[1].trim()
       const slot = parseInt(match[2])
 
-      if (!skusValidos.has(sku)) {
-        novos.push({ sku, arquivo: file.name, status: 'sku_nao_encontrado', msg: `SKU "${sku}" não encontrado no catálogo` })
+      if (slot < 1 || slot > 8) {
+        novos.push({ identificador: ident, arquivo: file.name, status: 'erro', msg: `Slot ${slot} inválido — use 1 a 8` })
         continue
       }
 
-      if (slot < 1 || slot > 8) {
-        novos.push({ sku, arquivo: file.name, status: 'erro', msg: `Slot ${slot} inválido — use 1 a 8` })
+      // Detectar: EAN de variação > EAN de produto > SKU de produto
+      const isVariacao = porEanVariacao.has(ident)
+      const isProdutoPorEan = porEanProduto.has(ident)
+      const isProdutoPorSku = porSku.has(ident.toUpperCase())
+
+      if (!isVariacao && !isProdutoPorEan && !isProdutoPorSku) {
+        novos.push({ identificador: ident, arquivo: file.name, status: 'nao_encontrado', msg: `"${ident}" não encontrado (EAN ou SKU inválido)` })
         continue
       }
 
       try {
         const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-        const nome = `produtos/${sku}/${slot}-${Date.now()}.${ext}`
+        const pasta = `produtos/${ident}`
+        const nome = `${pasta}/${slot}-${Date.now()}.${ext}`
+
         const { error } = await supabase.storage.from('midias').upload(nome, file, { upsert: true, contentType: file.type })
         if (error) throw error
-        const { data } = supabase.storage.from('midias').getPublicUrl(nome)
+        const { data: urlData } = supabase.storage.from('midias').getPublicUrl(nome)
+        const url = urlData.publicUrl
 
-        // Atualizar o campo images no produto
-        const { data: prod } = await supabase.from('products').select('images').eq('sku', sku).single()
-        const imgs: string[] = prod?.images || []
-        imgs[slot - 1] = data.publicUrl
-        await supabase.from('products').update({ images: imgs.filter(Boolean) }).eq('sku', sku)
+        if (isVariacao) {
+          // Atualiza variacao
+          const vari = porEanVariacao.get(ident)
+          const imgs: string[] = vari?.images || []
+          imgs[slot - 1] = url
+          await supabase.from('product_variants').update({ images: imgs.filter(Boolean) }).eq('id', vari.id)
+          // Se slot 1, atualiza main_image do produto pai tambem
+          if (slot === 1) {
+            await supabase.from('products').update({ main_image: url }).eq('id', vari.product_id)
+          }
+        } else {
+          // Atualiza produto (por EAN ou SKU)
+          const prod = isProdutoPorEan ? porEanProduto.get(ident) : porSku.get(ident.toUpperCase())
+          const imgs: string[] = prod?.images || []
+          imgs[slot - 1] = url
+          const upd: any = { images: imgs.filter(Boolean) }
+          if (slot === 1) upd.main_image = url
+          await supabase.from('products').update(upd).eq('id', prod.id)
+        }
 
-        novos.push({ sku, arquivo: file.name, status: 'ok' })
+        novos.push({ identificador: ident, arquivo: file.name, status: 'ok' })
       } catch (e: any) {
-        novos.push({ sku, arquivo: file.name, status: 'erro', msg: e?.message || 'Erro no upload' })
+        novos.push({ identificador: ident, arquivo: file.name, status: 'erro', msg: e?.message || 'Erro no upload' })
       }
     }
 
@@ -114,8 +148,8 @@ export default function UploadMassaTab() {
           ℹ️ Como usar o Upload em Massa
         </summary>
         <div className="px-4 pb-4 pt-1 text-sm text-gray-600 space-y-2">
-          <p><strong>1. Nomeie os arquivos no formato:</strong> <code className="bg-blue-100 px-1 rounded">SKU-slot.ext</code></p>
-          <p className="text-xs text-gray-500 ml-4">Exemplos: <code>TKL225-1.jpg</code> · <code>TKL225-2.jpg</code> · <code>TKL900-1.mp4</code></p>
+          <p><strong>1. Nomeie os arquivos no formato:</strong> <code className="bg-blue-100 px-1 rounded">EAN-slot.ext</code> ou <code className="bg-blue-100 px-1 rounded">SKU-slot.ext</code></p>
+          <p className="text-xs text-gray-500 ml-4">Exemplos: <code>7891234567890-1.jpg</code> · <code>7891234567890-2.jpg</code> · <code>TKL225-1.jpg</code></p>
           <p><strong>2. Slots disponíveis:</strong> 1 a 8 por produto</p>
           <p className="text-xs text-gray-500 ml-4">1-Still · 2-Lateral · 3-Verso · 4-Detalhe · 5-Ambiente · 6-Ambiente · 7-Técnico · 8-Lifestyle</p>
           <p><strong>3. Formas de envio:</strong></p>
@@ -124,7 +158,7 @@ export default function UploadMassaTab() {
             <li>Selecione vários arquivos clicando na área</li>
             <li>Comprima tudo num <strong>.zip</strong> e solte aqui — mais prático para muitos arquivos</li>
           </ul>
-          <p className="text-xs text-orange-600 font-medium mt-1">⚠️ O SKU deve existir no catálogo. Arquivos com SKU inválido serão ignorados.</p>
+          <p className="text-xs text-orange-600 font-medium mt-1">⚠️ O EAN ou SKU deve existir no catálogo. Arquivos não identificados serão ignorados.</p>
         </div>
       </details>
 
@@ -179,7 +213,7 @@ export default function UploadMassaTab() {
               <thead className="bg-gray-50 text-gray-500">
                 <tr>
                   <th className="text-left px-3 py-2">Arquivo</th>
-                  <th className="text-left px-3 py-2">SKU</th>
+                  <th className="text-left px-3 py-2">EAN / SKU</th>
                   <th className="text-left px-3 py-2">Status</th>
                 </tr>
               </thead>
@@ -187,7 +221,7 @@ export default function UploadMassaTab() {
                 {resultados.map((r, i) => (
                   <tr key={i} className={`border-t border-gray-50 ${r.status === 'ok' ? 'bg-white' : 'bg-red-50'}`}>
                     <td className="px-3 py-2 font-mono text-gray-600">{r.arquivo}</td>
-                    <td className="px-3 py-2 font-bold text-gray-700">{r.sku}</td>
+                    <td className="px-3 py-2 font-bold text-gray-700">{r.identificador}</td>
                     <td className="px-3 py-2">
                       {r.status === 'ok'
                         ? <span className="flex items-center gap-1 text-green-600"><CheckCircle size={12} /> Enviado</span>
