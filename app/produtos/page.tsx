@@ -7,6 +7,7 @@ import Footer from "@/components/store/Footer"
 import { useCart } from "@/contexts/CartContext"
 import Link from "next/link"
 import { supabase } from '@/lib/supabase'
+import { ShoppingCart } from 'lucide-react'
 
 
 const badgeColors: Record<string, string> = {
@@ -201,8 +202,8 @@ function ProdutosContent() {
                             </div>
                           )}
                           {precoCartao > 0 ? (
-                            <button onClick={() => addItem({ id: p.id, name: p.name, slug: p.slug, price: precoCartao, promo_price: preco, emoji: "💡" })} className="w-full bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2.5 rounded-lg transition-colors">
-                              COMPRAR
+                            <button onClick={() => addItem({ id: p.id, name: p.name, slug: p.slug, price: precoCartao, promo_price: preco, emoji: "💡" })} className="w-full bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                              <ShoppingCart size={13} /> ADICIONAR AO CARRINHO
                             </button>
                           ) : (
                             <button disabled className="w-full bg-gray-100 text-gray-400 font-black text-xs py-2.5 rounded-lg cursor-not-allowed border border-gray-200">
