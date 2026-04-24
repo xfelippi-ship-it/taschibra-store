@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Upload, X, FolderArchive } from 'lucide-react'
 import JSZip from 'jszip'
+import { detectMediaType, getYouTubeThumbnail } from '@/lib/media-helpers'
 
 interface Props {
   images: string[]
@@ -117,7 +118,7 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
           <li><strong>Várias fotos de uma vez:</strong> arraste múltiplos arquivos para a área abaixo ou clique nela</li>
           <li><strong>ZIP deste produto:</strong> arraste um .zip com as fotos — o sistema descompacta e preenche os slots em ordem alfabética</li>
           <li><strong>URL externa:</strong> cole a URL no campo "Cole URL..." abaixo de cada slot vazio e pressione Enter</li>
-          <li><strong>Vídeo:</strong> arraste ou selecione arquivos .mp4 ou .webm — serão salvos nos slots normalmente</li>
+          <li><strong>Vídeo:</strong> arraste arquivos .mp4 ou .webm, OU cole o link de um vídeo do YouTube/Vimeo no campo "Cole URL..."</li>
           <li><strong>Reordenar:</strong> use as setas ← → abaixo de cada imagem para mudar a ordem</li>
           <li><strong>Nomenclatura:</strong> não precisa renomear — o sistema usa o EAN do produto automaticamente</li>
         </ul>
@@ -171,7 +172,42 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
               onChange={e => { const f = e.target.files?.[0]; if (f) uploadSlot(f, idx) }} />
             {url ? (
               <>
-                <img src={url} alt={`Img ${idx + 1}`} className="w-full h-full object-contain rounded-lg p-1" />
+                {(() => {
+                  const tipo = detectMediaType(url)
+                  if (tipo === 'youtube') {
+                    const thumb = getYouTubeThumbnail(url)
+                    return (
+                      <>
+                        {thumb && <img src={thumb} alt={`Vídeo ${idx + 1}`} className="w-full h-full object-cover rounded-lg" />}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                          </div>
+                        </div>
+                        <span className="absolute bottom-1 right-1 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">YouTube</span>
+                      </>
+                    )
+                  }
+                  if (tipo === 'vimeo') {
+                    return (
+                      <>
+                        <div className="w-full h-full flex items-center justify-center bg-cyan-50 rounded-lg">
+                          <svg width="32" height="32" viewBox="0 0 24 24" fill="#1ab7ea"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <span className="absolute bottom-1 right-1 bg-cyan-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Vimeo</span>
+                      </>
+                    )
+                  }
+                  if (tipo === 'video') {
+                    return (
+                      <>
+                        <video src={url} className="w-full h-full object-contain rounded-lg p-1" muted />
+                        <span className="absolute bottom-1 right-1 bg-gray-700 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Vídeo</span>
+                      </>
+                    )
+                  }
+                  return <img src={url} alt={`Img ${idx + 1}`} className="w-full h-full object-contain rounded-lg p-1" />
+                })()}
                 <span className="absolute top-1 left-1 bg-black/50 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">{idx + 1}</span>
                 <button type="button" onClick={() => removeSlot(idx)}
                   className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600">
