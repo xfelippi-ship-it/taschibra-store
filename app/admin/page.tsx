@@ -101,6 +101,7 @@ function UsuariosTab() {
   const [usuarios, setUsuarios] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
+  const [nome, setNome] = useState('')
   const [modulosSelecionados, setModulosSelecionados] = useState<string[]>(['dashboard','pedidos','relatorios'])
   const [enviando, setEnviando] = useState(false)
   const [msg, setMsg] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null)
@@ -140,7 +141,7 @@ function UsuariosTab() {
     const res = await fetch('/api/admin-invite', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.trim(), papeis: ['custom'], modulos: modulosSelecionados })
+      body: JSON.stringify({ email: email.trim(), nome: nome.trim(), papeis: ['custom'], modulos: modulosSelecionados })
     })
     const json = await res.json()
     if (!res.ok) {
@@ -150,6 +151,7 @@ function UsuariosTab() {
       const emailOk = json.emailEnviado ? ' (e-mail enviado)' : ' (envie as credenciais manualmente)'
       setMsg({ tipo: 'ok', texto: `Convite criado para ${email.trim()}${emailOk}. Senha temporaria: ${senhaTemp} — O usuario devera trocar no primeiro acesso.` })
       setEmail('')
+      setNome('')
       setModulosSelecionados(['dashboard','pedidos','relatorios'])
       carregarUsuarios()
     }
@@ -269,14 +271,22 @@ function UsuariosTab() {
         <h2 className="font-black text-gray-800 mb-1">Convidar novo usuário</h2>
         <p className="text-sm text-gray-500 mb-4">Defina o e-mail e selecione quais módulos ele poderá acessar.</p>
         <div className="flex gap-3 mb-5">
-          <input
-            type="email" value={email}
-            onChange={e => setEmail(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && convidar()}
-            placeholder="email@exemplo.com"
-            className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
-          />
-          <button onClick={convidar}
+          <div className="flex-1 flex flex-col gap-2">
+            <input
+              type="email" value={email}
+              onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && convidar()}
+              placeholder="E-mail do usuário *"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
+            />
+            <input
+              type="text" value={nome}
+              onChange={e => setNome(e.target.value)}
+              placeholder="Nome completo (opcional)"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
+            />
+          </div>
+          <button onClick={convidar} style={{alignSelf:'flex-start'}}
             disabled={enviando || !email.trim() || modulosSelecionados.length === 0}
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold text-sm px-6 py-2.5 rounded-lg transition-colors">
             <Plus size={16} /> {enviando ? 'Enviando...' : 'Convidar'}
@@ -340,7 +350,8 @@ function UsuariosTab() {
               return (
                 <tr key={u.id} className={`border-b border-gray-100 hover:bg-gray-50 ${!ativo ? 'opacity-50' : ''}`}>
                   <td className="px-5 py-4">
-                    <p className="font-bold text-sm text-gray-800">{u.email}</p>
+                    <p className="font-bold text-sm text-gray-800">{u.name || u.email}</p>
+                    {u.name && <p className="text-xs text-gray-400 mt-0.5">{u.email}</p>}
                     {isMaster && <span className="text-xs bg-purple-100 text-purple-700 font-bold px-2 py-0.5 rounded-full">Master</span>}
                   </td>
                   <td className="px-5 py-4 max-w-xs">

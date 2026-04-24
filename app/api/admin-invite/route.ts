@@ -28,7 +28,7 @@ function gerarSenhaTemporaria(): string {
 
 export async function POST(req: Request) {
   try {
-    const { email, papeis, modulos } = await req.json()
+    const { email, nome, papeis, modulos } = await req.json()
     if (!email) return NextResponse.json({ error: 'E-mail obrigatorio' }, { status: 400 })
 
     const senhaTemp = gerarSenhaTemporaria()
@@ -65,6 +65,7 @@ export async function POST(req: Request) {
       await supabaseAdmin
         .from('admin_users')
         .update({
+          name: nome || undefined,
           papeis: papeis || ['custom'],
           modulos: modulos || ['dashboard', 'pedidos', 'relatorios'],
           ativo: true,
@@ -78,6 +79,7 @@ export async function POST(req: Request) {
         .from('admin_users')
         .insert({
           email,
+          name: nome || '',
           user_id: userId,
           role: 'admin',
           papeis: papeis || ['custom'],
