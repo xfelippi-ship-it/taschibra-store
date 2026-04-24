@@ -479,15 +479,14 @@ export default function ProdutoPage() {
               </div>
             ) : (
               <>
-                <button onClick={handleComprarAgora}
-                  className="flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all bg-green-600 hover:bg-green-700 text-white">
-                  <ShoppingCart size={18} />
-                  COMPRAR AGORA
-                </button>
                 <button onClick={handleAdd}
-                  className={`flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all border-2 ${adicionado ? 'border-green-700 bg-green-50 text-green-700' : 'border-green-600 text-green-600 hover:bg-green-50'}`}>
-                  <ShoppingCart size={16} />
+                  className={`flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all ${adicionado ? 'bg-green-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}>
+                  <ShoppingCart size={18} />
                   {adicionado ? 'ADICIONADO! ✓' : 'ADICIONAR AO CARRINHO'}
+                </button>
+                <button onClick={handleComprarAgora}
+                  className="flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all border-2 border-green-600 text-green-600 hover:bg-green-50 bg-white">
+                  COMPRAR AGORA
                 </button>
               </>
             )}
