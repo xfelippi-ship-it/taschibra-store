@@ -1,11 +1,12 @@
 'use client'
 import { useEmpresaConfig } from '@/hooks/useEmpresaConfig'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCart } from '@/contexts/CartContext'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import Link from 'next/link'
 import { ChevronRight, MapPin, Truck, CreditCard, CheckCircle, Copy, User } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 type Step = 'endereco' | 'frete' | 'pagamento' | 'confirmado'
 
@@ -31,6 +32,21 @@ export default function CheckoutPage() {
   const [freteEscolhido, setFreteEscolhido] = useState<any>(null)
   const [loadingFrete, setLoadingFrete] = useState(false)
   const [erroFrete, setErroFrete] = useState<string|null>(null)
+  const [tipoEntrega, setTipoEntrega] = useState<'envio'|'retirada'>('envio')
+  const [lojasRetirada, setLojasRetirada] = useState<any[]>([])
+  const [lojaEscolhida, setLojaEscolhida] = useState<any>(null)
+
+  useEffect(() => {
+    supabase.from('pickup_stores')
+      .select('id, nome, endereco, cidade, estado, cep, telefone, prazo_dias')
+      .eq('habilitado', true)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setLojasRetirada(data)
+          setLojaEscolhida(data[0])
+        }
+      })
+  }, [])
 
   async function buscarFrete(cepDestino: string) {
     setLoadingFrete(true)
@@ -248,23 +264,60 @@ export default function CheckoutPage() {
 
         {step==='frete'&&(
           <div className="bg-white border border-gray-200 rounded-xl p-6">
-            <h2 className="text-lg font-black text-gray-800 mb-2 flex items-center gap-2"><Truck size={18} className="text-green-600"/>Opções de entrega</h2>
-            {loadingFrete && <div className="flex items-center gap-3 py-8 text-gray-400 text-sm"><div className="animate-spin w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full"/>&nbsp;Calculando frete...</div>}
-            {erroFrete && <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-600 mb-3">{erroFrete}</div>}
-            <p className="text-sm text-gray-500 mb-5">Entregando em: <strong>{endereco?.logradouro}, {numero} — {endereco?.localidade}/{endereco?.uf}</strong></p>
-            <div className="space-y-3 mb-6">
-              {freteOpcoes.map(op=>(
-                <label key={op.id} className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-colors ${freteEscolhido?.id===op.id?'border-green-500 bg-green-50':'border-gray-200 hover:border-gray-300'}`}>
-                  <input type="radio" name="frete" checked={freteEscolhido?.id===op.id} onChange={()=>setFreteEscolhido(op)} className="accent-green-600"/>
-                  <span className="text-2xl">{op.icon}</span>
-                  <div className="flex-1"><div className="font-black text-gray-800 text-sm">{op.nome}</div><div className="text-xs text-gray-500">{op.prazo}</div></div>
-                  <div className="font-black text-green-700">R$ {op.preco.toFixed(2).replace('.',',')}</div>
-                </label>
-              ))}
+            <h2 className="text-lg font-black text-gray-800 mb-4 flex items-center gap-2"><Truck size={18} className="text-green-600"/>Opções de entrega</h2>
+            {/* Toggle Receber / Retirar */}
+            <div className="flex gap-2 mb-5">
+              <button onClick={()=>{ setTipoEntrega('envio'); setFreteEscolhido(freteOpcoes[0]||null) }}
+                className={`flex-1 py-3 rounded-xl border-2 font-bold text-sm transition-colors flex items-center justify-center gap-2 ${tipoEntrega==='envio'?'border-green-500 bg-green-50 text-green-700':'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+                <Truck size={16}/> Receber em casa
+              </button>
+              {lojasRetirada.length > 0 && (
+                <button onClick={()=>{ setTipoEntrega('retirada'); setFreteEscolhido({ id: 'retirada', nome: 'Retirada na Loja – ' + (lojaEscolhida?.nome||''), preco: 0 }) }}
+                  className={`flex-1 py-3 rounded-xl border-2 font-bold text-sm transition-colors flex items-center justify-center gap-2 ${tipoEntrega==='retirada'?'border-green-500 bg-green-50 text-green-700':'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+                  <MapPin size={16}/> Retirar na loja
+                </button>
+              )}
             </div>
+            {/* Envio normal */}
+            {tipoEntrega==='envio' && (
+              <>
+                {loadingFrete && <div className="flex items-center gap-3 py-8 text-gray-400 text-sm"><div className="animate-spin w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full"/>&nbsp;Calculando frete...</div>}
+                {erroFrete && <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-600 mb-3">{erroFrete}</div>}
+                <p className="text-sm text-gray-500 mb-4">Entregando em: <strong>{endereco?.logradouro}, {numero} — {endereco?.localidade}/{endereco?.uf}</strong></p>
+                <div className="space-y-3 mb-6">
+                  {freteOpcoes.map(op=>(
+                    <label key={op.id} className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-colors ${freteEscolhido?.id===op.id?'border-green-500 bg-green-50':'border-gray-200 hover:border-gray-300'}`}>
+                      <input type="radio" name="frete" checked={freteEscolhido?.id===op.id} onChange={()=>setFreteEscolhido(op)} className="accent-green-600"/>
+                      <span className="text-2xl">{op.icon}</span>
+                      <div className="flex-1"><div className="font-black text-gray-800 text-sm">{op.nome}</div><div className="text-xs text-gray-500">{op.prazo}</div></div>
+                      <div className="font-black text-green-700">R$ {op.preco.toFixed(2).replace('.',',')}</div>
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+            {/* Retirada na loja */}
+            {tipoEntrega==='retirada' && (
+              <div className="space-y-3 mb-6">
+                {lojasRetirada.map(loja=>(
+                  <label key={loja.id} className={`flex items-start gap-4 p-4 border-2 rounded-xl cursor-pointer transition-colors ${lojaEscolhida?.id===loja.id?'border-green-500 bg-green-50':'border-gray-200 hover:border-gray-300'}`}
+                    onClick={()=>{ setLojaEscolhida(loja); setFreteEscolhido({ id: 'retirada', nome: 'Retirada na Loja – ' + loja.nome, preco: 0 }) }}>
+                    <input type="radio" name="retirada" checked={lojaEscolhida?.id===loja.id} onChange={()=>{}} className="accent-green-600 mt-1"/>
+                    <div className="flex-1">
+                      <p className="font-black text-gray-800 text-sm">{loja.nome}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{loja.endereco}</p>
+                      <p className="text-xs text-gray-500">{loja.cidade}/{loja.estado} — CEP {loja.cep}</p>
+                      {loja.telefone && <p className="text-xs text-gray-500">{loja.telefone}</p>}
+                      <p className="text-xs text-green-700 font-bold mt-1">Prazo: {loja.prazo_dias} dia{loja.prazo_dias>1?'s':''} útil{loja.prazo_dias>1?'is':''} após confirmação</p>
+                    </div>
+                    <span className="font-black text-green-700 text-sm">GRÁTIS</span>
+                  </label>
+                ))}
+              </div>
+            )}
             <div className="flex gap-3">
               <button onClick={()=>setStep('endereco')} className="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50 transition-colors">← Voltar</button>
-              <button onClick={()=>setStep('pagamento')} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black py-3 rounded-lg transition-colors">Continuar para Pagamento →</button>
+              <button onClick={()=>setStep('pagamento')} disabled={!freteEscolhido} className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-black py-3 rounded-lg transition-colors">Continuar para Pagamento →</button>
             </div>
           </div>
         )}
