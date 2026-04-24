@@ -426,7 +426,7 @@ export default function ProdutoPage() {
 
           <VariacoesProduto produtoId={produto.id} onSelect={setVariacaoSelecionada} />
           <CalculaFrete produtoId={produto.id} />
-          <RetiradaLoja />
+          <RetiradaLoja modoInfo />
 
           {/* Preço */}
           <div className="bg-green-50 border border-green-100 rounded-xl p-4 mb-4 mt-4">
