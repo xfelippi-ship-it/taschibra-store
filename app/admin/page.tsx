@@ -1020,7 +1020,7 @@ export default function AdminPage() {
         )}
 
         {/* CATÁLOGO */}
-        {tem([], 'catalogo') && (
+        {true && (
           <Grupo id="catalogo" label="Catálogo">
             {tem([], 'catalogo') && <BtnItem id="produtos"   label="Produtos"     icon={<Package size={15} />} />}
             {tem([], 'categorias') && <BtnItem id="categorias" label="Categorias"   icon={<Tag size={15} />} />}
@@ -1036,7 +1036,7 @@ export default function AdminPage() {
         )}
 
         {/* VENDAS */}
-        {tem([], 'vendas') && (
+        {true && (
           <Grupo id="vendas" label="Vendas">
             {tem([], 'pedidos') && <BtnItem id="pedidos"    label="Pedidos"    icon={<ShoppingBag size={15} />} />}
             {tem([], 'cupons') && <BtnItem id="cupons"     label="Cupons"     icon={<Tag size={15} />} />}
@@ -1049,7 +1049,7 @@ export default function AdminPage() {
         )}
 
         {/* MARKETING */}
-        {tem([], 'marketing') && (
+        {true && (
           <Grupo id="marketing" label="Marketing">
             {tem([], 'banners') && <BtnItem id="banners"      label="Banners"            icon={<ImageIcon size={15} />} />}
             {tem([], 'topbar') && <BtnItem id="topbar"       label="Top Bar"            icon={<Megaphone size={15} />} />}
@@ -1062,7 +1062,7 @@ export default function AdminPage() {
         )}
 
         {/* LOJA */}
-        {tem([], 'loja') && (
+        {true && (
           <Grupo id="loja" label="Loja">
             <BtnItem id="retirada"      label="Retirada na Loja"   icon={<MapPin size={15} />} />
             <BtnItem id="faturamento"   label="Faturamento Direto" icon={<CreditCard size={15} />} />
@@ -1072,7 +1072,7 @@ export default function AdminPage() {
         )}
 
         {/* CLIENTES */}
-        {tem([], 'clientes_grupo') && (
+        {true && (
           <Grupo id="clientes" label="Clientes">
             {tem([], 'clientes') && <BtnItem id="clientes"    label="Clientes"     icon={<Users size={15} />} />}
             {tem([], 'newsletter') && <BtnItem id="newsletter"  label="Newsletter"   icon={<Mail size={15} />} />}
@@ -1083,7 +1083,7 @@ export default function AdminPage() {
         )}
 
         {/* ADMINISTRAÇÃO */}
-        {tem([], 'admin') && (
+        {true && (
           <Grupo id="admin" label="Administração">
             <BtnItem id="vendedores" label="Vendedores" icon={<Tag size={15} />} />
             <BtnItem id="usuarios"   label="Usuários"   icon={<Users size={15} />} />
