@@ -263,8 +263,10 @@ export default function CarrinhoPage() {
                 </span>
               </div>
               {!freeShipping && items.length > 0 && (
-                <CalculaFrete produtoId={items[0].id} />
-                <RetiradaLoja />
+                <>
+                  <CalculaFrete produtoId={items[0].id} />
+                  <RetiradaLoja />
+                </>
               )}
 
               <div className="border-t border-gray-100 pt-3 flex justify-between items-center font-black text-gray-800">
