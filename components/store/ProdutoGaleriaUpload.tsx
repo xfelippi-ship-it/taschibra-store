@@ -119,7 +119,7 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
           <li><strong>URL externa:</strong> cole a URL no campo "Cole URL..." abaixo de cada slot vazio e pressione Enter</li>
           <li><strong>Vídeo:</strong> arraste ou selecione arquivos .mp4 ou .webm — serão salvos nos slots normalmente</li>
           <li><strong>Reordenar:</strong> use as setas ← → abaixo de cada imagem para mudar a ordem</li>
-          <li><strong>Nomenclatura:</strong> não precisa renomear — o sistema usa o SKU do produto automaticamente</li>
+          <li><strong>Nomenclatura:</strong> não precisa renomear — o sistema usa o EAN do produto automaticamente</li>
         </ul>
       </details>
 
