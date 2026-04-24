@@ -47,6 +47,21 @@ export default function CalculaFrete({ produtoId }: { produtoId: string }) {
     }
   }
 
+  // Verifica se o CEP digitado e elegivel para frete gratis
+  function verificarFreteGratis(cepDigitado: string): { elegivel: boolean; estado: string } {
+    const n = parseInt(cepDigitado.replace(/\D/g, '').substring(0, 5))
+    if (n >= 88000 && n <= 89999) return { elegivel: true, estado: 'SC' }
+    if (n >= 80000 && n <= 87999) return { elegivel: true, estado: 'PR' }
+    if (n >= 90000 && n <= 99999) return { elegivel: true, estado: 'RS' }
+    if (n >= 1000  && n <= 19999) return { elegivel: true, estado: 'SP' }
+    if (n >= 20000 && n <= 28999) return { elegivel: true, estado: 'RJ' }
+    if (n >= 30000 && n <= 39999) return { elegivel: true, estado: 'MG' }
+    return { elegivel: false, estado: '' }
+  }
+
+  const cepLimpo = cep.replace(/\D/g, '')
+  const freteGratisInfo = cepLimpo.length >= 5 ? verificarFreteGratis(cepLimpo) : null
+
   return (
     <div className="border border-gray-200 rounded-xl p-4 mb-4">
       <p className="text-sm font-black text-gray-800 mb-3 flex items-center gap-2">
@@ -69,9 +84,20 @@ export default function CalculaFrete({ produtoId }: { produtoId: string }) {
           {loading ? '...' : 'OK'}
         </button>
       </div>
-      <a href="https://buscacepinter.correios.com.br" target="_blank" className="text-xs text-green-600 underline mb-3 block">
-        Não sei meu CEP
-      </a>
+      <div className="flex items-center justify-between mb-2">
+        <a href="https://buscacepinter.correios.com.br" target="_blank" className="text-xs text-green-600 underline">
+          Não sei meu CEP
+        </a>
+        {!freteGratisInfo && (
+          <span className="text-xs font-black text-red-600">FRETE GRÁTIS EM COMPRAS ACIMA DE R$500,00 PARA SC, PR, RS, SP, RJ E MG</span>
+        )}
+        {freteGratisInfo && !freteGratisInfo.elegivel && (
+          <span className="text-xs font-black text-red-600">FRETE GRÁTIS EM COMPRAS ACIMA DE R$500,00 PARA SC, PR, RS, SP, RJ E MG</span>
+        )}
+        {freteGratisInfo && freteGratisInfo.elegivel && (
+          <span className="text-xs font-black text-green-600">✅ FRETE GRÁTIS ACIMA DE R$500,00 PARA {freteGratisInfo.estado}</span>
+        )}
+      </div>
       {erro && <p className="text-xs text-red-500 mb-2">{erro}</p>}
       {opcoes.length > 0 && (
         <div className="space-y-2 mt-2">
