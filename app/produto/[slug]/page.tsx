@@ -320,9 +320,14 @@ export default function ProdutoPage() {
   const desconto = precoCartao > precoVista ? Math.round((1 - precoVista / precoCartao) * 100) : 0
   const { n: nParcelas, valor: valorParcela } = calcParcelas(precoCartao)
   const garantia = produto.warranty || (produto.warranty_months ? `${produto.warranty_months} meses` : null)
-  const imagens = produto.images?.filter(Boolean).length
+  // Imagens antes de vídeos: still/fotos primeiro, vídeos no final
+  const todasMidias = produto.images?.filter(Boolean).length
     ? produto.images!.filter(Boolean).slice(0, 10)
     : produto.main_image ? [produto.main_image] : []
+  const imagens = [
+    ...todasMidias.filter(url => !['youtube.com','youtu.be','vimeo.com'].some(d => url.includes(d)) && !url.match(/\.(mp4|webm|mov)/i)),
+    ...todasMidias.filter(url => ['youtube.com','youtu.be','vimeo.com'].some(d => url.includes(d)) || url.match(/\.(mp4|webm|mov)/i)),
+  ]
 
   const specs: { label: string; valor: string; icon?: React.ReactNode }[] = []
   if (produto.voltage) specs.push({ label: 'Tensão', valor: produto.voltage, icon: <Zap size={13} /> })
