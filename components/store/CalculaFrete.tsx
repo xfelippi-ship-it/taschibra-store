@@ -1,6 +1,12 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Truck } from 'lucide-react'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 type OpcaoFrete = {
   id: number
@@ -11,12 +17,26 @@ type OpcaoFrete = {
   prazo: string
 }
 
+type RegraFreteGratis = {
+  cep_from: string
+  cep_to: string
+  min_order_value: number
+}
+
 export default function CalculaFrete({ produtoId }: { produtoId: string }) {
   const [cep, setCep] = useState('')
   const [loading, setLoading] = useState(false)
   const [opcoes, setOpcoes] = useState<OpcaoFrete[]>([])
   const [erro, setErro] = useState('')
   const [selecionado, setSelecionado] = useState<number | null>(null)
+  const [regras, setRegras] = useState<RegraFreteGratis[]>([])
+
+  useEffect(() => {
+    supabase.from('free_shipping_rules')
+      .select('cep_from, cep_to, min_order_value')
+      .eq('active', true)
+      .then(({ data }) => { if (data) setRegras(data) })
+  }, [])
 
   async function calcular() {
     const cepLimpo = cep.replace(/\D/g, '')
@@ -48,19 +68,19 @@ export default function CalculaFrete({ produtoId }: { produtoId: string }) {
   }
 
   // Verifica se o CEP digitado e elegivel para frete gratis
-  function verificarFreteGratis(cepDigitado: string): { elegivel: boolean; estado: string } {
-    const n = parseInt(cepDigitado.replace(/\D/g, '').substring(0, 5))
-    if (n >= 88000 && n <= 89999) return { elegivel: true, estado: 'SC' }
-    if (n >= 80000 && n <= 87999) return { elegivel: true, estado: 'PR' }
-    if (n >= 90000 && n <= 99999) return { elegivel: true, estado: 'RS' }
-    if (n >= 1000  && n <= 19999) return { elegivel: true, estado: 'SP' }
-    if (n >= 20000 && n <= 28999) return { elegivel: true, estado: 'RJ' }
-    if (n >= 30000 && n <= 39999) return { elegivel: true, estado: 'MG' }
-    return { elegivel: false, estado: '' }
+  function verificarFreteGratis(): { elegivel: boolean; minimo: number } {
+    const cepLimpo = cep.replace(/\D/g, '')
+    if (cepLimpo.length < 5) return { elegivel: false, minimo: 0 }
+    const cepNum = parseInt(cepLimpo.substring(0, 8).padEnd(8, '0'))
+    for (const r of regras) {
+      const ini = parseInt(r.cep_from.replace(/\D/g, '').padEnd(8, '0'))
+      const fim = parseInt(r.cep_to.replace(/\D/g, '').padEnd(8, '9'))
+      if (cepNum >= ini && cepNum <= fim) return { elegivel: true, minimo: r.min_order_value }
+    }
+    return { elegivel: false, minimo: 0 }
   }
 
-  const cepLimpo = cep.replace(/\D/g, '')
-  const freteGratisInfo = cepLimpo.length >= 5 ? verificarFreteGratis(cepLimpo) : null
+  const freteGratis = verificarFreteGratis()
 
   return (
     <div className="border border-gray-200 rounded-xl p-4 mb-4">
@@ -88,14 +108,10 @@ export default function CalculaFrete({ produtoId }: { produtoId: string }) {
         <a href="https://buscacepinter.correios.com.br" target="_blank" className="text-xs text-green-600 underline">
           Não sei meu CEP
         </a>
-        {!freteGratisInfo && (
-          <span className="text-xs font-black text-red-600">FRETE GRÁTIS EM COMPRAS ACIMA DE R$500,00 PARA SC, PR, RS, SP, RJ E MG</span>
-        )}
-        {freteGratisInfo && !freteGratisInfo.elegivel && (
-          <span className="text-xs font-black text-red-600">FRETE GRÁTIS EM COMPRAS ACIMA DE R$500,00 PARA SC, PR, RS, SP, RJ E MG</span>
-        )}
-        {freteGratisInfo && freteGratisInfo.elegivel && (
-          <span className="text-xs font-black text-green-600">✅ FRETE GRÁTIS ACIMA DE R$500,00 PARA {freteGratisInfo.estado}</span>
+        {freteGratis.elegivel && (
+          <span className="text-xs text-red-500">
+            APROVEITE! PARA SUA REGIÃO, FRETE GRÁTIS NAS COMPRAS ACIMA DE R${freteGratis.minimo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}.
+          </span>
         )}
       </div>
       {erro && <p className="text-xs text-red-500 mb-2">{erro}</p>}
