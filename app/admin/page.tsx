@@ -172,6 +172,22 @@ function UsuariosTab() {
     setMsg({ tipo: 'ok', texto: '✅ Módulos atualizados com sucesso. O usuário precisa fazer logout e login novamente para ver as mudanças.' })
   }
 
+  async function excluirUsuario(adminUserId: string, userId: string, emailUsuario: string) {
+    if (!confirm(`Excluir ${emailUsuario} permanentemente? Esta acao nao pode ser desfeita.`)) return
+    const res = await fetch('/api/admin-delete-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminUserId, authUserId: userId, email: emailUsuario })
+    })
+    const data = await res.json()
+    if (data.ok) {
+      setMsg({ tipo: 'ok', texto: '✅ Usuario ' + emailUsuario + ' excluido permanentemente.' })
+      carregarUsuarios()
+    } else {
+      setMsg({ tipo: 'erro', texto: data.error || 'Erro ao excluir usuario' })
+    }
+  }
+
   async function desabilitarUsuario(id: string, emailUsuario: string, ativo: boolean) {
     const acao = ativo ? 'desabilitar' : 'reabilitar'
     if (!confirm(`${acao === 'desabilitar' ? 'Desabilitar' : 'Reabilitar'} acesso de ${emailUsuario}?`)) return
@@ -390,11 +406,20 @@ function UsuariosTab() {
                         className="text-blue-400 hover:text-blue-600 transition-colors text-xs font-bold">
                         🔑
                       </button>
-                      <button onClick={() => desabilitarUsuario(u.id, u.email, ativo)}
-                        title={ativo ? 'Desabilitar' : 'Reabilitar'}
-                        className={`transition-colors text-xs font-bold ${ativo ? 'text-orange-400 hover:text-orange-600' : 'text-green-400 hover:text-green-600'}`}>
-                        {ativo ? '🚫' : '✅'}
-                      </button>
+                      {u.status === 'aguardando' && (
+                        <button onClick={() => excluirUsuario(u.id, u.user_id, u.email)}
+                          title="Excluir usuario (nunca ativou)"
+                          className="text-red-400 hover:text-red-600 transition-colors text-xs font-bold">
+                          🗑️
+                        </button>
+                      )}
+                      {u.status !== 'aguardando' && (
+                        <button onClick={() => desabilitarUsuario(u.id, u.email, ativo)}
+                          title={ativo ? 'Desabilitar' : 'Reabilitar'}
+                          className={`transition-colors text-xs font-bold ${ativo ? 'text-orange-400 hover:text-orange-600' : 'text-green-400 hover:text-green-600'}`}>
+                          {ativo ? '🚫' : '✅'}
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
