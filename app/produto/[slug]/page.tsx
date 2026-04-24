@@ -5,6 +5,7 @@ import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
 import { ShoppingCart, Heart, Shield, ChevronRight, Star, Package, Zap, Thermometer, Ruler } from 'lucide-react'
 import CalculaFrete from '@/components/store/CalculaFrete'
+import RetiradaLoja from '@/components/store/RetiradaLoja'
 import VariacoesProduto from '@/components/store/VariacoesProduto'
 import { useCart } from '@/contexts/CartContext'
 import Link from 'next/link'
@@ -425,6 +426,7 @@ export default function ProdutoPage() {
 
           <VariacoesProduto produtoId={produto.id} onSelect={setVariacaoSelecionada} />
           <CalculaFrete produtoId={produto.id} />
+          <RetiradaLoja />
 
           {/* Preço */}
           <div className="bg-green-50 border border-green-100 rounded-xl p-4 mb-4 mt-4">

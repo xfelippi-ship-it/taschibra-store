@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import CalculaFrete from '@/components/store/CalculaFrete'
+import RetiradaLoja from '@/components/store/RetiradaLoja'
 import { useCart } from '@/contexts/CartContext'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
@@ -263,6 +264,7 @@ export default function CarrinhoPage() {
               </div>
               {!freeShipping && items.length > 0 && (
                 <CalculaFrete produtoId={items[0].id} />
+                <RetiradaLoja />
               )}
 
               <div className="border-t border-gray-100 pt-3 flex justify-between items-center font-black text-gray-800">
