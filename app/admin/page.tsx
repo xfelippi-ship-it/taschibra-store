@@ -156,15 +156,19 @@ function UsuariosTab() {
   }
 
   async function salvarModulos(id: string, emailUsuario: string) {
-    await supabase.from('admin_users').update({ modulos: modulosEdicao }).eq('id', id)
-    await supabase.from('audit_log').insert({
-      user_email: emailUsuario,
-      acao: 'modulos_alterados',
-      entidade: 'admin_users',
-      detalhe: `Módulos: ${modulosEdicao.join(', ')}`
+    const res = await fetch('/api/admin-update-modulos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, modulos: modulosEdicao, executedBy: meuEmail })
     })
+    const data = await res.json()
+    if (!data.ok) {
+      alert('Erro ao salvar módulos: ' + (data.error || 'Tente novamente'))
+      return
+    }
     setEditandoId(null)
     carregarUsuarios()
+    alert('Módulos atualizados. O usuário precisa fazer logout e login novamente para ver as mudanças.')
   }
 
   async function desabilitarUsuario(id: string, emailUsuario: string, ativo: boolean) {
