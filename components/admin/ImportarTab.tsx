@@ -584,7 +584,7 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
       <div className="bg-gray-50 rounded-xl p-4 mb-4 flex items-center gap-3">
         <Download size={16} className="text-blue-500 flex-shrink-0" />
         <div>
-          <a href="/api/admin/planilha-modelo" download className="text-sm font-bold text-blue-600 cursor-pointer hover:underline">Baixar planilha modelo v4</a>
+          <a href="/LightSales_Planilha_Importacao_Produtos_v4.1.xlsx" download className="text-sm font-bold text-blue-600 cursor-pointer hover:underline">Baixar planilha modelo v4.1</a>
           <span className="text-xs text-gray-400 ml-2">.xlsx com abas Produtos + Variações + Referência (inclui coluna EAN)</span>
         </div>
       </div>
