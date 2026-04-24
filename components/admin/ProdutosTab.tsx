@@ -528,12 +528,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                 className={`px-4 py-2 text-sm font-bold transition-colors border-b-2 ${abaModal === 'dados' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
                 Dados gerais
               </button>
-              {produtoEdit.id && (
-                <button onClick={() => setAbaModal('fotos')}
-                  className={`px-4 py-2 text-sm font-bold transition-colors border-b-2 ${abaModal === 'fotos' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
-                  Fotos
-                </button>
-              )}
+
               {produtoEdit.id && (
                 <button onClick={() => { setAbaModal('variacoes'); carregarVariacoes(produtoEdit.id!) }}
                   className={`px-4 py-2 text-sm font-bold transition-colors border-b-2 ${abaModal === 'variacoes' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
@@ -734,7 +729,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
             </div>
           )}
           {abaModal === 'fotos' && produtoEdit.id && (
-            <FotosTab produtoId={produtoEdit.id} />
+
           )}
           {abaModal === 'variacoes' && produtoEdit.id && (
                 <div>
