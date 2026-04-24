@@ -1043,8 +1043,8 @@ export default function AdminPage() {
             {tem([], 'carrinhos') && <BtnItem id="carrinhos"  label="Carrinhos"  icon={<ShoppingBag size={15} />} />}
             {tem([], 'frete') && <BtnItem id="frete"      label="Frete Grátis" icon={<Truck size={15} />} />}
             {tem([], 'relatorios') && <BtnItem id="relatorios" label="Relatórios" icon={<BarChart3 size={15} />} />}
-            <BtnItem id="motivos"    label="Motivos Cancel." icon={<AlertCircle size={15} />} />
-            <BtnItem id="monitor-preco" label="Monitor Preços" icon={<TrendingDown size={15} />} />
+            {tem([], 'motivos') && <BtnItem id="motivos"    label="Motivos Cancel." icon={<AlertCircle size={15} />} />}
+            {tem([], 'monitor-preco') && <BtnItem id="monitor-preco" label="Monitor Preços" icon={<TrendingDown size={15} />} />}
           </Grupo>
         )}
 
@@ -1053,21 +1053,21 @@ export default function AdminPage() {
           <Grupo id="marketing" label="Marketing">
             {tem([], 'banners') && <BtnItem id="banners"      label="Banners"            icon={<ImageIcon size={15} />} />}
             {tem([], 'topbar') && <BtnItem id="topbar"       label="Top Bar"            icon={<Megaphone size={15} />} />}
-            <BtnItem id="galeria"      label="Galeria de Imagens" icon={<ImageIcon size={15} />} />
-            <BtnItem id="promo-banner" label="Banner Promo"        icon={<Megaphone size={15} />} />
-            <BtnItem id="popup"        label="Popup Promocional"   icon={<Megaphone size={15} />} />
+            {tem([], 'galeria') && <BtnItem id="galeria"      label="Galeria de Imagens" icon={<ImageIcon size={15} />} />}
+            {tem([], 'promo-banner') && <BtnItem id="promo-banner" label="Banner Promo"        icon={<Megaphone size={15} />} />}
+            {tem([], 'popup') && <BtnItem id="popup"        label="Popup Promocional"   icon={<Megaphone size={15} />} />}
             {tem([], 'midias') && <BtnItem id="midias"       label="Mídias Sociais"     icon={<Megaphone size={15} />} />}
-            <BtnItem id="blog"         label="Blog e Guias"        icon={<Megaphone size={15} />} />
+            {tem([], 'blog') && <BtnItem id="blog"         label="Blog e Guias"        icon={<Megaphone size={15} />} />}
           </Grupo>
         )}
 
         {/* LOJA */}
         {true && (
           <Grupo id="loja" label="Loja">
-            <BtnItem id="retirada"      label="Retirada na Loja"   icon={<MapPin size={15} />} />
-            <BtnItem id="faturamento"   label="Faturamento Direto" icon={<CreditCard size={15} />} />
-            <BtnItem id="beneficios"    label="Barra Benefícios"   icon={<Star size={15} />} />
-            <BtnItem id="cms"           label="Páginas e Blocos"   icon={<FileText size={15} />} />
+            {tem([], 'retirada') && <BtnItem id="retirada"      label="Retirada na Loja"   icon={<MapPin size={15} />} />}
+            {tem([], 'faturamento') && <BtnItem id="faturamento"   label="Faturamento Direto" icon={<CreditCard size={15} />} />}
+            {tem([], 'beneficios') && <BtnItem id="beneficios"    label="Barra Benefícios"   icon={<Star size={15} />} />}
+            {tem([], 'cms') && <BtnItem id="cms"           label="Páginas e Blocos"   icon={<FileText size={15} />} />}
           </Grupo>
         )}
 
@@ -1085,11 +1085,11 @@ export default function AdminPage() {
         {/* ADMINISTRAÇÃO */}
         {true && (
           <Grupo id="admin" label="Administração">
-            <BtnItem id="vendedores" label="Vendedores" icon={<Tag size={15} />} />
-            <BtnItem id="usuarios"   label="Usuários"   icon={<Users size={15} />} />
-            <BtnItem id="auditoria"  label="Auditoria"  icon={<BarChart3 size={15} />} />
-            <BtnItem id="configuracoes" label="Configurações da Loja" icon={<Settings2 size={15} />} />
-            <BtnItem id="seo"           label="SEO"                   icon={<Search size={15} />} />
+            {tem([], 'vendedores') && <BtnItem id="vendedores" label="Vendedores" icon={<Tag size={15} />} />}
+            {tem([], 'usuarios') && <BtnItem id="usuarios"   label="Usuários"   icon={<Users size={15} />} />}
+            {tem([], 'auditoria') && <BtnItem id="auditoria"  label="Auditoria"  icon={<BarChart3 size={15} />} />}
+            {tem([], 'configuracoes') && <BtnItem id="configuracoes" label="Configurações da Loja" icon={<Settings2 size={15} />} />}
+            {tem([], 'seo') && <BtnItem id="seo"           label="SEO"                   icon={<Search size={15} />} />}
           </Grupo>
         )}
       </div>
