@@ -1020,9 +1020,9 @@ export default function AdminPage() {
         )}
 
         {/* CATÁLOGO */}
-        {true && (
+        {(meuPapel==='master'||meusModulos.includes('todos')||['produtos','categorias','caracteristicas','canais','importar','upload-massa','compre-junto','marcas','badges','cores'].some(m=>meusModulos.includes(m))) && (
           <Grupo id="catalogo" label="Catálogo">
-            {tem([], 'catalogo') && <BtnItem id="produtos"   label="Produtos"     icon={<Package size={15} />} />}
+            {tem([], 'produtos') && <BtnItem id="produtos"   label="Produtos"     icon={<Package size={15} />} />}
             {tem([], 'categorias') && <BtnItem id="categorias" label="Categorias"   icon={<Tag size={15} />} />}
             {tem([], 'caracteristicas') && <BtnItem id="caracteristicas" label="Características" icon={<Sliders size={15} />} />}
             {tem([], 'canais') && <BtnItem id="canais" label="Canais de Venda" icon={<ShoppingBag size={15} />} />}
@@ -1036,7 +1036,7 @@ export default function AdminPage() {
         )}
 
         {/* VENDAS */}
-        {true && (
+        {(meuPapel==='master'||meusModulos.includes('todos')||['pedidos','cupons','carrinhos','frete','relatorios','motivos','monitor-preco'].some(m=>meusModulos.includes(m))) && (
           <Grupo id="vendas" label="Vendas">
             {tem([], 'pedidos') && <BtnItem id="pedidos"    label="Pedidos"    icon={<ShoppingBag size={15} />} />}
             {tem([], 'cupons') && <BtnItem id="cupons"     label="Cupons"     icon={<Tag size={15} />} />}
@@ -1049,7 +1049,7 @@ export default function AdminPage() {
         )}
 
         {/* MARKETING */}
-        {true && (
+        {(meuPapel==='master'||meusModulos.includes('todos')||['banners','topbar','galeria','promo-banner','popup','midias','blog'].some(m=>meusModulos.includes(m))) && (
           <Grupo id="marketing" label="Marketing">
             {tem([], 'banners') && <BtnItem id="banners"      label="Banners"            icon={<ImageIcon size={15} />} />}
             {tem([], 'topbar') && <BtnItem id="topbar"       label="Top Bar"            icon={<Megaphone size={15} />} />}
@@ -1062,7 +1062,7 @@ export default function AdminPage() {
         )}
 
         {/* LOJA */}
-        {true && (
+        {(meuPapel==='master'||meusModulos.includes('todos')||['retirada','faturamento','beneficios','cms'].some(m=>meusModulos.includes(m))) && (
           <Grupo id="loja" label="Loja">
             {tem([], 'retirada') && <BtnItem id="retirada"      label="Retirada na Loja"   icon={<MapPin size={15} />} />}
             {tem([], 'faturamento') && <BtnItem id="faturamento"   label="Faturamento Direto" icon={<CreditCard size={15} />} />}
@@ -1072,7 +1072,7 @@ export default function AdminPage() {
         )}
 
         {/* CLIENTES */}
-        {true && (
+        {(meuPapel==='master'||meusModulos.includes('todos')||['clientes','newsletter','faleconosco','avaliacoes','faq'].some(m=>meusModulos.includes(m))) && (
           <Grupo id="clientes" label="Clientes">
             {tem([], 'clientes') && <BtnItem id="clientes"    label="Clientes"     icon={<Users size={15} />} />}
             {tem([], 'newsletter') && <BtnItem id="newsletter"  label="Newsletter"   icon={<Mail size={15} />} />}
@@ -1083,7 +1083,7 @@ export default function AdminPage() {
         )}
 
         {/* ADMINISTRAÇÃO */}
-        {true && (
+        {(meuPapel==='master'||meusModulos.includes('todos')||['vendedores','usuarios','auditoria','configuracoes','seo'].some(m=>meusModulos.includes(m))) && (
           <Grupo id="admin" label="Administração">
             {tem([], 'vendedores') && <BtnItem id="vendedores" label="Vendedores" icon={<Tag size={15} />} />}
             {tem([], 'usuarios') && <BtnItem id="usuarios"   label="Usuários"   icon={<Users size={15} />} />}
