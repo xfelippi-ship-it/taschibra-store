@@ -344,6 +344,23 @@ export default function ProdutoPage() {
   const semEstoque = estoqueAtual !== null && estoqueAtual <= 0
   const semPreco = !precoCartao || precoCartao <= 0
 
+  function handleComprarAgora() {
+    const varId = variacaoSelecionada?.id || produto.id
+    const varName = variacaoSelecionada ? `${produto.name} — ${variacaoSelecionada.name}` : produto.name
+    const preco = variacaoSelecionada?.promo_price || variacaoSelecionada?.price || produto.promo_price || produto.price
+    addItem({
+      id: varId,
+      name: varName,
+      price: preco,
+      promo_price: variacaoSelecionada?.promo_price || produto.promo_price,
+      quantity: quantidade,
+      emoji: produto.main_image ? '' : '💡',
+      image: produto.main_image || '',
+      sku: variacaoSelecionada?.sku || produto.sku,
+    })
+    window.location.href = '/carrinho'
+  }
+
   function handleAdd() {
     if (semEstoque) return
     addItem({
@@ -461,9 +478,14 @@ export default function ProdutoPage() {
                 Em Atualização
               </div>
             ) : (
-              <button onClick={handleAdd}
-                className={`flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all ${adicionado ? 'bg-green-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}>
+              <button onClick={handleComprarAgora}
+                className="flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all bg-green-600 hover:bg-green-700 text-white">
                 <ShoppingCart size={18} />
+                COMPRAR AGORA
+              </button>
+              <button onClick={handleAdd}
+                className={`flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all border-2 ${adicionado ? 'border-green-700 bg-green-50 text-green-700' : 'border-green-600 text-green-600 hover:bg-green-50'}`}>
+                <ShoppingCart size={16} />
                 {adicionado ? 'ADICIONADO! ✓' : 'ADICIONAR AO CARRINHO'}
               </button>
             )}
@@ -670,10 +692,15 @@ export default function ProdutoPage() {
             Em Atualização
           </div>
         ) : (
-        <button onClick={handleAdd}
-          className={`flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all ${adicionado ? 'bg-green-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}>
+        <button onClick={handleComprarAgora}
+          className="flex-1 font-black text-sm py-3 rounded-lg flex items-center justify-center gap-2 transition-all bg-green-600 hover:bg-green-700 text-white">
           <ShoppingCart size={16} />
-          {adicionado ? 'Adicionado! ✓' : 'Comprar'}
+          Comprar agora
+        </button>
+        <button onClick={handleAdd}
+          className={`px-3 py-3 rounded-lg border-2 flex items-center justify-center transition-all ${adicionado ? 'border-green-700 bg-green-50 text-green-700' : 'border-green-600 text-green-600 hover:bg-green-50'}`}
+          title="Adicionar ao carrinho">
+          <ShoppingCart size={16} />
         </button>
         )}
         <button
