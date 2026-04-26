@@ -28,7 +28,6 @@ import RetiradaLojaTab from '@/components/admin/RetiradaLojaTab'
 import BadgesTab from '@/components/admin/BadgesTab'
 import BenefitBarTab from '@/components/admin/BenefitBarTab'
 import MotivosTab from '@/components/admin/MotivosTab'
-import MonitoramentoPrecoTab from '@/components/admin/MonitoramentoPrecoTab'
 import FaturamentoDiretoTab from '@/components/admin/FaturamentoDiretoTab'
 import AvaliacoesTab from '@/components/admin/AvaliacoesTab'
 import MarcasTab from '@/components/admin/MarcasTab'
@@ -827,7 +826,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'cores' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup' | 'blog' | 'caracteristicas' | 'canais' | 'badges' | 'beneficios' | 'motivos' | 'monitor-preco' | 'upload-massa' | 'compre-junto'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'cores' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup' | 'blog' | 'caracteristicas' | 'canais' | 'badges' | 'beneficios' | 'motivos'  | 'upload-massa' | 'compre-junto'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -1072,7 +1071,7 @@ export default function AdminPage() {
         )}
 
         {/* VENDAS */}
-        {(meuPapel==='master'||meusModulos.includes('todos')||['pedidos','cupons','carrinhos','frete','relatorios','motivos','monitor-preco'].some(m=>meusModulos.includes(m))) && (
+        {(meuPapel==='master'||meusModulos.includes('todos')||['pedidos','cupons','carrinhos','frete','relatorios','motivos'].some(m=>meusModulos.includes(m))) && (
           <Grupo id="vendas" label="Vendas">
             {tem([], 'pedidos') && <BtnItem id="pedidos"    label="Pedidos"    icon={<ShoppingBag size={15} />} />}
             {tem([], 'cupons') && <BtnItem id="cupons"     label="Cupons"     icon={<Tag size={15} />} />}
@@ -1167,7 +1166,7 @@ export default function AdminPage() {
         {aba === 'badges' && <BadgesTab />}
         {aba === 'beneficios' && <BenefitBarTab />}
         {aba === 'motivos' && <MotivosTab />}
-        {aba === 'monitor-preco' && <MonitoramentoPrecoTab />}
+        
         {aba === 'faturamento' && <FaturamentoDiretoTab />}
         {aba === 'avaliacoes' && <AvaliacoesTab />}
         {aba === 'marcas' && <MarcasTab />}

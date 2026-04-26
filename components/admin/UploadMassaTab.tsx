@@ -25,7 +25,7 @@ export default function UploadMassaTab() {
     // Carrega produtos (sku + ean) e variações (ean + product_id) de uma vez
     setProgresso('Carregando catálogo...')
     const { data: produtos } = await supabase.from('products').select('id, sku, ean, images, main_image').not('sku', 'is', null)
-    const { data: variacoes } = await supabase.from('product_variants').select('id, product_id, sku, ean, images').not('id', 'is', null)
+    const { data: variacoes } = await (supabase.from('product_variants') as any).select('id, product_id, sku, ean').not('id', 'is', null)
 
     // Mapas de lookup: identificador -> produto ou variacao
     const porSku = new Map<string, any>()
@@ -82,21 +82,23 @@ export default function UploadMassaTab() {
         const url = urlData.publicUrl
 
         if (isVariacao) {
-          // Atualiza variacao
+          // Atualiza variacao — imagens ficam no produto pai
           const vari = porEanVariacao.get(ident)
-          const imgs: string[] = vari?.images || []
-          imgs[slot - 1] = url
-          await supabase.from('product_variants').update({ images: imgs.filter(Boolean) }).eq('id', vari.id)
-          // Se slot 1, atualiza main_image do produto pai tambem
           if (slot === 1) {
             await supabase.from('products').update({ main_image: url }).eq('id', vari.product_id)
           }
+          // Atualiza galeria do produto pai
+          const { data: prodPai } = await supabase.from('products').select('images').eq('id', vari.product_id).single()
+          const imgs: string[] = (prodPai?.images as string[]) || []
+          imgs[slot - 1] = url
+          await supabase.from('products').update({ images: imgs }).eq('id', vari.product_id)
         } else {
           // Atualiza produto (por EAN ou SKU)
           const prod = isProdutoPorEan ? porEanProduto.get(ident) : porSku.get(ident.toUpperCase())
-          const imgs: string[] = prod?.images || []
+          const { data: prodAtual } = await supabase.from('products').select('images').eq('id', prod.id).single()
+          const imgs: string[] = (prodAtual?.images as string[]) || []
           imgs[slot - 1] = url
-          const upd: any = { images: imgs.filter(Boolean) }
+          const upd: any = { images: imgs }
           if (slot === 1) upd.main_image = url
           await supabase.from('products').update(upd).eq('id', prod.id)
         }

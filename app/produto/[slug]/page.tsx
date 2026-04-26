@@ -357,13 +357,21 @@ export default function ProdutoPage() {
     addItem({
       id: varId,
       name: varName,
+      slug: produto.slug,
       price: preco,
       promo_price: variacaoSelecionada?.promo_price || produto.promo_price,
-      quantity: quantidade,
       emoji: produto.main_image ? '' : '💡',
-      image: produto.main_image || '',
-      sku: variacaoSelecionada?.sku || produto.sku,
     })
+    for (let i = 1; i < qty; i++) {
+      addItem({
+        id: varId,
+        name: varName,
+        slug: produto.slug,
+        price: preco,
+        promo_price: variacaoSelecionada?.promo_price || produto.promo_price,
+        emoji: produto.main_image ? '' : '💡',
+      })
+    }
     window.location.href = '/carrinho'
   }
 

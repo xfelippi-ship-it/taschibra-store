@@ -516,7 +516,7 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
           <LayoutGrid size={16} className="text-emerald-600" />
           <h2 className="font-black text-gray-700 text-sm uppercase tracking-wide">Variações de produtos</h2>
         </div>
-        <p className="text-xs text-gray-400 mb-4">Importe variações vinculadas ao SKU do produto pai. Aceita .csv e .xlsx (aba &quot;Variações&quot;).</p>
+        <p className="text-xs text-gray-400 mb-4">Importe variações vinculadas ao EAN do produto pai. Aceita .csv e .xlsx (aba &quot;Variações&quot;).</p>
 
         <div onClick={() => inputVarRef.current?.click()}
           className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50 transition-colors">
