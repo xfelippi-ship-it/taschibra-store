@@ -16,6 +16,17 @@ const securityHeaders = [
 ]
 
 const nextConfig = {
+  async redirects() {
+    return [
+      { source: '/documentos/politica', destination: '/privacidade', permanent: true },
+      { source: '/documentos/termos', destination: '/termos', permanent: true },
+      { source: '/documentos/troca', destination: '/trocas-devolucoes', permanent: true },
+      { source: '/documentos/seguranca', destination: '/seguranca', permanent: true },
+      { source: '/empresa', destination: '/quem-somos', permanent: true },
+      { source: '/perguntas-frequentes', destination: '/faq', permanent: true },
+      { source: '/produtos/:categoria', destination: '/produtos?categoria=:categoria', permanent: true },
+    ]
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },

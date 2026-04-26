@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR">
       <head>
-        <link rel="preconnect" href="https://gcmoiimijouhmgjopgct.supabase.co" />
+        <link rel="preconnect" href="https://gcmoiimijouhmgjopgct.supabase.co" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://gcmoiimijouhmgjopgct.supabase.co" />
       </head>
       <body suppressHydrationWarning className={`${nunito.variable} antialiased bg-white text-gray-900`}>

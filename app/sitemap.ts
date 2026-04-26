@@ -13,6 +13,7 @@ export default async function sitemap() {
     .select('slug, updated_at')
     .eq('active', true)
     .order('updated_at', { ascending: false })
+    .limit(5000)
 
   const { data: categories } = await supabase
     .from('categories')
@@ -28,6 +29,8 @@ export default async function sitemap() {
     { url: BASE + '/quem-somos', lastModified: new Date(), changeFrequency: 'yearly', priority: 0.4 },
     { url: BASE + '/trocas-devolucoes', lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
     { url: BASE + '/seguranca', lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+    { url: BASE + '/faq', lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: BASE + '/fale-conosco', lastModified: new Date(), changeFrequency: 'yearly', priority: 0.4 },
   ]
 
   const productPages = (products || []).map(p => ({
