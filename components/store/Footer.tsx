@@ -69,10 +69,10 @@ export default function Footer() {
         <p style={{color:'#4a8a5a', fontSize:'11px', letterSpacing:'2px', fontWeight:700, textAlign:'center', margin:'0 0 24px', textTransform:'uppercase'}}>Compra 100% Segura</p>
         <div style={{display:'flex', justifyContent:'center', gap:'16px'}}>
           {[
-            { img: '/logos/SSL SEGURANCA.png', label: 'SSL Certificado' },
-            { img: '/logos/PAGAR.ME.png',      label: 'Pagamento Seguro' },
-            { img: '/logos/CLEAR SALE.png',    label: 'Antifraude' },
-            { img: '/logos/MELHOR ENVIO.png',  label: 'Entrega Garantida' },
+            { img: '/logos/SSL SEGURANCA.webp', label: 'SSL Certificado' },
+            { img: '/logos/PAGAR.ME.webp',      label: 'Pagamento Seguro' },
+            { img: '/logos/CLEAR SALE.webp',    label: 'Antifraude' },
+            { img: '/logos/MELHOR ENVIO.webp',  label: 'Entrega Garantida' },
           ].map((selo) => (
             <div key={selo.label} style={{display:'flex', flexDirection:'column', alignItems:'center', gap:'6px'}}>
               <img src={selo.img} alt={selo.label} style={{height:'62px', width:'160px', objectFit:'contain'}} />
@@ -98,12 +98,12 @@ export default function Footer() {
           </div>
           <div style={{display:'flex', alignItems:'center'}}>
             {[
-              { img: '/logos/VISA.png',             alt: 'Visa' },
-              { img: '/logos/MASTER.png',           alt: 'Mastercard' },
-              { img: '/logos/ELO.png',              alt: 'Elo' },
-              { img: '/logos/PIX.png',              alt: 'Pix' },
-              { img: '/logos/BOLETO.png',           alt: 'Boleto' },
-              { img: '/logos/AMERICAN EXPRESS.png', alt: 'American Express' },
+              { img: '/logos/VISA.webp',             alt: 'Visa' },
+              { img: '/logos/MASTER.webp',           alt: 'Mastercard' },
+              { img: '/logos/ELO.webp',              alt: 'Elo' },
+              { img: '/logos/PIX.webp',              alt: 'Pix' },
+              { img: '/logos/BOLETO.webp',           alt: 'Boleto' },
+              { img: '/logos/AMERICAN EXPRESS.webp', alt: 'American Express' },
             ].map((b, i, arr) => (
               <img key={b.alt} src={b.img} alt={b.alt}
                 style={{height:'36px', width:'72px', objectFit:'contain', marginRight: i < arr.length - 1 ? '-10px' : '0'}} />
