@@ -52,7 +52,7 @@ export default function ProdutoZoom({ src, alt = '', className = '' }: Props) {
         onMouseLeave={() => setZoom(false)}
         onMouseMove={handleMove}
       >
-        <img src={src} alt={alt} draggable={false} className="w-full h-full object-contain" />
+        <img src={src} alt={alt} draggable={false} className="w-full h-full object-cover" />
 
         {zoom && (
           <div className="absolute border-2 border-green-500 bg-green-500/10 pointer-events-none"
