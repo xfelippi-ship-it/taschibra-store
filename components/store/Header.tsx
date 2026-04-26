@@ -254,6 +254,94 @@ function TodasCategoriasPanel({ onClose }: { onClose: () => void }) {
   )
 }
 
+// ─── Menu Mobile com accordion expansível ──────────────────────────────────
+function MobileMenu({
+  menuItems, subcatsMenu, onClose, search, setSearch, handleSearch
+}: {
+  menuItems: readonly { label: string; slug: string; type: string }[]
+  subcatsMenu: Record<string, SubCat[]>
+  onClose: () => void
+  search: string
+  setSearch: (v: string) => void
+  handleSearch: (e?: React.FormEvent) => void
+}) {
+  const [openSlug, setOpenSlug] = useState<string | null>(null)
+
+  return (
+    <div className="md:hidden border-t border-gray-100 bg-white max-h-[85vh] overflow-y-auto">
+      <div className="px-4 py-3 border-b border-gray-100">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="O que você está procurando?"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
+            className="w-full h-10 border-2 border-gray-200 rounded-full px-4 pr-10 text-sm outline-none focus:border-green-500 bg-gray-50"
+          />
+          <button onClick={() => handleSearch()} className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-600 w-7 h-7 rounded-full flex items-center justify-center">
+            <Search size={13} color="white" />
+          </button>
+        </div>
+      </div>
+      <div className="py-1">
+        {menuItems.map(({ label, slug }) => {
+          const subs = subcatsMenu[slug] || []
+          const isOpen = openSlug === slug
+          const hasSubs = subs.length > 0
+          return (
+            <div key={slug} className="border-b border-gray-50 last:border-0">
+              <div className="flex items-center">
+                <Link
+                  href={`/produtos?categoria=${encodeURIComponent(slug)}`}
+                  onClick={onClose}
+                  className="flex-1 px-5 py-3.5 text-sm font-bold text-gray-800 hover:text-green-600 active:text-green-600 transition-colors"
+                >
+                  {label}
+                </Link>
+                {hasSubs && (
+                  <button
+                    onClick={() => setOpenSlug(prev => prev === slug ? null : slug)}
+                    className="px-4 py-3.5 text-gray-400 hover:text-green-600 transition-colors"
+                    aria-label={isOpen ? 'Fechar subcategorias' : 'Ver subcategorias'}
+                  >
+                    <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-green-600' : ''}`} />
+                  </button>
+                )}
+              </div>
+              {hasSubs && isOpen && (
+                <div className="bg-gray-50 border-t border-gray-100 pb-1">
+                  {subs.map(sub => (
+                    <Link
+                      key={sub.id}
+                      href={`/produtos?categoria=${encodeURIComponent(sub.slug)}`}
+                      onClick={onClose}
+                      className="flex items-center gap-2.5 px-7 py-2.5 text-sm text-gray-600 hover:text-green-600 hover:bg-green-50 active:bg-green-50 transition-colors"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
+                      {sub.label}
+                    </Link>
+                  ))}
+                  <Link
+                    href={`/produtos?categoria=${encodeURIComponent(slug)}`}
+                    onClick={onClose}
+                    className="flex items-center gap-2 px-7 py-2.5 text-xs font-bold text-green-600 hover:bg-green-50 transition-colors border-t border-gray-100 mt-1"
+                  >
+                    Ver todos em {label} →
+                  </Link>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+      <div className="px-5 py-3 bg-green-50 border-t border-green-100 flex items-center gap-2 text-xs text-green-700 font-semibold">
+        <Phone size={13} /> (47) 99149-3270
+      </div>
+    </div>
+  )
+}
+
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 export default function Header() {
@@ -447,30 +535,14 @@ export default function Header() {
 
         {/* Menu mobile */}
         {menuOpen && (
-          <div className="md:hidden border-t border-gray-100 bg-white">
-            <div className="px-4 py-3 border-b border-gray-100">
-              <div className="relative">
-                <input type="text" placeholder="O que você está procurando?" value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="w-full h-10 border-2 border-gray-200 rounded-full px-4 pr-10 text-sm outline-none focus:border-green-500 bg-gray-50" />
-                <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-600 w-7 h-7 rounded-full flex items-center justify-center">
-                  <Search size={13} color="white" />
-                </button>
-              </div>
-            </div>
-            <div className="py-2">
-              {menuItems.map(({ label, slug }) => (
-                <Link key={slug} href={`/produtos?categoria=${encodeURIComponent(slug)}`}
-                  onClick={() => setMenuOpen(false)}
-                  className="block px-6 py-3 text-sm font-bold text-gray-700 hover:text-green-600 hover:bg-green-50 transition-colors border-b border-gray-50">
-                  {label}
-                </Link>
-              ))}
-            </div>
-            <div className="px-6 py-3 bg-green-50 flex items-center gap-2 text-xs text-green-700 font-semibold">
-              <Phone size={13} /> (47) 99149-3270
-            </div>
-          </div>
+          <MobileMenu
+            menuItems={menuItems}
+            subcatsMenu={subcatsMenu}
+            onClose={() => setMenuOpen(false)}
+            search={search}
+            setSearch={setSearch}
+            handleSearch={handleSearch}
+          />
         )}
 
       </header>
