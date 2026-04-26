@@ -17,7 +17,7 @@ export default function PrivacidadePage() {
         <div className="prose prose-sm text-gray-600 space-y-6">
           <section>
             <h2 className="text-base font-black text-gray-800 mb-2">1. Quem somos</h2>
-            <p>A Blumenox Iluminação LTDA (CNPJ 02.477.605/0001-01), detentora da marca Taschibra, com sede em Indaial/SC, é responsável pelo tratamento dos seus dados pessoais no âmbito da Taschibra Store.</p>
+            <p>A Blumenox Iluminação LTDA (CNPJ 02.477.605/0001-01), com sede em Indaial/SC, operadora da Taschibra Store, é responsável pelo tratamento dos seus dados pessoais nesta plataforma.</p>
           </section>
 
           <section>
@@ -85,7 +85,7 @@ export default function PrivacidadePage() {
           <section>
             <h2 className="text-base font-black text-gray-800 mb-2">9. Contato e DPO</h2>
             <p>Responsável pela proteção de dados: <strong>privacidade@taschibra.com.br</strong></p>
-            <p className="mt-1">Blumenox Iluminação LTDA — Marca Taschibra — Indaial/SC</p>
+            <p className="mt-1">Blumenox Iluminação LTDA — Indaial/SC — CEP 89085-144</p>
           </section>
 
           <section>
