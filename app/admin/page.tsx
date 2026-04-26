@@ -72,7 +72,6 @@ const TODOS_MODULOS = [
   { id: 'frete',           label: 'Frete Grátis',          grupo: 'Vendas' },
   { id: 'relatorios',      label: 'Relatórios',            grupo: 'Vendas' },
   { id: 'motivos',         label: 'Motivos Cancelamento',  grupo: 'Vendas' },
-  { id: 'monitor-preco',   label: 'Monitor Preços',        grupo: 'Vendas' },
   { id: 'banners',         label: 'Banners',               grupo: 'Marketing' },
   { id: 'topbar',          label: 'Top Bar',               grupo: 'Marketing' },
   { id: 'galeria',         label: 'Galeria de Imagens',    grupo: 'Marketing' },
@@ -1079,7 +1078,6 @@ export default function AdminPage() {
             {tem([], 'frete') && <BtnItem id="frete"      label="Frete Grátis" icon={<Truck size={15} />} />}
             {tem([], 'relatorios') && <BtnItem id="relatorios" label="Relatórios" icon={<BarChart3 size={15} />} />}
             {tem([], 'motivos') && <BtnItem id="motivos"    label="Motivos Cancel." icon={<AlertCircle size={15} />} />}
-            {tem([], 'monitor-preco') && <BtnItem id="monitor-preco" label="Monitor Preços" icon={<TrendingDown size={15} />} />}
           </Grupo>
         )}
 
