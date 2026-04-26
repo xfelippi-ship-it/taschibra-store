@@ -75,7 +75,7 @@ function CardProduto({ p }: { p: ProdCard }) {
       <div className="p-3 flex flex-col flex-1">
         <p className="text-xs font-semibold text-gray-700 leading-tight line-clamp-2 mb-auto pb-2">{p.name}</p>
         <div className="flex items-center gap-1.5 flex-wrap mt-2">
-          <span className="text-xs bg-teal-500 text-white font-black px-1.5 py-0.5 rounded">PIX</span>
+          <span className="text-xs bg-teal-700 text-white font-black px-1.5 py-0.5 rounded">PIX</span>
           <span className="text-sm font-black text-green-700">R$ {brl(preco)}</span>
         </div>
         {p.price > preco && (
@@ -493,7 +493,7 @@ export default function ProdutoPage() {
               </p>
             )}
             <div className="flex items-center gap-2 pt-2 border-t border-green-100 mt-2">
-              <span className="bg-teal-500 text-white text-xs font-black px-1.5 py-0.5 rounded">PIX</span>
+              <span className="bg-teal-700 text-white text-xs font-black px-1.5 py-0.5 rounded">PIX</span>
               <span className="text-2xl md:text-3xl font-black text-green-700">R$ {brl(precoVista)}</span>
               {desconto > 0 && (
                 <span className="bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">-{desconto}%</span>

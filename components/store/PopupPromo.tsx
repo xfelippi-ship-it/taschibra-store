@@ -57,7 +57,7 @@ export default function PopupPromo() {
         className="relative w-full max-w-md rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300"
         style={{ background: popup.bg_color || '#1e7a3c' }}
       >
-        <button onClick={fechar} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-colors z-10">
+        <button onClick={fechar} aria-label="Fechar promoção" className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-colors z-10">
           <X size={16} />
         </button>
         {popup.image_url && (

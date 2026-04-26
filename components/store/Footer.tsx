@@ -31,7 +31,7 @@ export default function Footer() {
     <footer className="bg-green-950 text-green-300 mt-16 px-12 pt-14 pb-8">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-10">
         <div>
-          <img src="/images/logo.webp" alt="Taschibra Store" className="h-10 object-contain mb-3" />
+          <img src="/images/logo.webp" alt="Taschibra Store" width={200} height={40} className="h-10 object-contain mb-3" />
           <p style={{fontSize:'13px', color:'#6aab7a', lineHeight:'1.6', margin:0}}>
             {descricao}
           </p>
