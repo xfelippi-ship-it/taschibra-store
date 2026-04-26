@@ -7,6 +7,7 @@ import Footer from "@/components/store/Footer"
 import { useCart } from "@/contexts/CartContext"
 import Link from "next/link"
 import { supabase } from '@/lib/supabase'
+import { getImageUrl } from '@/lib/imageUrl'
 import { ShoppingCart } from 'lucide-react'
 
 
@@ -174,7 +175,7 @@ function ProdutosContent() {
                           ) : null)
                         })()}
                         {p.main_image ? (
-                          <img src={p.main_image} alt={p.name}
+                          <img src={getImageUrl(p.main_image, 600)} loading="lazy" alt={p.name}
                             className="w-full h-full object-contain p-3 scale-[1.35] group-hover:scale-[1.5] transition-transform duration-300"
                             onError={e => { (e.target as HTMLImageElement).style.display = "none" }} />
                         ) : (
