@@ -14,7 +14,7 @@ export default function TrustBar() {
   const [items, setItems] = useState(FALLBACK)
 
   useEffect(() => {
-    supabase.from('benefit_bar' as any).select('icon,texto,sort_order')
+    supabase.from('benefit_bar' as any).select('icone,texto,sort_order')
       .eq('ativo', true).order('sort_order')
       .then(({ data }: any) => {
         if (data && data.length > 0) setItems(data)
