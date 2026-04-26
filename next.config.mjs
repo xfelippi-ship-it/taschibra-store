@@ -24,6 +24,7 @@ const nextConfig = {
       { source: '/documentos/seguranca', destination: '/seguranca', permanent: true },
       { source: '/empresa', destination: '/quem-somos', permanent: true },
       { source: '/perguntas-frequentes', destination: '/faq', permanent: true },
+      { source: '/lancamentos', destination: '/produtos?categoria=lancamentos', permanent: true },
       { source: '/produtos/:categoria', destination: '/produtos?categoria=:categoria', permanent: true },
     ]
   },
