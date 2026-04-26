@@ -10,6 +10,7 @@ import VariacoesProduto from '@/components/store/VariacoesProduto'
 import { useCart } from '@/contexts/CartContext'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { getImageUrl } from '@/lib/imageUrl'
 import ProductJsonLd from '@/components/store/ProductJsonLd'
 import ProdutoZoom from '@/components/store/ProdutoZoom'
 import { detectMediaType, getYouTubeEmbedUrl, getVimeoEmbedUrl, getYouTubeThumbnail } from '@/lib/media-helpers'
@@ -68,7 +69,7 @@ function CardProduto({ p }: { p: ProdCard }) {
           </span>
         )}
         {p.main_image
-          ? <img src={p.main_image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+          ? <img src={getImageUrl(p.main_image, 600)} loading="lazy" alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
           : <div className="flex items-center justify-center w-full h-full"><span className="text-5xl">💡</span></div>}
       </div>
       <div className="p-3 flex flex-col flex-1">
@@ -122,7 +123,7 @@ function CompreJunto({ categorySlug, produtoAtual }: {
         <div className="flex flex-col items-center gap-2 w-36">
           <div className="bg-gray-50 border border-gray-200 rounded-xl w-full aspect-square flex items-center justify-center overflow-hidden">
             {produtoAtual.main_image
-              ? <img src={produtoAtual.main_image} alt={produtoAtual.name} className="w-full h-full object-cover" />
+              ? <img src={getImageUrl(produtoAtual.main_image, 800)} alt={produtoAtual.name} className="w-full h-full object-cover" />
               : <div className="flex items-center justify-center w-full h-full"><span className="text-5xl">💡</span></div>}
           </div>
           <p className="text-[11px] text-gray-600 text-center leading-tight line-clamp-2">{produtoAtual.name}</p>
@@ -140,7 +141,7 @@ function CompreJunto({ categorySlug, produtoAtual }: {
                   className={`relative bg-gray-50 border-2 rounded-xl w-full aspect-square flex items-center justify-center overflow-hidden cursor-pointer transition-colors ${sel ? 'border-green-500' : 'border-gray-200 opacity-60'}`}>
                   {sel && <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center text-white text-[10px]">✓</span>}
                   {p.main_image
-                    ? <img src={p.main_image} alt={p.name} className="w-full h-full object-cover" />
+                    ? <img src={getImageUrl(p.main_image, 600)} loading="lazy" alt={p.name} className="w-full h-full object-cover" />
                     : <div className="flex items-center justify-center w-full h-full"><span className="text-5xl">💡</span></div>}
                 </div>
                 <p className="text-[11px] text-gray-600 text-center leading-tight line-clamp-2">{p.name}</p>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { registrarAuditoria } from '@/lib/auditLog'
+import { getImageUrl } from '@/lib/imageUrl'
 import {
   ChevronDown, ChevronRight, Package, XCircle,
   CreditCard, RefreshCw, AlertTriangle, Filter, X,
@@ -977,7 +978,7 @@ export default function PedidosTab({ meuEmail = 'admin' }: { meuEmail?: string }
                                 <div key={item.id} className="flex items-center gap-3 bg-gray-50 rounded-lg px-3 py-2">
                                   {item.products?.main_image ? (
                                     <img
-                                      src={item.products.main_image}
+                                      src={getImageUrl(item.products.main_image, 150)}
                                       alt={item.products?.name || ''}
                                       className="w-10 h-10 object-cover rounded border border-gray-200 flex-shrink-0"
                                     />

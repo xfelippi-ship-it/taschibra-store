@@ -6,6 +6,7 @@ import Footer from '@/components/store/Footer'
 import { Heart, ArrowLeft, ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { getImageUrl } from '@/lib/imageUrl'
 import { useCart } from '@/contexts/CartContext'
 
 export default function FavoritosPage() {
@@ -78,7 +79,7 @@ export default function FavoritosPage() {
                 <Link href={`/produto/${p.slug}`}>
                   <div className="bg-gray-50 flex items-center justify-center h-40">
                     {p.main_image
-                      ? <img src={p.main_image} alt={p.name} className="h-36 object-contain" />
+                      ? <img src={getImageUrl(p.main_image, 400)} loading="lazy" alt={p.name} className="h-36 object-contain" />
                       : <span className="text-5xl">💡</span>}
                   </div>
                   <div className="p-3">
