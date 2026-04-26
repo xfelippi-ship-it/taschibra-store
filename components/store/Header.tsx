@@ -406,7 +406,7 @@ export default function Header() {
 
         {/* Linha principal */}
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center gap-3 md:gap-6">
-          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden flex-shrink-0 text-gray-700 hover:text-green-600 transition-colors">
+          <button onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} className="md:hidden flex-shrink-0 text-gray-700 hover:text-green-600 transition-colors">
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
           <Link href="/" className="flex-shrink-0" onClick={closeAll}>
@@ -416,12 +416,12 @@ export default function Header() {
             <input type="text" placeholder="O que você está procurando?" value={search}
               onChange={e => setSearch(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSearch()}
               className="w-full h-11 border-2 border-gray-200 rounded-full px-5 pr-12 text-sm outline-none focus:border-green-500 bg-gray-50 focus:bg-white transition-all" />
-            <button onClick={handleSearch} className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-600 hover:bg-green-700 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+            <button onClick={handleSearch} aria-label="Buscar" className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-600 hover:bg-green-700 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
               <Search size={14} color="white" />
             </button>
           </div>
           <div className="flex items-center gap-2 md:gap-4 ml-auto">
-            <button className="md:hidden text-gray-700 hover:text-green-600 transition-colors"><Search size={22} /></button>
+            <button aria-label="Buscar produtos" className="md:hidden text-gray-700 hover:text-green-600 transition-colors"><Search size={22} /></button>
             <Link href="/login" className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-green-600 transition-colors">
               <User size={20} className="text-green-600" />
               <div className="text-left hidden md:block">

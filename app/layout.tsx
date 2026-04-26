@@ -22,6 +22,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
+      <head>
+        <link rel="preconnect" href="https://gcmoiimijouhmgjopgct.supabase.co" />
+        <link rel="dns-prefetch" href="https://gcmoiimijouhmgjopgct.supabase.co" />
+      </head>
       <body suppressHydrationWarning className={`${nunito.variable} antialiased bg-white text-gray-900`}>
         <CartProvider>
           {children}

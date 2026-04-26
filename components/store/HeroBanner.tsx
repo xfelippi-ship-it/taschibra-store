@@ -112,17 +112,20 @@ export default function HeroBanner() {
       {slides.length > 1 && (
         <>
           <button onClick={() => goTo((current - 1 + slides.length) % slides.length)}
+            aria-label="Banner anterior"
             className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/35 text-white border border-white/30 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center transition z-20 text-sm">
             ←
           </button>
           <button onClick={next}
+            aria-label="Próximo banner"
             className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/35 text-white border border-white/30 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center transition z-20 text-sm">
             →
           </button>
           <div className="absolute bottom-3 md:bottom-5 left-1/2 -translate-x-1/2 flex gap-2 z-20">
             {slides.map((_, i) => (
               <button key={i} onClick={() => goTo(i)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${i === current ? 'w-5 bg-yellow-400' : 'w-1.5 bg-white/40'}`} />
+                aria-label={`Ir para banner ${i + 1}`}
+                className={`h-3 w-3 rounded-full transition-all duration-300 ${i === current ? 'bg-yellow-400 scale-110' : 'bg-white/40'}`} />
             ))}
           </div>
         </>
