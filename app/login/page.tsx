@@ -46,7 +46,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/">
-<Image src="/images/logo.png" alt="Taschibra Store" width={200} height={48} className="h-12 w-auto mx-auto mb-4" priority />          </Link>
+<Image src="/images/logo.webp" alt="Taschibra Store" width={200} height={48} className="h-12 w-auto mx-auto mb-4" priority />          </Link>
           <h1 className="text-2xl font-black text-gray-800">
             {modo === 'login' ? 'Bem-vindo de volta!' : 'Criar conta'}
           </h1>

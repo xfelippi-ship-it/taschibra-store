@@ -410,7 +410,7 @@ export default function Header() {
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
           <Link href="/" className="flex-shrink-0" onClick={closeAll}>
-            <Image src="/images/logo.png" alt="Taschibra Store" width={160} height={40} className="h-9 md:h-12 w-auto" priority />
+            <Image src="/images/logo.webp" alt="Taschibra Store" width={160} height={40} className="h-9 md:h-12 w-auto" priority />
           </Link>
           <div className="hidden md:flex flex-1 max-w-xl relative">
             <input type="text" placeholder="O que você está procurando?" value={search}

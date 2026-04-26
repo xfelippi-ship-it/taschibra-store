@@ -972,7 +972,7 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-green-900 flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center">
-          <Image src="/images/logo.png" alt="Taschibra Store" width={200} height={48} className="h-12 w-auto mx-auto mb-4" priority />
+          <Image src="/images/logo.webp" alt="Taschibra Store" width={200} height={48} className="h-12 w-auto mx-auto mb-4" priority />
           <h1 className="text-xl font-black text-gray-800 mb-1">Backoffice</h1>
           <p className="text-sm text-gray-500 mb-6">Área Restrita</p>
           <div className="space-y-3 text-left">
@@ -1133,7 +1133,7 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gray-100 flex">
       <aside className="w-60 bg-green-900 text-white flex flex-col flex-shrink-0">
         <div className="p-4 border-b border-green-800 flex flex-col items-center">
-          <Image src="/images/logo.png" alt="Taschibra Store" width={160} height={40} className="w-auto h-9 mb-2" priority />
+          <Image src="/images/logo.webp" alt="Taschibra Store" width={160} height={40} className="w-auto h-9 mb-2" priority />
           <div className="text-xs font-bold text-green-400 tracking-widest uppercase">Backoffice</div>
         </div>
         <nav className="flex-1 p-2 overflow-y-auto">
