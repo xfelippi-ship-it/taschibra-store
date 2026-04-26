@@ -88,7 +88,7 @@ function ProdCard({ p }: { p: Produto }) {
         </p>
         <div className="flex items-center gap-2 mb-1">
           <span className="bg-teal-700 text-white text-xs font-black px-1.5 py-0.5 rounded">PIX</span>
-          <span className="text-lg font-black text-green-700">R$ {formatPrice(precoFinal)}</span>
+          <span className="text-lg font-black text-gray-900">R$ {formatPrice(precoFinal)}</span>
           {desconto > 0 && (
             <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
               -{desconto}%
