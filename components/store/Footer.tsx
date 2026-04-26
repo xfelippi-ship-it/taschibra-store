@@ -59,7 +59,7 @@ export default function Footer() {
           <ul className="space-y-2">
             <li><a href="/quem-somos" style={{color:'rgba(255,255,255,0.75)', fontSize:'13px', textDecoration:'none'}}>Quem Somos</a></li>
             <li><a href="/fale-conosco" style={{color:'rgba(255,255,255,0.75)', fontSize:'13px', textDecoration:'none'}}>Contato</a></li>
-            <li><a href="/fale-conosco" style={{color:'rgba(255,255,255,0.75)', fontSize:'13px', textDecoration:'none'}}>Para Empresas</a></li>
+            <li><a href="https://taschibrab2b.com.br" target="_blank" rel="noopener noreferrer" style={{color:'rgba(255,255,255,0.75)', fontSize:'13px', textDecoration:'none'}}>Para Empresas</a></li>
             <li><a href="/lancamentos" style={{color:'rgba(255,255,255,0.75)', fontSize:'13px', textDecoration:'none'}}>Lancamentos</a></li>
           </ul>
         </div>
