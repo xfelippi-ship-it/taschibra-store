@@ -305,7 +305,7 @@ function MobileMenu({
                     className="px-4 py-3.5 text-gray-400 hover:text-green-600 transition-colors"
                     aria-label={isOpen ? 'Fechar subcategorias' : 'Ver subcategorias'}
                   >
-                    <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-green-600' : ''}`} />
+                    <ChevronDown size={20} className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-green-600' : 'text-gray-500'}`} />
                   </button>
                 )}
               </div>
