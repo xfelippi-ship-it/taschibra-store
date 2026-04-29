@@ -258,7 +258,7 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
         ))}
       </div>
       <p className="text-xs text-gray-400 mt-1.5">
-        1-Still · 2-Lateral · 3-Detalhe · 4-Embalagem · 5-Ambiente · 6-Ambiente · 7-Técnico · 8-Lifestyle
+        1-Still · 2-Lateral · 3-Detalhe · 4-Ambiente · 5-Ambiente · 6-Embalagem · 7-Técnico · 8-Lifestyle
       </p>
     </div>
   )

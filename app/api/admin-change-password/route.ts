@@ -37,7 +37,7 @@ export async function POST(req: Request) {
 
     await supabaseAdmin
       .from('admin_users')
-      .update({ trocar_senha: false })
+      .update({ trocar_senha: false, status: 'ativo' })
       .eq('user_id', userId)
 
     return NextResponse.json({ ok: true })

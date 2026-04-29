@@ -153,7 +153,7 @@ export default function UploadMassaTab() {
           <p><strong>1. Nomeie os arquivos no formato:</strong> <code className="bg-blue-100 px-1 rounded">EAN-slot.ext</code> ou <code className="bg-blue-100 px-1 rounded">SKU-slot.ext</code></p>
           <p className="text-xs text-gray-500 ml-4">Exemplos: <code>7891234567890-1.jpg</code> · <code>7891234567890-2.jpg</code> · <code>TKL225-1.jpg</code></p>
           <p><strong>2. Slots disponíveis:</strong> 1 a 8 por produto</p>
-          <p className="text-xs text-gray-500 ml-4">1-Still · 2-Lateral · 3-Verso · 4-Detalhe · 5-Ambiente · 6-Ambiente · 7-Técnico · 8-Lifestyle</p>
+          <p className="text-xs text-gray-500 ml-4">1-Still · 2-Lateral · 3-Detalhe · 4-Ambiente · 5-Ambiente · 6-Embalagem · 7-Técnico · 8-Lifestyle</p>
           <p><strong>3. Formas de envio:</strong></p>
           <ul className="list-disc list-inside ml-4 text-xs text-gray-500 space-y-1">
             <li>Arraste vários arquivos diretamente para a área abaixo</li>
