@@ -668,6 +668,27 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                   )}
                 </div>
 
+                {/* Produtos relacionados por cor */}
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Produtos relacionados por cor</label>
+                  <p className="text-xs text-gray-400 mb-2">Cole os IDs dos outros SKUs desta mesma luminária em outras cores. O seletor de cor aparecerá na PDP automaticamente.</p>
+                  <textarea
+                    value={(produtoEdit.cores_relacionadas || []).join('\n')}
+                    onChange={e => setProdutoEdit({
+                      ...produtoEdit,
+                      cores_relacionadas: e.target.value.split('\n').map(s => s.trim()).filter(Boolean)
+                    })}
+                    placeholder={'Cole um ID por linha:\nabc-123-def\nxyz-456-ghi'}
+                    rows={3}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs font-mono outline-none focus:border-green-500 resize-none"
+                  />
+                  {(produtoEdit.cores_relacionadas || []).length > 0 && (
+                    <p className="text-xs text-green-600 mt-1">
+                      {(produtoEdit.cores_relacionadas || []).length} produto(s) relacionado(s)
+                    </p>
+                  )}
+                </div>
+
                 <div className="flex items-center gap-3 pt-1">
                   <input type="checkbox" id="ativo_prod" checked={produtoEdit.active ?? true}
                     onChange={e => setProdutoEdit({ ...produtoEdit, active: e.target.checked })}
