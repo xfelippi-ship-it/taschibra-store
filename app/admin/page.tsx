@@ -133,6 +133,7 @@ function UsuariosTab() {
   }
 
   async function convidar() {
+    if (!nome.trim()) { alert('Nome completo é obrigatório'); return }
     if (!email.trim()) return
     setEnviando(true)
     setMsg(null)
@@ -280,7 +281,7 @@ function UsuariosTab() {
             <input
               type="text" value={nome}
               onChange={e => setNome(e.target.value)}
-              placeholder="Nome completo (opcional)"
+              placeholder="Nome completo *"
               className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
             />
           </div>
