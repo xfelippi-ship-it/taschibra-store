@@ -18,25 +18,25 @@ export default function SwatchesCor({ produtoId }: { produtoId: string }) {
 
   useEffect(() => {
     async function carregar() {
+      // Buscar familia_cor do produto atual
       const { data: prod } = await (supabase.from('products') as any)
-        .select('id, name, slug, cor_id, cores_relacionadas')
+        .select('id, familia_cor, cor_id')
         .eq('id', produtoId)
         .single()
 
-      if (!prod?.cor_id) return
+      if (!prod?.familia_cor || !prod?.cor_id) return
 
-      const ids: string[] = [prod.id, ...((prod.cores_relacionadas as string[]) || [])]
-
+      // Buscar todos os produtos da mesma familia com cor cadastrada
       const { data: prods } = await (supabase.from('products') as any)
         .select('id, name, slug, cor_id')
-        .in('id', ids)
+        .eq('familia_cor', prod.familia_cor)
         .eq('active', true)
+        .not('cor_id', 'is', null)
 
       if (!prods || prods.length < 2) return
 
-      const corIds = prods.map((p: any) => p.cor_id).filter(Boolean)
-      if (!corIds.length) return
-
+      // Buscar dados das cores
+      const corIds = [...new Set(prods.map((p: any) => p.cor_id))]
       const { data: cores } = await (supabase.from as any)('color_library')
         .select('id, nome, hex')
         .in('id', corIds)
@@ -44,7 +44,6 @@ export default function SwatchesCor({ produtoId }: { produtoId: string }) {
       if (!cores) return
 
       const result: ProdutoCor[] = prods
-        .filter((p: any) => p.cor_id)
         .map((p: any) => {
           const cor = cores.find((c: any) => c.id === p.cor_id)
           return cor ? {
