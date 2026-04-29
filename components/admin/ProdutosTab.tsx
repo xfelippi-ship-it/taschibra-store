@@ -14,7 +14,7 @@ type Produto = {
   stock_qty: number; active: boolean; badge: string; badges?: string[]; is_lancamento?: boolean; family?: string; brand_id?: string
   category_slug?: string; subcategory_slug?: string; categories?: string[]; description?: string; main_image?: string; images?: string[]; datasheet_url?: string
   weight_kg?: number; warranty?: string; ean?: string
-  cor_id?: string; cores_relacionadas?: string[]
+  cor_id?: string; cores_relacionadas?: string[]; familia_cor?: string
 }
 
 type Variacao = {
@@ -669,15 +669,19 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                   )}
                 </div>
 
-                {/* Produtos relacionados por cor */}
+                {/* Família de cores */}
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-1 block">Produtos relacionados por cor</label>
-                  <p className="text-xs text-gray-400 mb-2">Busque e adicione os outros SKUs desta mesma luminária em outras cores.</p>
-                  <BuscaProdutosRelacionados
-                    produtoAtualId={produtoEdit.id || ''}
-                    selecionados={produtoEdit.cores_relacionadas || []}
-                    onChange={ids => setProdutoEdit({ ...produtoEdit, cores_relacionadas: ids })}
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Família de cores</label>
+                  <p className="text-xs text-gray-400 mb-1">Produtos com o mesmo código aparecem linkados na PDP. Ex: <code className="bg-gray-100 px-1 rounded">cannon-mini</code></p>
+                  <input
+                    value={produtoEdit.familia_cor || ''}
+                    onChange={e => setProdutoEdit({ ...produtoEdit, familia_cor: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                    placeholder="Ex: cannon-mini, spot-led-30w..."
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
                   />
+                  {produtoEdit.familia_cor && (
+                    <p className="text-xs text-green-600 mt-1">Todos os produtos com família <strong>{produtoEdit.familia_cor}</strong> aparecerão linkados na PDP</p>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-3 pt-1">
