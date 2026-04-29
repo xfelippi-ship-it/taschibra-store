@@ -13,6 +13,7 @@ type Produto = {
   stock_qty: number; active: boolean; badge: string; badges?: string[]; is_lancamento?: boolean; family?: string; brand_id?: string
   category_slug?: string; subcategory_slug?: string; categories?: string[]; description?: string; main_image?: string; images?: string[]; datasheet_url?: string
   weight_kg?: number; warranty?: string; ean?: string
+  cor_id?: string; cores_relacionadas?: string[]
 }
 
 type Variacao = {
@@ -74,7 +75,11 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
 
   const [badgeModalProduto, setBadgeModalProduto] = useState<any>(null)
   const [marcas, setMarcas] = useState<{id:string;nome:string}[]>([])
-  useEffect(() => { supabase.from('brands').select('id,nome').eq('ativo',true).order('nome').then(({data}) => setMarcas(data||[])) }, [])
+  const [coresBib, setCoresBib] = useState<{id:string,nome:string,hex:string}[]>([])
+  useEffect(() => {
+    supabase.from('brands').select('id,nome').eq('ativo',true).order('nome').then(({data}) => setMarcas(data||[]))
+    ;(supabase.from as any)('color_library').select('id,nome,hex').eq('ativo',true).order('sort_order').then(({data}:any) => setCoresBib(data||[]))
+  }, [])
   const [badgesTemp, setBadgesTemp] = useState<string[]>([])
 
   async function toggleLancamentoProduto(produto: any) {
@@ -629,6 +634,38 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                       placeholder="Ex: 12 meses"
                       className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                   </div>
+                </div>
+
+                {/* Campo de cor da biblioteca */}
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Cor do produto</label>
+                  <div className="flex flex-wrap gap-2 p-3 border border-gray-200 rounded-lg">
+                    <div
+                      onClick={() => setProdutoEdit({ ...produtoEdit, cor_id: undefined })}
+                      className={`flex flex-col items-center gap-1 cursor-pointer`}>
+                      <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-content-center bg-gray-100 ${!produtoEdit.cor_id ? 'border-green-500' : 'border-gray-200'}`}
+                        style={{display:'flex',alignItems:'center',justifyContent:'center'}}>
+                        {!produtoEdit.cor_id && <svg width="12" height="12" viewBox="0 0 24 24" fill="#1a6e35"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>}
+                      </div>
+                      <span className="text-xs text-gray-400">Nenhuma</span>
+                    </div>
+                    {coresBib.map(cor => (
+                      <div key={cor.id}
+                        onClick={() => setProdutoEdit({ ...produtoEdit, cor_id: cor.id })}
+                        className="flex flex-col items-center gap-1 cursor-pointer">
+                        <div className={`w-8 h-8 rounded-full border-2 ${produtoEdit.cor_id === cor.id ? 'border-green-500' : 'border-gray-200'}`}
+                          style={{background: cor.hex === 'rainbow' ? 'linear-gradient(135deg,red,orange,yellow,green,blue,purple)' : cor.hex, display:'flex',alignItems:'center',justifyContent:'center'}}>
+                          {produtoEdit.cor_id === cor.id && <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>}
+                        </div>
+                        <span className="text-xs text-gray-500 max-w-12 text-center leading-tight">{cor.nome}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {produtoEdit.cor_id && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      Cor selecionada: <strong>{coresBib.find(c => c.id === produtoEdit.cor_id)?.nome}</strong>
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-3 pt-1">
