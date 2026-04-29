@@ -10,6 +10,7 @@ import VariacoesProduto from '@/components/store/VariacoesProduto'
 import { useCart } from '@/contexts/CartContext'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import SwatchesCor from '@/components/store/SwatchesCor'
 import { getImageUrl } from '@/lib/imageUrl'
 import ProductJsonLd from '@/components/store/ProductJsonLd'
 import ProdutoZoom from '@/components/store/ProdutoZoom'
@@ -476,6 +477,8 @@ export default function ProdutoPage() {
               )}
             </p>
           )}
+          <SwatchesCor produtoId={produto.id} />
+
           <div className="flex items-center gap-1 mb-3">
             {[1,2,3,4,5].map(i => <Star key={i} size={13} className="fill-yellow-400 text-yellow-400" />)}
             <span className="text-xs text-gray-500 ml-1">{reviews.length > 0 ? `${reviews.length} avaliações` : 'Taschibra'}</span>
