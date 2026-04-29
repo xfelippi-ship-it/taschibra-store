@@ -77,6 +77,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
   const [badgeModalProduto, setBadgeModalProduto] = useState<any>(null)
   const [marcas, setMarcas] = useState<{id:string;nome:string}[]>([])
   const [coresBib, setCoresBib] = useState<{id:string,nome:string,hex:string}[]>([])
+  const [corPopup, setCorPopup] = useState<string|null>(null)
   useEffect(() => {
     supabase.from('brands').select('id,nome').eq('ativo',true).order('nome').then(({data}) => setMarcas(data||[]))
     ;(supabase.from as any)('color_library').select('id,nome,hex').eq('ativo',true).order('sort_order').then(({data}:any) => setCoresBib(data||[]))
@@ -360,12 +361,14 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
               {meuPapel !== 'marketing' && <th className="text-right px-5 py-3 text-xs font-black text-gray-500 uppercase">Preço</th>}
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Estoque</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Badge</th>
+              <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase text-green-600">Cor</th>
+              <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase text-green-600">Família</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Lançamento</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Status</th>
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Ações</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody onClick={() => setCorPopup(null)}>
             {loading ? (
               <tr><td colSpan={10} className="text-center py-8 text-gray-400">Carregando...</td></tr>
             ) : produtosFiltrados.map(p => {
@@ -419,6 +422,65 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                       ) : (
                         <span className="text-gray-400 text-xs hover:text-green-600">+ badge</span>
                       )}
+                    </td>
+                    {/* Coluna Cor inline */}
+                    <td className="px-5 py-4 text-center" onClick={e => e.stopPropagation()}>
+                      <div className="relative inline-block">
+                        {(p as any).cor_id && coresBib.find(c => c.id === (p as any).cor_id) ? (
+                          <div className="relative group">
+                            <div
+                              className="w-6 h-6 rounded-full border-2 border-green-500 mx-auto cursor-pointer"
+                              style={{background: coresBib.find(c => c.id === (p as any).cor_id)?.hex || '#ccc'}}
+                              onClick={e => { e.stopPropagation(); setCorPopup(corPopup === p.id ? null : p.id) }}
+                            />
+                          </div>
+                        ) : (
+                          <span
+                            className="text-gray-400 text-xs hover:text-green-600 cursor-pointer"
+                            onClick={e => { e.stopPropagation(); setCorPopup(corPopup === p.id ? null : p.id) }}
+                          >+ cor</span>
+                        )}
+                        {corPopup === p.id && (
+                          <div className="absolute top-8 left-1/2 -translate-x-1/2 z-50 bg-white border border-gray-200 rounded-xl shadow-lg p-3 w-52" onClick={e => e.stopPropagation()}>
+                            <p className="text-xs text-gray-500 mb-2 font-medium">Selecionar cor</p>
+                            <div className="flex flex-wrap gap-2">
+                              {coresBib.map(cor => (
+                                <button key={cor.id} title={cor.nome}
+                                  onClick={async e => {
+                                    e.stopPropagation()
+                                    await supabase.from('products').update({ cor_id: cor.id } as any).eq('id', p.id)
+                                    setCorPopup(null)
+                                    carregar()
+                                  }}
+                                  className="flex flex-col items-center gap-1">
+                                  <div className={`w-6 h-6 rounded-full border-2 ${(p as any).cor_id === cor.id ? 'border-green-500' : 'border-gray-200'}`}
+                                    style={{background: cor.hex === 'rainbow' ? 'linear-gradient(135deg,red,orange,yellow,green,blue,purple)' : cor.hex}} />
+                                  <span className="text-xs text-gray-500 leading-none" style={{maxWidth:'36px',fontSize:'9px'}}>{cor.nome}</span>
+                                </button>
+                              ))}
+                            </div>
+                            <button onClick={async e => { e.stopPropagation(); await supabase.from('products').update({ cor_id: null } as any).eq('id', p.id); setCorPopup(null); carregar() }}
+                              className="mt-2 text-xs text-gray-400 hover:text-red-500 w-full text-center">✕ Remover cor</button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    {/* Coluna Família inline */}
+                    <td className="px-5 py-4 text-center" onClick={e => e.stopPropagation()}>
+                      <input
+                        type="text"
+                        defaultValue={(p as any).familia_cor || ''}
+                        placeholder="+ família"
+                        className="w-24 text-xs border border-gray-200 rounded px-2 py-1 outline-none focus:border-green-500 text-center"
+                        onBlur={async e => {
+                          const val = e.target.value.toLowerCase().replace(/\s+/g, '-').trim()
+                          if (val !== ((p as any).familia_cor || '')) {
+                            await supabase.from('products').update({ familia_cor: val || null } as any).eq('id', p.id)
+                            carregar()
+                          }
+                        }}
+                        onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
+                      />
                     </td>
                     <td className="px-5 py-4 text-center cursor-pointer" onClick={e => { e.stopPropagation(); toggleLancamentoProduto(p) }} title="Clique para alternar">
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full transition-colors ${p.is_lancamento ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-gray-100 text-gray-400 hover:bg-purple-50 hover:text-purple-600'}`}>
