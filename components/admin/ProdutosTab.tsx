@@ -441,7 +441,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                           >+ cor</span>
                         )}
                         {corPopup === p.id && (
-                          <div className="absolute top-8 left-1/2 -translate-x-1/2 z-50 bg-white border border-gray-200 rounded-xl shadow-lg p-3 w-52" onClick={e => e.stopPropagation()}>
+                          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 bg-white border border-gray-200 rounded-xl shadow-lg p-3 w-52" onClick={e => e.stopPropagation()}>
                             <p className="text-xs text-gray-500 mb-2 font-medium">Selecionar cor</p>
                             <div className="flex flex-wrap gap-2">
                               {coresBib.map(cor => (
