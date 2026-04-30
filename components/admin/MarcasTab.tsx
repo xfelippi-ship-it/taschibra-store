@@ -126,9 +126,14 @@ export default function MarcasTab() {
 
   useEffect(() => {
     if (!bulkAberto) return
+    carregarProdutosBulk('')
+  }, [bulkAberto])
+
+  useEffect(() => {
+    if (!bulkAberto) return
     const timer = setTimeout(() => carregarProdutosBulk(bulkBusca), 400)
     return () => clearTimeout(timer)
-  }, [bulkBusca, bulkAberto])
+  }, [bulkBusca])
 
   async function toggleAtivo(marca: Brand) {
     await supabase.from('brands').update({ ativo: !marca.ativo }).eq('id', marca.id!)
