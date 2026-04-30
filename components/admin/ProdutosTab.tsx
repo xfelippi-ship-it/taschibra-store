@@ -314,7 +314,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
       </div>
 
       <div className="flex gap-3 mb-4">
-        <input type="text" placeholder="Buscar por nome ou SKU..." value={busca}
+        <input type="text" placeholder="Buscar por nome, SKU ou EAN..." value={busca}
           onChange={e => setBusca(e.target.value)}
           className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
         <select value={ordem} onChange={e => setOrdem(e.target.value as 'asc' | 'desc')}
