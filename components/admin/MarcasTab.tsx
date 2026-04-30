@@ -24,7 +24,7 @@ export default function MarcasTab() {
   const [editando, setEditando] = useState<string | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
   const [bulkMarcaId, setBulkMarcaId] = useState<string>('')
-  const [bulkProdutos, setBulkProdutos] = useState<{id:string,nome:string,sku:string,brand_id:string|null}[]>([])
+  const [bulkProdutos, setBulkProdutos] = useState<{id:string,title:string,sku:string,brand_id:string|null}[]>([])
   const [bulkSelecionados, setBulkSelecionados] = useState<Set<string>>(new Set())
   const [bulkBusca, setBulkBusca] = useState('')
   const [bulkLoading, setBulkLoading] = useState(false)
@@ -122,7 +122,7 @@ export default function MarcasTab() {
   }
 
   const bulkProdutosFiltrados = bulkProdutos.filter(p =>
-    p.nome.toLowerCase().includes(bulkBusca.toLowerCase()) ||
+    p.title.toLowerCase().includes(bulkBusca.toLowerCase()) ||
     p.sku?.toLowerCase().includes(bulkBusca.toLowerCase())
   )
 
@@ -295,7 +295,7 @@ export default function MarcasTab() {
                         <input type="checkbox" checked={bulkSelecionados.has(p.id)} onChange={() => toggleSelecionado(p.id)}
                           className="w-4 h-4 accent-green-600 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-gray-800 truncate">{p.nome}</p>
+                          <p className="text-sm font-bold text-gray-800 truncate">{p.title}</p>
                           <p className="text-xs text-gray-400 font-mono">{p.sku}</p>
                         </div>
                         {marcaAtual && (

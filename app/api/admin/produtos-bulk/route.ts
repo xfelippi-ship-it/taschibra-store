@@ -9,8 +9,8 @@ const supabase = createClient(
 export async function GET() {
   const { data, error } = await supabase
     .from('products')
-    .select('id, nome, sku, brand_id')
-    .order('nome')
+    .select('id, title, sku, brand_id')
+    .order('title')
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data })
 }
