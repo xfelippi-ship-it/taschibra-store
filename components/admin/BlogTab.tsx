@@ -25,6 +25,18 @@ export default function BlogTab() {
   const [msg, setMsg] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null)
   const [blogAtivo, setBlogAtivo] = useState(true)
   const [salvandoConfig, setSalvandoConfig] = useState(false)
+  const [uploadandoImagem, setUploadandoImagem] = useState(false)
+
+  async function uploadImagem(file: File) {
+    setUploadandoImagem(true)
+    const ext = file.name.split('.').pop()
+    const nome = `blog-${Date.now()}.${ext}`
+    const { error } = await supabase.storage.from('blog-images').upload(nome, file, { upsert: true })
+    if (error) { setUploadandoImagem(false); return }
+    const { data } = supabase.storage.from('blog-images').getPublicUrl(nome)
+    setEditando(prev => prev ? { ...prev, cover_image: data.publicUrl } : prev)
+    setUploadandoImagem(false)
+  }
 
   async function carregar() {
     setLoading(true)
@@ -176,9 +188,22 @@ export default function BlogTab() {
               <p className="text-xs text-gray-400 mt-1">Use ## para subtitulos, ### para sub-subtitulos, - para listas.</p>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-600 block mb-1">Imagem de capa (URL)</label>
-              <input value={editando.cover_image || ''} onChange={e => setEditando({...editando, cover_image: e.target.value})}
-                className={inputCls} placeholder="https://..." />
+              <label className="text-xs font-bold text-gray-600 block mb-1">Imagem de capa</label>
+              <div className="flex flex-col gap-2">
+                <input value={editando.cover_image || ''} onChange={e => setEditando({...editando, cover_image: e.target.value})}
+                  className={inputCls} placeholder="https://... ou faca upload abaixo" />
+                <div className="flex items-center gap-3">
+                  <label className={`flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-xs font-bold cursor-pointer hover:bg-gray-50 ${uploadandoImagem ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    {uploadandoImagem ? 'Enviando...' : 'Subir imagem'}
+                    <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden"
+                      onChange={e => { const f = e.target.files?.[0]; if (f) uploadImagem(f) }} />
+                  </label>
+                  {editando.cover_image && (
+                    <img src={editando.cover_image} alt="preview" className="h-12 w-20 object-cover rounded-lg border border-gray-200" />
+                  )}
+                </div>
+              </div>
             </div>
             <div>
               <label className="text-xs font-bold text-gray-600 block mb-1">Slug (URL)</label>
