@@ -23,6 +23,8 @@ export default function BlogTab() {
   const [editando, setEditando] = useState<Post | null>(null)
   const [salvando, setSalvando] = useState(false)
   const [msg, setMsg] = useState<{ tipo: 'ok' | 'erro'; texto: string } | null>(null)
+  const [blogAtivo, setBlogAtivo] = useState(true)
+  const [salvandoConfig, setSalvandoConfig] = useState(false)
 
   async function carregar() {
     setLoading(true)
@@ -31,7 +33,19 @@ export default function BlogTab() {
     setLoading(false)
   }
 
-  useEffect(() => { carregar() }, [])
+  async function carregarConfig() {
+    const { data } = await supabase.from('site_config').select('value').eq('key', 'blog_no_rodape').single()
+    if (data) setBlogAtivo(data.value !== 'false')
+  }
+
+  async function toggleBlog(ativo: boolean) {
+    setSalvandoConfig(true)
+    await supabase.from('site_config').upsert({ key: 'blog_no_rodape', value: ativo ? 'true' : 'false' }, { onConflict: 'key' })
+    setBlogAtivo(ativo)
+    setSalvandoConfig(false)
+  }
+
+  useEffect(() => { carregar(); carregarConfig() }, [])
 
   function showMsg(texto: string, tipo: 'ok' | 'erro' = 'ok') {
     setMsg({ tipo, texto }); setTimeout(() => setMsg(null), 3000)
@@ -99,6 +113,19 @@ export default function BlogTab() {
 
   return (
     <div className="max-w-5xl">
+      <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between mb-4">
+        <div>
+          <p className="text-sm font-medium text-gray-800">Blog e Guias no rodape</p>
+          <p className="text-xs text-gray-500 mt-0.5">Exibe o link "Blog e Guias" na coluna Institucional do rodape do site</p>
+        </div>
+        <button
+          onClick={() => toggleBlog(!blogAtivo)}
+          disabled={salvandoConfig}
+          className={"relative inline-flex h-6 w-11 items-center rounded-full transition-colors " + (blogAtivo ? "bg-green-600" : "bg-gray-300")}
+        >
+          <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition-transform " + (blogAtivo ? "translate-x-6" : "translate-x-1")} />
+        </button>
+      </div>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black text-gray-800">Blog e Guias</h1>

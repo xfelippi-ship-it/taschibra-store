@@ -8,7 +8,7 @@ export default function Footer() {
   useEffect(() => {
     const keys = ['empresa_razao_social','empresa_cnpj','empresa_endereco','empresa_cidade',
       'empresa_estado','empresa_cep','empresa_telefone','empresa_email',
-      'empresa_slogan','empresa_descricao','empresa_nome_fantasia']
+      'empresa_slogan','empresa_descricao','empresa_nome_fantasia','blog_no_rodape']
     ;(supabase.from as any)('site_config').select('key,value').in('key', keys)
       .then(({ data }) => {
         const map: Record<string,string> = {}
@@ -24,8 +24,9 @@ export default function Footer() {
   const estado      = cfg.empresa_estado        || 'SC'
   const cep         = cfg.empresa_cep           || '89085-144'
   const telefone    = cfg.empresa_telefone      || '(47) 3281-7640'
-  const descricao   = cfg.empresa_descricao     || 'Uma das maiores indústrias de iluminação da América Latina. Fábrica própria em Indaial/SC.'
-  const ano         = new Date().getFullYear()
+  const descricao     = cfg.empresa_descricao   || 'Uma das maiores indústrias de iluminação da América Latina. Fábrica própria em Indaial/SC.'
+  const blogAtivo     = cfg.blog_no_rodape !== 'false'
+  const ano           = new Date().getFullYear()
 
   return (
     <footer className="bg-green-950 text-white mt-16 px-12 pt-14 pb-8">
@@ -67,6 +68,9 @@ export default function Footer() {
             <li><a href="/fale-conosco" style={{color:'rgba(255,255,255,0.75)', fontSize:'13px', textDecoration:'none'}}>Contato</a></li>
             <li><a href="https://taschibrab2b.com.br" target="_blank" rel="noopener noreferrer" style={{color:'rgba(255,255,255,0.75)', fontSize:'13px', textDecoration:'none'}}>Para Empresas</a></li>
             <li><a href="/lancamentos" style={{color:'rgba(255,255,255,0.75)', fontSize:'13px', textDecoration:'none'}}>Lançamentos</a></li>
+            {blogAtivo && (
+              <li><a href="/blog" style={{color:'rgba(255,255,255,0.75)', fontSize:'13px', textDecoration:'none'}}>Blog e Guias</a></li>
+            )}
           </ul>
         </div>
       </div>
