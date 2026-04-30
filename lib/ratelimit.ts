@@ -1,54 +1,58 @@
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
+import { NextRequest, NextResponse } from 'next/server'
 
-let _redis: Redis | null = null
-let _ratelimit: Ratelimit | null = null
-let _ratelimitPagamento: Ratelimit | null = null
+const redis = Redis.fromEnv()
 
-function getRedis() {
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) return null
-  if (!_redis) {
-    _redis = new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
-    })
-  }
-  return _redis
-}
+export const ratelimitGeral = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, '10 s'),
+  analytics: true,
+  prefix: 'taschibra_geral',
+})
 
-export function getRatelimit() {
-  const redis = getRedis()
-  if (!redis) return null
-  if (!_ratelimit) {
-    _ratelimit = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '10 s'), analytics: true, prefix: 'taschibra_rl' })
-  }
-  return _ratelimit
-}
+export const ratelimitPagamento = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(3, '60 s'),
+  analytics: true,
+  prefix: 'taschibra_pagamento',
+})
 
-export function getRatelimitPagamento() {
-  const redis = getRedis()
-  if (!redis) return null
-  if (!_ratelimitPagamento) {
-    _ratelimitPagamento = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3, '60 s'), analytics: true, prefix: 'taschibra_pagamento' })
-  }
-  return _ratelimitPagamento
-}
-
-export function getIP(req: Request): string {
+export function getIP(req: NextRequest): string {
   return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     || req.headers.get('x-real-ip')
     || '127.0.0.1'
 }
 
-export async function checkRateLimit(req: Request, tipo: 'geral' | 'pagamento' = 'geral'): Promise<Response | null> {
-  const rl = tipo === 'pagamento' ? getRatelimitPagamento() : getRatelimit()
-  if (!rl) return null
+export async function checkRateLimit(
+  req: NextRequest,
+  tipo: 'geral' | 'pagamento' = 'geral'
+): Promise<NextResponse | null> {
   const ip = getIP(req)
-  const { success } = await rl.limit(ip)
+  const identifier = tipo + ':' + ip
+  const rl = tipo === 'pagamento' ? ratelimitPagamento : ratelimitGeral
+  const { success, limit, remaining, reset } = await rl.limit(identifier)
+
+  console.log('RATE LIMIT:', { identifier, success, limit, remaining, reset })
+
   if (!success) {
-    return new Response(
-      JSON.stringify({ error: tipo === 'pagamento' ? 'Muitas tentativas de pagamento. Aguarde 1 minuto.' : 'Muitas requisicoes. Aguarde alguns instantes.' }),
-      { status: 429, headers: { 'Content-Type': 'application/json' } }
+    return NextResponse.json(
+      {
+        error: tipo === 'pagamento'
+          ? 'Muitas tentativas de pagamento. Aguarde 1 minuto.'
+          : 'Muitas requisicoes. Aguarde alguns instantes.',
+        limit,
+        remaining,
+        reset,
+      },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': String(limit),
+          'X-RateLimit-Remaining': String(remaining),
+          'X-RateLimit-Reset': String(reset),
+        },
+      }
     )
   }
   return null
