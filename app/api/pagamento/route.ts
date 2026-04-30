@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit } from '@/lib/ratelimit'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -51,6 +52,9 @@ type Cliente = {
 }
 
 export async function POST(req: NextRequest) {
+  const limited = await checkRateLimit(req, 'pagamento')
+  if (limited) return limited
+
   try {
     const body = await req.json()
     const { metodo, itens, endereco, frete, total, cupom, cartao, cliente }: {

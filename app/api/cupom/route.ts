@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit } from '@/lib/ratelimit'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,6 +8,9 @@ const supabase = createClient(
 )
 
 export async function POST(req: NextRequest) {
+  const limited = await checkRateLimit(req, 'geral')
+  if (limited) return limited
+
   const { code, subtotal, subtotal_apos_fixos, items: subtotalItems = [] } = await req.json()
   // Se ja houve desconto fixo, aplica percentual sobre o saldo
   const baseCalculo = subtotal_apos_fixos ?? subtotal
