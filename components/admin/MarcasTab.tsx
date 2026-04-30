@@ -71,7 +71,7 @@ export default function MarcasTab() {
     showMsg('Marca removida!')
   }
 
-  async function carregarProdutosBulk() {
+  async function carregarProdutosBulk(busca?: string) {
     setBulkLoading(true)
     try {
       const res = await fetch('/api/admin/produtos-bulk')
@@ -121,10 +121,13 @@ export default function MarcasTab() {
     })
   }
 
-  const bulkProdutosFiltrados = bulkProdutos.filter(p =>
-    p.name.toLowerCase().includes(bulkBusca.toLowerCase()) ||
-    p.sku?.toLowerCase().includes(bulkBusca.toLowerCase())
-  )
+  const bulkProdutosFiltrados = bulkProdutos
+
+  useEffect(() => {
+    if (!bulkAberto) return
+    const timer = setTimeout(() => carregarProdutosBulk(bulkBusca), 400)
+    return () => clearTimeout(timer)
+  }, [bulkBusca, bulkAberto])
 
   async function toggleAtivo(marca: Brand) {
     await supabase.from('brands').update({ ativo: !marca.ativo }).eq('id', marca.id!)

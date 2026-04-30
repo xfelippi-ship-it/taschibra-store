@@ -6,11 +6,21 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function GET() {
-  const { data, error } = await supabase
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const q = searchParams.get('q')?.trim()
+
+  let query = supabase
     .from('products')
     .select('id, name, sku, brand_id')
     .order('name')
+    .limit(200)
+
+  if (q && q.length >= 2) {
+    query = query.or(`name.ilike.%${q}%,sku.ilike.%${q}%`)
+  }
+
+  const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data })
 }
