@@ -74,7 +74,8 @@ export default function MarcasTab() {
   async function carregarProdutosBulk(busca?: string) {
     setBulkLoading(true)
     try {
-      const res = await fetch('/api/admin/produtos-bulk')
+      const q = busca && busca.trim().length >= 2 ? '?q=' + encodeURIComponent(busca.trim()) : ''
+      const res = await fetch('/api/admin/produtos-bulk' + q)
       const json = await res.json()
       setBulkProdutos(json.data || [])
     } catch {
@@ -263,10 +264,10 @@ export default function MarcasTab() {
                 </select>
               </div>
               <div className="flex-1 min-w-48">
-                <label className="text-xs font-bold text-gray-600 mb-1 block">Buscar produto</label>
+                <label className="text-xs font-bold text-gray-600 mb-1 block">Nome, SKU ou EAN</label>
                 <input value={bulkBusca} onChange={e => setBulkBusca(e.target.value)}
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500"
-                  placeholder="Nome ou SKU..." />
+                  placeholder="Nome, SKU ou EAN..." />
               </div>
               <button onClick={aplicarBulk}
                 disabled={!bulkMarcaId || bulkSelecionados.size === 0 || bulkSalvando}
