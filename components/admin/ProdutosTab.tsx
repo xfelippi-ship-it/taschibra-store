@@ -195,7 +195,15 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
     const from = (pag - 1) * PAGE_SIZE
     const to = from + PAGE_SIZE - 1
     let q = (supabase as any).from('products').select('*', { count: 'exact' }).order('name').range(from, to)
-    if (textoBusca.trim()) q = q.or(`name.ilike.%${textoBusca}%,sku.ilike.%${textoBusca}%`)
+    if (textoBusca.trim()) {
+      const eanData = await (supabase as any).from('product_variants').select('product_id').ilike('ean', `%${textoBusca}%`)
+      const eanIds: string[] = (eanData.data || []).map((r: any) => r.product_id)
+      if (eanIds.length > 0) {
+        q = q.or(`name.ilike.%${textoBusca}%,sku.ilike.%${textoBusca}%,short_description.ilike.%${textoBusca}%,id.in.(${eanIds.join(',')})`)
+      } else {
+        q = q.or(`name.ilike.%${textoBusca}%,sku.ilike.%${textoBusca}%,short_description.ilike.%${textoBusca}%`)
+      }
+    }
     const { data, count } = await q
     setProdutos(data || [])
     setTotalProdutos(count || 0)
