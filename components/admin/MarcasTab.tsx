@@ -73,8 +73,13 @@ export default function MarcasTab() {
 
   async function carregarProdutosBulk() {
     setBulkLoading(true)
-    const { data } = await supabase.from('products').select('id,nome,sku,brand_id').order('nome')
-    setBulkProdutos((data || []) as any)
+    try {
+      const res = await fetch('/api/admin/produtos-bulk')
+      const json = await res.json()
+      setBulkProdutos(json.data || [])
+    } catch {
+      setBulkProdutos([])
+    }
     setBulkLoading(false)
   }
 
@@ -82,11 +87,19 @@ export default function MarcasTab() {
     if (!bulkMarcaId || bulkSelecionados.size === 0) return
     setBulkSalvando(true)
     const ids = Array.from(bulkSelecionados)
-    await supabase.from('products').update({ brand_id: bulkMarcaId }).in('id', ids)
-    setBulkProdutos(prev => prev.map(p => bulkSelecionados.has(p.id) ? { ...p, brand_id: bulkMarcaId } : p))
-    setBulkSelecionados(new Set())
+    try {
+      await fetch('/api/admin/produtos-bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brand_id: bulkMarcaId, product_ids: ids })
+      })
+      setBulkProdutos(prev => prev.map(p => bulkSelecionados.has(p.id) ? { ...p, brand_id: bulkMarcaId } : p))
+      setBulkSelecionados(new Set())
+      showMsg(`Marca aplicada em ${ids.length} produto(s)!`)
+    } catch {
+      showMsg('Erro ao aplicar marca')
+    }
     setBulkSalvando(false)
-    showMsg(`Marca aplicada em ${ids.length} produto(s)!`)
   }
 
   function toggleSelecionado(id: string) {
