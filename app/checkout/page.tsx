@@ -7,6 +7,7 @@ import Footer from '@/components/store/Footer'
 import Link from 'next/link'
 import { ChevronRight, MapPin, Truck, CreditCard, CheckCircle, Copy, User } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { Turnstile } from '@marsidev/react-turnstile'
 
 type Step = 'endereco' | 'frete' | 'pagamento' | 'confirmado'
 
@@ -88,6 +89,7 @@ export default function CheckoutPage() {
   const [cartaoValidade, setCartaoValidade] = useState('')
   const [cartaoCvv, setCartaoCvv] = useState('')
   const [cartaoParcelas, setCartaoParcelas] = useState(1)
+  const [turnstileToken, setTurnstileToken] = useState('')
 
   const desconto = cupom?.discount_amount || 0
   const totalComFrete = total - desconto + (freteEscolhido?.preco || 0)
@@ -118,6 +120,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           metodo: pagamento,
+          turnstile_token: turnstileToken,
           itens: items,
           endereco: { ...endereco, numero, complemento, cep },
           frete: freteEscolhido,
@@ -337,9 +340,12 @@ export default function CheckoutPage() {
                   <p className="font-black text-gray-800 text-lg mb-1">Pague com PIX</p>
                   <p className="text-sm text-gray-500">O QR Code será gerado após confirmar o pedido.</p>
                 </div>
+                <div className="flex justify-center mb-3">
+                  <Turnstile siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} onSuccess={setTurnstileToken} onError={() => setTurnstileToken('')} onExpire={() => setTurnstileToken('')} />
+                </div>
                 <div className="flex gap-3">
                   <button onClick={()=>setStep('frete')} className="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50 transition-colors">← Voltar</button>
-                  <button onClick={finalizarPedido} disabled={processando} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black py-3 rounded-lg transition-colors disabled:opacity-60">{processando?'Processando...':'Gerar PIX ✓'}</button>
+                  <button onClick={finalizarPedido} disabled={processando || !turnstileToken} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black py-3 rounded-lg transition-colors disabled:opacity-60">{processando?'Processando...':'Gerar PIX ✓'}</button>
                 </div>
               </div>
             )}
@@ -355,6 +361,9 @@ export default function CheckoutPage() {
                   <select value={cartaoParcelas} onChange={e=>setCartaoParcelas(Number(e.target.value))} className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500 bg-white">
                     {Array.from({length:parcelas},(_,i)=>i+1).map(n=><option key={n} value={n}>{n}x de R$ {(totalComFrete/n).toFixed(2).replace('.',',')} {n===1?'(à vista)':'sem juros'}</option>)}
                   </select>
+                </div>
+                <div className="flex justify-center mb-3">
+                  <Turnstile siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} onSuccess={setTurnstileToken} onError={() => setTurnstileToken('')} onExpire={() => setTurnstileToken('')} />
                 </div>
                 <div className="flex gap-3 mt-2">
                   <button onClick={()=>setStep('frete')} className="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50 transition-colors">← Voltar</button>
