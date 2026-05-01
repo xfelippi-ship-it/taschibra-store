@@ -20,96 +20,12 @@ type CatData = {
 
 type SubCat = { id: string; label: string; slug: string; sort_order: number }
 
-// ─── Menu horizontal ─────────────────────────────────────────────────────────
+// ─── Menu horizontal — dinâmico via Supabase ─────────────────────────────────
 
-const menuItems = [
-  { label: 'Lançamentos',      slug: 'lancamentos',    type: 'sub' },
-  { label: 'Ambientes',        slug: 'ambientes',      type: 'mega' },
-  { label: 'Lâmpadas',         slug: 'lampadas',       type: 'sub' },
-  { label: 'SMART',            slug: 'smart',          type: 'sub' },
-  { label: 'Trilhos & Perfis', slug: 'trilhos-perfis', type: 'sub' },
-  { label: 'Fitas & Neon',     slug: 'fitas-neon',     type: 'sub' },
-  { label: 'Energia',          slug: 'energia',        type: 'sub' },
-  { label: 'Profissional',     slug: 'profissional',   type: 'sub' },
-  { label: 'Bazar',            slug: 'bazar',          type: 'sub' },
-  { label: 'Fechaduras',       slug: 'fechaduras',     type: 'sub' },
-  { label: 'Outlet',           slug: 'outlet',         type: 'sub' },
-] as const
+type MenuItem = { label: string; slug: string }
 
-// ─── Dados dos megamenus inline ───────────────────────────────────────────────
 
-const ambientes = [
-  { label: 'Pendente',         slug: 'pendente',        desc: 'Pendentes · Lustres · Spots' },
-  { label: 'Plafons',          slug: 'plafons',         desc: 'Embutidos · Plafons · Sobrepor' },
-  { label: 'Teto',             slug: 'teto',            desc: 'Spots · Luminárias · Embutidos' },
-  { label: 'Parede',           slug: 'parede',          desc: 'Arandelas · Balizadores' },
-  { label: 'Mesa',             slug: 'mesa',            desc: 'Abajures · Luminárias de Mesa' },
-  { label: 'Piso',             slug: 'piso',            desc: 'Balizadores · Colunas · Espetos' },
-  { label: 'Externo',          slug: 'externo',         desc: 'Refletores · Postes · Solar' },
-  { label: 'Pendente/Plafon',  slug: 'pendente-plafon', desc: 'Uso misto' },
-]
 
-const trilhosPerfis = [
-  { label: 'Trilho Magnético', slug: 'trilho-magnetico', desc: 'Attract · Embutir · Sobrepor' },
-  { label: 'Perfil LED',       slug: 'perfil',           desc: 'Apex · Vertex · Zenith · Sopé' },
-  { label: 'Cinta Soho',       slug: 'cinta-soho',       desc: 'Fita eletrificada flexível 48V' },
-]
-
-const fitasNeonItems = [
-  { label: 'Fita LED',             slug: 'fita-led',              desc: 'Techcord · Neon Flex · Pro COB' },
-  { label: 'Acessórios p/ Fita',   slug: 'acessorios-para-fita',  desc: 'Conectores · Clips · Capas' },
-  { label: 'Fontes e Drivers',     slug: 'fonte',                 desc: 'Drivers · Fontes · Transformadores' },
-  { label: 'Corda LED',            slug: 'corda-led',             desc: 'Corda LED · Mangueira · Pisca' },
-  { label: 'Neon Flex 360°',       slug: 'neon-flex-360',         desc: 'Neon Flex 360° Taschibra' },
-]
-
-const energiaItems = [
-  { label: 'Solar',            slug: 'solar',               desc: 'Luminárias · Painéis · Postes' },
-  { label: 'Soquete',          slug: 'soquete',             desc: 'Soquetes · Adaptadores' },
-  { label: 'Extensões',        slug: 'extensao',            desc: 'Filtros · Réguas · Tomadas' },
-  { label: 'Sensores',         slug: 'sensores-de-presenca',desc: 'Presença · Movimento' },
-  { label: 'Cabos USB',        slug: 'cabo-usb',            desc: 'USB-A · USB-C · Cabos' },
-  { label: 'Fita Isolante',    slug: 'fita-isolante',       desc: 'Isolamento elétrico' },
-]
-
-// ─── Ícones SVG ───────────────────────────────────────────────────────────────
-
-function IconAmbiente({ slug }: { slug: string }) {
-  if (slug === 'pendentes') return <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><line x1="16" y1="3" x2="16" y2="9" stroke="#555" strokeWidth="1.5" strokeLinecap="round"/><ellipse cx="16" cy="14" rx="5" ry="3" fill="#fbbf24" opacity=".95"/><path d="M11 14 Q16 23 21 14" fill="#fbbf24" opacity=".55"/><ellipse cx="16" cy="23" rx="7" ry="2" fill="#fbbf24" opacity=".12"/></svg>
-  if (slug === 'plafons') return <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect x="4" y="6" width="24" height="3" rx="1.5" fill="#2a2a4e"/><circle cx="10" cy="7.5" r="2.5" fill="#fbbf24" opacity=".9"/><circle cx="22" cy="7.5" r="2.5" fill="#fbbf24" opacity=".9"/><line x1="10" y1="10" x2="10" y2="19" stroke="#fbbf24" strokeWidth="1" strokeDasharray="1.5 2" opacity=".35"/><line x1="22" y1="10" x2="22" y2="19" stroke="#fbbf24" strokeWidth="1" strokeDasharray="1.5 2" opacity=".35"/><ellipse cx="10" cy="15" rx="5" ry="2" fill="#fbbf24" opacity=".15"/><ellipse cx="22" cy="15" rx="5" ry="2" fill="#fbbf24" opacity=".15"/></svg>
-  if (slug === 'refletores') return <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><line x1="16" y1="28" x2="16" y2="15" stroke="#2a3a2a" strokeWidth="2" strokeLinecap="round"/><path d="M10 15 Q16 9 22 15" fill="#fbbf24" opacity=".85"/><circle cx="16" cy="12" r="3" fill="#fbbf24"/><line x1="16" y1="7" x2="16" y2="5" stroke="#fbbf24" strokeWidth="1.2" opacity=".5" strokeLinecap="round"/><line x1="8" y1="9" x2="6" y2="7" stroke="#fbbf24" strokeWidth="1.2" opacity=".4" strokeLinecap="round"/><line x1="24" y1="9" x2="26" y2="7" stroke="#fbbf24" strokeWidth="1.2" opacity=".4" strokeLinecap="round"/></svg>
-  if (slug === 'parede') return <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect x="4" y="4" width="3" height="24" rx="1.5" fill="#2a2a4e"/><rect x="7" y="13" width="5" height="2" rx="1" fill="#3a3a6e"/><path d="M12 10 L12 22 Q12 26 17 26 Q22 26 22 22 L22 10 Q22 6 17 6 Q12 6 12 10Z" fill="#fbbf24" opacity=".8"/><ellipse cx="17" cy="16" rx="4" ry="5" fill="#fbbf24" opacity=".4"/></svg>
-  if (slug === 'piso') return <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect x="4" y="26" width="24" height="2.5" rx="1.2" fill="#2a2a4e"/><rect x="10" y="20" width="12" height="6" rx="2" fill="#2a2a4e"/><rect x="12" y="18" width="8" height="4" rx="1.5" fill="#fbbf24" opacity=".9"/><ellipse cx="16" cy="18" rx="8" ry="2.5" fill="#fbbf24" opacity=".15"/></svg>
-  if (slug === 'sinalizacao') return <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect x="5" y="11" width="22" height="10" rx="2.5" fill="#2a2a4e" stroke="#3a3a6e" strokeWidth="1"/><rect x="7" y="13" width="7" height="6" rx="1.5" fill="#fbbf24" opacity=".9"/><rect x="18" y="13" width="7" height="6" rx="1.5" fill="#fbbf24" opacity=".9"/></svg>
-  if (slug === 'marcenaria') return <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect x="4" y="9" width="24" height="4" rx="1.5" fill="#2a1a0a" opacity=".9"/><rect x="4" y="21" width="24" height="4" rx="1.5" fill="#2a1a0a" opacity=".9"/><rect x="6" y="13" width="20" height="2.5" rx="1" fill="#fbbf24" opacity=".95"/><ellipse cx="16" cy="15" rx="12" ry="2.5" fill="#fbbf24" opacity=".12"/></svg>
-  return <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="13" r="6" fill="#fbbf24" opacity=".9"/><circle cx="16" cy="13" r="3.5" fill="#fff" opacity=".45"/><circle cx="16" cy="13" r="1.5" fill="#fff" opacity=".9"/><line x1="16" y1="4" x2="16" y2="7" stroke="#fbbf24" strokeWidth="1.2" strokeLinecap="round" opacity=".55"/><line x1="8" y1="6" x2="10" y2="8.5" stroke="#fbbf24" strokeWidth="1.2" strokeLinecap="round" opacity=".4"/><line x1="24" y1="6" x2="22" y2="8.5" stroke="#fbbf24" strokeWidth="1.2" strokeLinecap="round" opacity=".4"/></svg>
-}
-
-function IconTrilho({ slug }: { slug: string }) {
-  if (slug === 'trilho-magnetico') return <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect x="4" y="13" width="24" height="6" rx="3" fill="#2a2a4e"/><circle cx="10" cy="16" r="2.5" fill="#fbbf24" opacity=".9"/><circle cx="16" cy="16" r="2.5" fill="#fbbf24" opacity=".9"/><circle cx="22" cy="16" r="2.5" fill="#fbbf24" opacity=".9"/></svg>
-  if (slug === 'perfil') return <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect x="4" y="12" width="24" height="5" rx="2" fill="#2a2a4e"/><rect x="6" y="14" width="20" height="2" rx="1" fill="#fbbf24" opacity=".95"/><line x1="8" y1="12" x2="8" y2="8" stroke="#3a3a6e" strokeWidth="1.5" strokeLinecap="round"/><line x1="16" y1="12" x2="16" y2="7" stroke="#3a3a6e" strokeWidth="1.5" strokeLinecap="round"/><line x1="24" y1="12" x2="24" y2="8" stroke="#3a3a6e" strokeWidth="1.5" strokeLinecap="round"/></svg>
-  return <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><path d="M4 16 Q8 10 16 10 Q24 10 28 16 Q24 22 16 22 Q8 22 4 16Z" fill="#2a2a4e" opacity=".8"/><path d="M6 16 Q10 12 16 12 Q22 12 26 16 Q22 20 16 20 Q10 20 6 16Z" fill="#fbbf24" opacity=".85"/><ellipse cx="16" cy="16" rx="4" ry="3" fill="#fbbf24"/></svg>
-}
-
-// ─── MegaCard (Ambientes / Trilhos) ──────────────────────────────────────────
-
-function MegaCard({ label, slug, desc, type, onClick }: {
-  label: string; slug: string; desc: string
-  type: 'ambiente' | 'trilho'; onClick: () => void
-}) {
-  return (
-    <Link href={`/produtos?categoria=${encodeURIComponent(slug)}`} onClick={onClick}
-      className="flex items-center gap-3 p-2.5 rounded-xl border border-gray-200 hover:border-green-500 hover:bg-green-50 transition-all group">
-      <div className="w-12 h-12 rounded-lg bg-[#1a1a2e] flex items-center justify-center flex-shrink-0">
-        {type === 'ambiente' ? <IconAmbiente slug={slug} /> : <IconTrilho slug={slug} />}
-      </div>
-      <div>
-        <div className="text-xs font-bold text-gray-900 leading-tight group-hover:text-green-700">{label}</div>
-        <div className="text-[10px] text-gray-500 mt-1 leading-relaxed">{desc}</div>
-      </div>
-    </Link>
-  )
-}
 
 
 // ─── Ícones fixos por slug (v2) ───────────────────────────────────────────────────
@@ -258,7 +174,7 @@ function TodasCategoriasPanel({ onClose }: { onClose: () => void }) {
 function MobileMenu({
   menuItems, subcatsMenu, onClose, search, setSearch, handleSearch
 }: {
-  menuItems: readonly { label: string; slug: string; type: string }[]
+  menuItems: MenuItem[]
   subcatsMenu: Record<string, SubCat[]>
   onClose: () => void
   search: string
@@ -350,6 +266,7 @@ export default function Header() {
   const [activeMega, setActiveMega] = useState<string | null>(null)
   const [todasOpen, setTodasOpen]   = useState(false)
   const [subcatsMenu, setSubcatsMenu] = useState<Record<string, SubCat[]>>({})
+  const [menuItems, setMenuItems]     = useState<MenuItem[]>([])
   const { count } = useCart()
   const router    = useRouter()
   const headerRef = useRef<HTMLDivElement>(null)
@@ -369,17 +286,42 @@ export default function Header() {
   function closeAll()              { setActiveMega(null); setTodasOpen(false) }
 
   useEffect(() => {
+    // Carrega categorias principais da barra de menu
     supabase
-      .from('category_subcategories')
-      .select('id,category_slug,label,slug,sort_order')
+      .from('categories')
+      .select('id,name,slug')
+      .eq('show_in_menu', true)
+      .is('parent_id', null)
       .order('sort_order')
       .then(({ data }) => {
-        const grouped: Record<string, SubCat[]> = {}
-        for (const s of (data || [])) {
-          if (!grouped[s.category_slug]) grouped[s.category_slug] = []
-          grouped[s.category_slug].push(s)
-        }
-        setSubcatsMenu(grouped)
+        setMenuItems((data || []).map((c: { id: string; name: string; slug: string }) => ({
+          label: c.name,
+          slug: c.slug,
+        })))
+      })
+    // Carrega subcategorias para dropdowns
+    supabase
+      .from('categories')
+      .select('id,name,slug,parent_id,sort_order')
+      .not('parent_id', 'is', null)
+      .order('sort_order')
+      .then(({ data: subs }) => {
+        supabase
+          .from('categories')
+          .select('id,slug')
+          .is('parent_id', null)
+          .then(({ data: parents }) => {
+            const parentMap: Record<string, string> = {}
+            for (const p of (parents || [])) parentMap[p.id] = p.slug
+            const grouped: Record<string, SubCat[]> = {}
+            for (const s of (subs || [])) {
+              const parentSlug = parentMap[s.parent_id]
+              if (!parentSlug) continue
+              if (!grouped[parentSlug]) grouped[parentSlug] = []
+              grouped[parentSlug].push({ id: s.id, label: s.name, slug: s.slug, sort_order: s.sort_order })
+            }
+            setSubcatsMenu(grouped)
+          })
       })
   }, [])
 
@@ -455,58 +397,45 @@ export default function Header() {
             <div className="w-px bg-gray-200 my-2 mx-1 flex-shrink-0" />
 
             {menuItems.map(item => {
-              const isActive = activeMega === item.slug
-              if (item.type === 'sub') {
-                const subs = subcatsMenu[item.slug] || []
-                const isActiveSub = activeMega === item.slug
-                if (!subs.length) return (
-                  <Link key={item.slug} href={`/produtos?categoria=${encodeURIComponent(item.slug)}`}
-                    onClick={closeAll}
-                    className="px-3 py-2.5 text-sm font-bold text-gray-700 hover:text-green-600 border-b-2 border-transparent hover:border-green-500 transition-all whitespace-nowrap flex-shrink-0 flex items-center">
-                    {item.label}
-                  </Link>
-                )
-                return (
-                  <div key={item.slug} onMouseEnter={() => openMega(item.slug)} onMouseLeave={closeMega} className="relative flex items-stretch">
-                    <Link href={`/produtos?categoria=${encodeURIComponent(item.slug)}`}
-                      onClick={closeAll}
-                      className={`px-3 py-2.5 text-sm font-bold border-b-2 transition-all whitespace-nowrap flex-shrink-0 flex items-center gap-1 ${
-                        isActiveSub ? 'text-green-600 border-green-500' : 'text-gray-700 border-transparent hover:text-green-600 hover:border-green-500'
-                      }`}>
-                      {item.label}
-                      <ChevronDown size={11} className={`transition-transform ${isActiveSub ? 'rotate-180' : ''}`} />
-                    </Link>
-                    {isActiveSub && (
-                      <div onMouseEnter={cancelDelay} onMouseLeave={closeMega}
-                        className="absolute top-full left-0 bg-white border border-gray-200 rounded-xl shadow-lg z-50 min-w-48 py-2">
-                        {subs.map((sub: SubCat) => (
-                          <Link key={sub.id} href={`/produtos?categoria=${encodeURIComponent(sub.slug)}`}
-                            onClick={closeAll}
-                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:text-green-700 hover:bg-green-50 transition-colors">
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
-                            {sub.label}
-                          </Link>
-                        ))}
-                        <div className="border-t border-gray-100 mt-1 pt-1">
-                          <Link href={`/produtos?categoria=${encodeURIComponent(item.slug)}`}
-                            onClick={closeAll}
-                            className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-green-600 hover:bg-green-50 transition-colors">
-                            Ver todos →
-                          </Link>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              }
+              const subs = subcatsMenu[item.slug] || []
+              const isActiveSub = activeMega === item.slug
+              if (!subs.length) return (
+                <Link key={item.slug} href={`/produtos?categoria=${encodeURIComponent(item.slug)}`}
+                  onClick={closeAll}
+                  className="px-3 py-2.5 text-sm font-bold text-gray-700 hover:text-green-600 border-b-2 border-transparent hover:border-green-500 transition-all whitespace-nowrap flex-shrink-0 flex items-center">
+                  {item.label}
+                </Link>
+              )
               return (
-                <div key={item.slug} onMouseEnter={() => openMega(item.slug)} onMouseLeave={closeMega} className="flex items-stretch">
-                  <button className={`px-3 py-2.5 text-sm font-bold border-b-2 transition-all whitespace-nowrap flex-shrink-0 flex items-center gap-1 ${
-                    isActive ? 'text-green-600 border-green-500' : 'text-gray-700 border-transparent hover:text-green-600 hover:border-green-500'
-                  }`}>
+                <div key={item.slug} onMouseEnter={() => openMega(item.slug)} onMouseLeave={closeMega} className="relative flex items-stretch">
+                  <Link href={`/produtos?categoria=${encodeURIComponent(item.slug)}`}
+                    onClick={closeAll}
+                    className={`px-3 py-2.5 text-sm font-bold border-b-2 transition-all whitespace-nowrap flex-shrink-0 flex items-center gap-1 ${
+                      isActiveSub ? 'text-green-600 border-green-500' : 'text-gray-700 border-transparent hover:text-green-600 hover:border-green-500'
+                    }`}>
                     {item.label}
-                    <ChevronDown size={11} className={`transition-transform ${isActive ? 'rotate-180' : ''}`} />
-                  </button>
+                    <ChevronDown size={11} className={`transition-transform ${isActiveSub ? 'rotate-180' : ''}`} />
+                  </Link>
+                  {isActiveSub && (
+                    <div onMouseEnter={cancelDelay} onMouseLeave={closeMega}
+                      className="absolute top-full left-0 bg-white border border-gray-200 rounded-xl shadow-lg z-50 min-w-48 py-2">
+                      {subs.map((sub: SubCat) => (
+                        <Link key={sub.id} href={`/produtos?categoria=${encodeURIComponent(sub.slug)}`}
+                          onClick={closeAll}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:text-green-700 hover:bg-green-50 transition-colors">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
+                          {sub.label}
+                        </Link>
+                      ))}
+                      <div className="border-t border-gray-100 mt-1 pt-1">
+                        <Link href={`/produtos?categoria=${encodeURIComponent(item.slug)}`}
+                          onClick={closeAll}
+                          className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-green-600 hover:bg-green-50 transition-colors">
+                          Ver todos →
+                        </Link>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )
             })}
@@ -519,17 +448,7 @@ export default function Header() {
             </div>
           )}
 
-          {/* Megamenu Ambientes */}
-          {activeMega === 'ambientes' && (
-            <div onMouseEnter={cancelDelay} onMouseLeave={closeMega}
-              className="absolute top-full left-0 right-0 bg-white border-t border-b border-gray-200 shadow-lg z-50">
-              <div className="max-w-7xl mx-auto px-6 py-5">
-                <div className="grid grid-cols-4 gap-3">
-                  {ambientes.map(item => <MegaCard key={item.slug} {...item} type="ambiente" onClick={closeAll} />)}
-                </div>
-              </div>
-            </div>
-          )}
+
 
        </nav>
 
