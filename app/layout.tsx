@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 }
 
 
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning className={`${nunito.variable} antialiased bg-white text-gray-900`}>
         <CartProvider>
           {children}
+        <CookieBanner />
         </CartProvider>
         <CookieBanner />
               <ChatWidget />
