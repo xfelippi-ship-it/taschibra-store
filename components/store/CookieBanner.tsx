@@ -18,7 +18,11 @@ export default function CookieBanner() {
 
   useEffect(() => {
     const salvo = localStorage.getItem(KEY)
-    if (!salvo) setVisible(true)
+    if (!salvo) {
+      // Delay para nao competir com o LCP da pagina
+      const t = setTimeout(() => setVisible(true), 1500)
+      return () => clearTimeout(t)
+    }
   }, [])
 
   async function salvarConsentimento(escolha: CookiePrefs) {
