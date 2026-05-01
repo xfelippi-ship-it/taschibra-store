@@ -18,6 +18,13 @@ const securityHeaders = [
 ]
 
 const nextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'gcmoiimijouhmgjopgct.supabase.co' },
+      { protocol: 'https', hostname: 'picsum.photos' },
+      { protocol: 'https', hostname: 'img.youtube.com' },
+    ],
+  },
   async redirects() {
     return [
       { source: '/documentos/politica', destination: '/privacidade', permanent: true },
