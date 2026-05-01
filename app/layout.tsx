@@ -9,7 +9,7 @@ import { createClient } from '@supabase/supabase-js'
 const nunito = Nunito({
   subsets: ["latin"],
   variable: "--font-nunito",
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["400", "700", "800", "900"],
 })
 
 // SEO padrão — sobrescrito por generateMetadata em cada página
@@ -30,10 +30,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning className={`${nunito.variable} antialiased bg-white text-gray-900`}>
         <CartProvider>
           {children}
-        <CookieBanner />
+          <CookieBanner />
+          <ChatWidget />
         </CartProvider>
-        <CookieBanner />
-              <ChatWidget />
       </body>
     </html>
   )
