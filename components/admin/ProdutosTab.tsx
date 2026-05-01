@@ -365,6 +365,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
               </th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Produto</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">SKU</th>
+              <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">EAN</th>
               <th className="text-left px-5 py-3 text-xs font-black text-gray-500 uppercase">Categoria</th>
               {meuPapel !== 'marketing' && <th className="text-right px-5 py-3 text-xs font-black text-gray-500 uppercase">Preço</th>}
               <th className="text-center px-5 py-3 text-xs font-black text-gray-500 uppercase">Estoque</th>
@@ -401,6 +402,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
                       {p.family && <span className="text-xs text-gray-400 ml-1">{p.family}</span>}
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500 font-mono">{p.sku}</td>
+                    <td className="px-5 py-4 text-sm text-gray-400 font-mono">{p.ean || '—'}</td>
                     <td className="px-5 py-4">
                       <div className="flex flex-col gap-0.5">
                         {p.category_slug && (
