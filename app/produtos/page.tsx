@@ -31,7 +31,7 @@ function ProdutosContent() {
   const [pagina, setPagina] = useState(1)
   const [loading, setLoading] = useState(true)
   const [titulo, setTitulo] = useState("Todos os Produtos")
-  const [ordem, setOrdem] = useState("sort_asc")
+  const [ordem, setOrdem] = useState("stock_desc")
   const [precoMin, setPrecoMin] = useState("")
   const [precoMax, setPrecoMax] = useState("")
   const { addItem } = useCart()
@@ -47,7 +47,13 @@ function ProdutosContent() {
       const [ordemCampo, ordemDir] = ordem.split("_")
       const ascending = ordemDir === "asc"
       const campoOrdem = ordemCampo === "name" ? "name" : ordemCampo === "preco" ? "price" : ordemCampo === "sales" ? "sales_count" : ordemCampo === "sort" ? "sort_order" : "created_at"
-      let query = supabase.from("products").select("*", { count: "exact" }).order(campoOrdem, { ascending })
+      let query = supabase.from("products").select("*", { count: "exact" })
+      if (ordem === "stock_desc") {
+        query = query.order("stock_qty", { ascending: false, nullsFirst: false }).order("name", { ascending: true })
+      } else {
+        query = query.order(campoOrdem, { ascending })
+      }
+      query = query
       if (precoMin) query = query.gte("price", parseFloat(precoMin))
       if (precoMax) query = query.lte("price", parseFloat(precoMax))
       if (busca) {
@@ -177,7 +183,17 @@ function ProdutosContent() {
                         {p.main_image ? (
                           <img src={getImageUrl(p.main_image, 600)} loading="lazy" alt={p.name}
                             className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-300"
-                            onError={e => { (e.target as HTMLImageElement).style.display = "none" }} />
+                            onError={e => {
+                              const t = e.target as HTMLImageElement
+                              t.style.display = "none"
+                              const par = t.parentElement
+                              if (par && !par.querySelector(".img-fallback")) {
+                                const d = document.createElement("div")
+                                d.className = "img-fallback w-full h-full flex items-center justify-center text-5xl"
+                                d.textContent = "💡"
+                                par.appendChild(d)
+                              }
+                            }} />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-5xl">💡</div>
                         )}
