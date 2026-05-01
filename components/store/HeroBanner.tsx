@@ -103,7 +103,7 @@ export default function HeroBanner() {
                 </div>
               </div>
             </div>
-            <div className="absolute bottom-0 left-0 h-1 bg-yellow-400 transition-all duration-100"
+            <div className="absolute bottom-0 left-0 h-1 bg-yellow-400 transition-[width] duration-100"
               style={{ width: i === current ? `${progress}%` : '0%' }} />
           </div>
         ))}

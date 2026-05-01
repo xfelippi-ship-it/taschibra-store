@@ -35,6 +35,7 @@ export default function CookieBanner() {
   }
 
   if (!visible) return null
+  if (typeof window === 'undefined') return null
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6">
