@@ -18,11 +18,7 @@ export default function CookieBanner() {
 
   useEffect(() => {
     const salvo = localStorage.getItem(KEY)
-    if (!salvo) {
-      // Delay para nao competir com o LCP da pagina
-      const t = setTimeout(() => setVisible(true), 1500)
-      return () => clearTimeout(t)
-    }
+    if (!salvo) setVisible(true)
   }, [])
 
   async function salvarConsentimento(escolha: CookiePrefs) {
@@ -39,10 +35,11 @@ export default function CookieBanner() {
   }
 
   if (!visible) return null
+  if (typeof window === 'undefined') return null
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl border border-gray-200 p-5" data-nosnippet>
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl border border-gray-200 p-5">
         <div className="flex items-start gap-3 mb-4">
           <span className="text-2xl">🍪</span>
           <div className="flex-1">
