@@ -299,29 +299,18 @@ export default function Header() {
           slug: c.slug,
         })))
       })
-    // Carrega subcategorias para dropdowns
+    // Carrega subcategorias para dropdowns — usa category_subcategories
     supabase
-      .from('categories')
-      .select('id,name,slug,parent_id,sort_order')
-      .not('parent_id', 'is', null)
+      .from('category_subcategories')
+      .select('id,category_slug,label,slug,sort_order')
       .order('sort_order')
-      .then(({ data: subs }) => {
-        supabase
-          .from('categories')
-          .select('id,slug')
-          .is('parent_id', null)
-          .then(({ data: parents }) => {
-            const parentMap: Record<string, string> = {}
-            for (const p of (parents || [])) parentMap[p.id] = p.slug
-            const grouped: Record<string, SubCat[]> = {}
-            for (const s of (subs || [])) {
-              const parentSlug = parentMap[s.parent_id]
-              if (!parentSlug) continue
-              if (!grouped[parentSlug]) grouped[parentSlug] = []
-              grouped[parentSlug].push({ id: s.id, label: s.name, slug: s.slug, sort_order: s.sort_order })
-            }
-            setSubcatsMenu(grouped)
-          })
+      .then(({ data }) => {
+        const grouped: Record<string, SubCat[]> = {}
+        for (const s of (data || [])) {
+          if (!grouped[s.category_slug]) grouped[s.category_slug] = []
+          grouped[s.category_slug].push({ id: s.id, label: s.label, slug: s.slug, sort_order: s.sort_order })
+        }
+        setSubcatsMenu(grouped)
       })
   }, [])
 
