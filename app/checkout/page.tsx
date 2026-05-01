@@ -341,7 +341,7 @@ export default function CheckoutPage() {
                   <p className="text-sm text-gray-500">O QR Code será gerado após confirmar o pedido.</p>
                 </div>
                 <div className="flex justify-center mb-3">
-                  <Turnstile siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} onSuccess={setTurnstileToken} onError={() => setTurnstileToken('')} onExpire={() => setTurnstileToken('')} />
+                  <Turnstile siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} onSuccess={setTurnstileToken} onError={() => setTurnstileToken('')} onExpire={() => setTurnstileToken('')} options={{ theme: 'light' }} />
                 </div>
                 <div className="flex gap-3">
                   <button onClick={()=>setStep('frete')} className="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50 transition-colors">← Voltar</button>
@@ -363,7 +363,7 @@ export default function CheckoutPage() {
                   </select>
                 </div>
                 <div className="flex justify-center mb-3">
-                  <Turnstile siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} onSuccess={setTurnstileToken} onError={() => setTurnstileToken('')} onExpire={() => setTurnstileToken('')} />
+                  <Turnstile siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} onSuccess={setTurnstileToken} onError={() => setTurnstileToken('')} onExpire={() => setTurnstileToken('')} options={{ theme: 'light' }} />
                 </div>
                 <div className="flex gap-3 mt-2">
                   <button onClick={()=>setStep('frete')} className="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-lg hover:bg-gray-50 transition-colors">← Voltar</button>
