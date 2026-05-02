@@ -63,7 +63,7 @@ async function parseXLSX(file: File, sheetName?: string): Promise<Record<string,
   let headerIdx = 0
   for (let i = 0; i < Math.min(rawRows.length, 15); i++) {
     const row = rawRows[i] as any[]
-    if (row.some((cell: any) => String(cell).trim().toLowerCase() === 'sku')) {
+    if (row.some((cell: any) => ['sku','sku_pai','sku pai'].includes(String(cell).trim().toLowerCase()))) {
       headerIdx = i
       break
     }
