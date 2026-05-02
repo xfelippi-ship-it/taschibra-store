@@ -11,4 +11,4 @@ export const supabase =
   globalForSupabase.supabase ??
   createClient<Database>(supabaseUrl, supabaseAnonKey)
 
-if (process.env.NODE_ENV !== 'production') globalForSupabase.supabase = supabase
+globalForSupabase.supabase = supabase
