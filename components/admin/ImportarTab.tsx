@@ -281,12 +281,13 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
         }
 
         if (existe) {
-          await supabase.from('products').update({ ...payload, updated_at: new Date().toISOString() }).eq('sku', sku)
+          const { error: updErr } = await supabase.from('products').update({ ...payload, updated_at: new Date().toISOString() }).eq('sku', sku)
+          if (updErr) console.log('UPDATE ERR', sku, updErr)
           res.push({ sku, status: 'atualizado' })
         } else {
           const nome = row['name'] || row['nome'] || sku
           const slug = row['slug'] || nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
-          await supabase.from('products').insert({
+          const { error: insErr } = await supabase.from('products').insert({
             sku, name: nome, slug,
             price:       parseFloat((row['price'] || row['preco'] || '0').replace(',', '.')) || 0,
             promo_price: parseFloat((row['promo_price'] || row['preco_pix'] || '0').replace(',', '.')) || 0,
@@ -294,7 +295,8 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
             active: true,
             ...payload
           })
-          res.push({ sku, status: 'criado' })
+          if (insErr) console.log('INSERT ERR', sku, insErr)
+          res.push({ sku, status: insErr ? 'erro' : 'criado' })
         }
       } catch (e: any) {
         console.log('ERRO SKU', sku, e.message)
