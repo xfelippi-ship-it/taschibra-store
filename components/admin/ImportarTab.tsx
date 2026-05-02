@@ -1,8 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { useState, useRef, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { registrarAuditoria } from '@/lib/auditLog'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
 import { Upload, CheckCircle, XCircle, ChevronDown, ChevronUp, Package, LayoutGrid, Download, Info } from 'lucide-react'
 import * as XLSX from 'xlsx'
 
