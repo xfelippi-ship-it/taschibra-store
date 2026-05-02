@@ -75,7 +75,7 @@ function ProdCard({ p }: { p: Produto }) {
           </span>
         )}
         {p.main_image ? (
-          <img src={getImageUrl(p.main_image, 600)} alt={nome} className="w-full h-full object-contain p-3" loading="lazy" />
+          <img src={getImageUrl(p.main_image, 600)} alt={nome} className="w-full h-full object-contain p-3" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.png' }} />
         ) : (
           <div className="flex items-center justify-center w-full h-40">
             <span className="text-6xl">💡</span>
