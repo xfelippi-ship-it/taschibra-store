@@ -69,11 +69,20 @@ async function parseXLSX(file: File, sheetName?: string): Promise<Record<string,
     }
   }
   const headers = (rawRows[headerIdx] as any[]).map((h: any) => String(h).trim().toLowerCase())
-  const rows: any[] = rawRows.slice(headerIdx + 1).map((row: any[]) => {
-    const obj: Record<string, string> = {}
-    headers.forEach((h, i) => { obj[h] = String(row[i] ?? '').trim() })
-    return obj
-  })
+  const skuColIdx = headers.indexOf('sku') !== -1 ? headers.indexOf('sku') : headers.indexOf('sku_pai')
+  const rows: any[] = rawRows.slice(headerIdx + 1)
+    .map((row: any[]) => {
+      const obj: Record<string, string> = {}
+      headers.forEach((h, i) => { obj[h] = String(row[i] ?? '').trim() })
+      return obj
+    })
+    .filter((row: Record<string, string>) => {
+      // Ignorar linhas de instrução/exemplo — SKU tem que ser não-vazio e não ser texto de instrução
+      const skuVal = (row['sku'] || row['sku_pai'] || '').trim()
+      if (!skuVal) return false
+      if (skuVal.startsWith('Texto') || skuVal.startsWith('Ex:') || skuVal.startsWith('▼') || skuVal === 'SKU *' || skuVal === 'SKU Produto Pai *') return false
+      return true
+    })
   return rows.map((row: any) => {
     const obj: Record<string, string> = {}
     Object.keys(row).forEach(k => { obj[k.trim().toLowerCase()] = String(row[k]).trim() })
