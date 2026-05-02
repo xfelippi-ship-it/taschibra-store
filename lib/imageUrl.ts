@@ -30,6 +30,12 @@ export function getImageUrl(
   // Sem resize solicitado, retorna a URL original
   if (!width) return url
 
-  // Retorna URL original sem transformacao (render/image desativado temporariamente)
-  return url
+  // Converte /object/public/ para /render/image/public/ e adiciona params
+  const transformedUrl = url.replace(
+    '/storage/v1/object/public/',
+    '/storage/v1/render/image/public/'
+  )
+
+  const separator = transformedUrl.includes('?') ? '&' : '?'
+  return `${transformedUrl}${separator}width=${width}&quality=${quality}`
 }
