@@ -150,6 +150,7 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
   const [camposSelecionados, setCamposSelecionados] = useState<string[]>(['price', 'promo_price'])
   const [processando, setProcessando] = useState(false)
   const [progresso, setProgresso] = useState(0)
+  const [progressoVar, setProgressoVar] = useState(0)
   const [resultados, setResultados] = useState<Resultado[]>([])
   const [mostrarPreview, setMostrarPreview] = useState(false)
   const [mostrarResultados, setMostrarResultados] = useState(false)
@@ -212,12 +213,14 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
     const res: Resultado[] = []
     const totalVar = rows.length
     for (let i = 0; i < rows.length; i++) {
-      setProgresso(Math.round(((i + 1) / totalVar) * 100))
+      setProgressoVar(Math.round(((i + 1) / totalVar) * 100))
       const row = rows[i]
       const skuPai  = (row['sku_pai'] || row['sku pai'] || '').trim()
       const skuVar  = (row['sku variacao'] || row['sku_variacao'] || row['sku'] || '').trim()
       const tipo    = (row['tipo'] || row['type'] || '').trim()
       const valor   = (row['valor'] || row['value'] || '').trim()
+      // Ignorar linhas de header/instrução
+      if (skuPai === 'SKU Produto Pai *' || skuPai.startsWith('Texto') || skuPai.startsWith('Ex:') || skuPai.startsWith('▼')) continue
       if (!skuPai || !tipo || !valor) {
         res.push({ sku: `var linha ${i+2}`, status: 'erro', msg: 'SKU Pai, Tipo ou Valor ausente' })
         continue
@@ -590,7 +593,7 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
               onClick={async () => {
                 if (!arquivoVar) return
                 setProcessando(true)
-                setProgresso(0)
+                setProgressoVar(0)
                 setMostrarResultados(true)
                 const rows = await parseFile(arquivoVar, 'Variações')
                 const fallback = rows.length === 0 ? await parseFile(arquivoVar) : rows
@@ -602,14 +605,14 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-black px-5 py-2 rounded-lg text-sm transition-colors"
             >
               <Upload size={14} />
-              {processando ? `Processando... ${progresso}%` : `Importar ${arquivoVar.name}`}
+              {processando ? `Processando... ${progressoVar}%` : `Importar ${arquivoVar.name}`}
             </button>
           )}
-          {processando && (
+          {processando && progressoVar > 0 && (
             <div className="mt-4">
-              <div className="flex justify-between text-xs text-gray-500 mb-1"><span>Progresso</span><span>{progresso}%</span></div>
+              <div className="flex justify-between text-xs text-gray-500 mb-1"><span>Progresso</span><span>{progressoVar}%</span></div>
               <div className="w-full bg-gray-100 rounded-full h-2">
-                <div className="bg-emerald-600 h-2 rounded-full transition-all" style={{ width: `${progresso}%` }} />
+                <div className="bg-emerald-600 h-2 rounded-full transition-all" style={{ width: `${progressoVar}%` }} />
               </div>
             </div>
           )}
