@@ -242,6 +242,7 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
     const total = rows.length
     const res: Resultado[] = []
 
+    console.log('TOTAL ROWS:', rows.length, 'CAMPOS:', camposSelecionados)
     for (let i = 0; i < rows.length; i++) {
       const row = normalizeRow(rows[i])
       const sku = (row['sku'] || row['codigo'] || '').trim()
@@ -296,6 +297,7 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
           res.push({ sku, status: 'criado' })
         }
       } catch (e: any) {
+        console.log('ERRO SKU', sku, e.message)
         res.push({ sku, status: 'erro', msg: e.message || 'Erro desconhecido' })
       }
 
