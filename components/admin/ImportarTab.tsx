@@ -1,15 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { useState, useRef, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
 import { registrarAuditoria } from '@/lib/auditLog'
 import { Upload, CheckCircle, XCircle, ChevronDown, ChevronUp, Package, LayoutGrid, Download, Info } from 'lucide-react'
 import * as XLSX from 'xlsx'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 const CAMPOS = [
   { id: 'name',             label: 'Nome do produto',          col: 'name' },
@@ -218,10 +213,10 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
         const { data: existe } = await supabase.from('product_variants')
           .select('id').eq('product_id', produto.id).eq('type', tipo).eq('value', valor).maybeSingle()
         if (existe) {
-          await supabase.from('product_variants').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', existe.id)
+          await supabase.from('product_variants').update(payload as any).eq('id', existe.id)
           res.push({ sku: `${skuPai}/${valor}`, status: 'atualizado' })
         } else {
-          await supabase.from('product_variants').insert(payload)
+          await supabase.from('product_variants').insert(payload as any)
           res.push({ sku: `${skuPai}/${valor}`, status: 'criado' })
         }
       } catch (e: any) {
