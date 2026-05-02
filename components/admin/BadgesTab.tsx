@@ -20,6 +20,54 @@ interface Badge {
 
 const VAZIO: Badge = { slug: '', label: '', bg_color: '#F3F4F6', text_color: '#374151', active: true, sort_order: 0 }
 
+const PALETA_FUNDO = [
+  '#FEF3C7','#FDE68A','#FCD34D','#F59E0B',
+  '#FEE2E2','#FECACA','#F87171','#EF4444',
+  '#D1FAE5','#A7F3D0','#6EE7B7','#10B981',
+  '#DBEAFE','#BFDBFE','#93C5FD','#3B82F6',
+  '#EDE9FE','#DDD6FE','#A78BFA','#8B5CF6',
+  '#FCE7F3','#FBCFE8','#F472B6','#EC4899',
+  '#F3F4F6','#E5E7EB','#D1D5DB','#6B7280',
+  '#111827','#1F2937','#374151','#000000',
+]
+
+const PALETA_TEXTO = [
+  '#FFFFFF','#F9FAFB','#F3F4F6','#E5E7EB',
+  '#111827','#1F2937','#374151','#4B5563',
+  '#B45309','#92400E','#78350F','#451A03',
+  '#065F46','#064E3B','#022C22','#166534',
+  '#1E40AF','#1E3A8A','#172554','#1D4ED8',
+  '#5B21B6','#4C1D95','#3B0764','#7C3AED',
+  '#9D174D','#831843','#500724','#BE185D',
+  '#EF4444','#F59E0B','#10B981','#3B82F6',
+]
+
+function ColorPicker({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const paleta = label === 'Cor de fundo' ? PALETA_FUNDO : PALETA_TEXTO
+  return (
+    <div>
+      <label className="text-xs font-bold text-gray-600 mb-1 block">{label}</label>
+      <div className="flex gap-2 mb-2">
+        <input type="color" value={value}
+          onChange={e => onChange(e.target.value)}
+          className="w-10 h-10 rounded border border-gray-200 cursor-pointer p-0.5" />
+        <input className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono outline-none focus:border-green-500"
+          value={value}
+          onChange={e => onChange(e.target.value)} />
+      </div>
+      <div className="grid grid-cols-8 gap-1">
+        {paleta.map(cor => (
+          <button key={cor} type="button"
+            onClick={() => onChange(cor)}
+            title={cor}
+            className={`w-6 h-6 rounded border-2 transition-transform hover:scale-110 ${value === cor ? 'border-gray-800 scale-110' : 'border-transparent'}`}
+            style={{ backgroundColor: cor }} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function BadgesTab() {
   const [badges, setBadges] = useState<Badge[]>([])
   const [loading, setLoading] = useState(true)
@@ -144,23 +192,22 @@ export default function BadgesTab() {
 
       {modal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4" onClick={() => setModal(false)}>
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-black text-gray-800">{form.id ? 'Editar Badge' : 'Novo Badge'}</h2>
               <button onClick={() => setModal(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
             </div>
 
-            {form.label && (
-              <div className="mb-4 p-3 bg-gray-50 rounded-lg flex items-center gap-3">
-                <span className="text-xs font-black">Preview:</span>
-                <span className="text-xs font-black px-3 py-1 rounded"
-                  style={{ backgroundColor: form.bg_color, color: form.text_color }}>
-                  {form.label}
-                </span>
-              </div>
-            )}
+            {/* Preview sempre visível */}
+            <div className="mb-5 p-4 bg-gray-50 rounded-xl flex items-center gap-3 border border-gray-100">
+              <span className="text-xs font-bold text-gray-500">Preview:</span>
+              <span className="text-xs font-black px-3 py-1.5 rounded"
+                style={{ backgroundColor: form.bg_color, color: form.text_color }}>
+                {form.label || 'Badge'}
+              </span>
+            </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-gray-600 mb-1 block">Label (texto exibido) *</label>
                 <input className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500"
@@ -174,30 +221,13 @@ export default function BadgesTab() {
                   value={form.slug}
                   onChange={e => setForm({ ...form, slug: e.target.value })} />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-gray-600 mb-1 block">Cor de fundo</label>
-                  <div className="flex gap-2">
-                    <input type="color" value={form.bg_color}
-                      onChange={e => setForm({ ...form, bg_color: e.target.value })}
-                      className="w-10 h-10 rounded border border-gray-200 cursor-pointer" />
-                    <input className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono outline-none focus:border-green-500"
-                      value={form.bg_color}
-                      onChange={e => setForm({ ...form, bg_color: e.target.value })} />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-600 mb-1 block">Cor do texto</label>
-                  <div className="flex gap-2">
-                    <input type="color" value={form.text_color}
-                      onChange={e => setForm({ ...form, text_color: e.target.value })}
-                      className="w-10 h-10 rounded border border-gray-200 cursor-pointer" />
-                    <input className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono outline-none focus:border-green-500"
-                      value={form.text_color}
-                      onChange={e => setForm({ ...form, text_color: e.target.value })} />
-                  </div>
-                </div>
-              </div>
+
+              <ColorPicker label="Cor de fundo" value={form.bg_color}
+                onChange={v => setForm({ ...form, bg_color: v })} />
+
+              <ColorPicker label="Cor do texto" value={form.text_color}
+                onChange={v => setForm({ ...form, text_color: v })} />
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-gray-600 mb-1 block">Ordem</label>
@@ -216,6 +246,7 @@ export default function BadgesTab() {
                 </div>
               </div>
             </div>
+
             <div className="flex gap-3 mt-5">
               <button onClick={() => setModal(false)}
                 className="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-lg">Cancelar</button>
