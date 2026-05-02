@@ -10,6 +10,7 @@ interface Props {
 export default function ProdutoZoom({ src, alt = '', className = '' }: Props) {
   const [zoom, setZoom] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [imgSrc, setImgSrc] = useState(src)
   const [lensPos, setLensPos] = useState({ x: 0, y: 0 })
   const [panelPos, setPanelPos] = useState({ top: 0, left: 0 })
   const [pct, setPct] = useState({ x: 50, y: 50 })
@@ -19,6 +20,7 @@ export default function ProdutoZoom({ src, alt = '', className = '' }: Props) {
   const PANEL = 420
 
   useEffect(() => { setMounted(true) }, [])
+  useEffect(() => { setImgSrc(src) }, [src])
 
   const handleMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return
@@ -52,7 +54,7 @@ export default function ProdutoZoom({ src, alt = '', className = '' }: Props) {
         onMouseLeave={() => setZoom(false)}
         onMouseMove={handleMove}
       >
-        <img src={src} alt={alt} draggable={false} className="w-full h-full object-cover" />
+        <img src={imgSrc} alt={alt} draggable={false} className="w-full h-full object-cover" onError={() => setImgSrc('/placeholder-product.svg')} />
 
         {zoom && (
           <div className="absolute border-2 border-green-500 bg-green-500/10 pointer-events-none"
@@ -69,7 +71,7 @@ export default function ProdutoZoom({ src, alt = '', className = '' }: Props) {
       {mounted && zoom && (
         <div className="fixed bg-white border-2 border-gray-200 shadow-2xl overflow-hidden pointer-events-none"
           style={{ width: PANEL, height: PANEL, top: panelPos.top, left: panelPos.left, zIndex: 9999 }}>
-          <img src={src} alt="" draggable={false} className="absolute"
+          <img src={imgSrc} alt="" draggable={false} className="absolute"
             style={{ width: PANEL * SCALE, height: PANEL * SCALE, maxWidth: 'none', objectFit: 'contain', left: imgLeft, top: imgTop }} />
         </div>
       )}
