@@ -257,7 +257,6 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
     const total = rows.length
     const res: Resultado[] = []
 
-    console.log('TOTAL ROWS:', rows.length, 'CAMPOS:', camposSelecionados)
     for (let i = 0; i < rows.length; i++) {
       const row = normalizeRow(rows[i])
       const sku = (row['sku'] || row['codigo'] || '').trim()
@@ -297,7 +296,6 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
 
         if (existe) {
           const { error: updErr } = await supabase.from('products').update({ ...payload, updated_at: new Date().toISOString() }).eq('sku', sku)
-          if (updErr) console.log('UPDATE ERR', sku, updErr)
           res.push({ sku, status: 'atualizado' })
         } else {
           const nome = row['name'] || row['nome'] || sku
@@ -310,11 +308,9 @@ export default function ImportarTab({ meuEmail = 'admin' }: { meuEmail?: string 
             active: true,
             ...payload
           })
-          if (insErr) console.log('INSERT ERR', sku, insErr)
           res.push({ sku, status: insErr ? 'erro' : 'criado' })
         }
       } catch (e: any) {
-        console.log('ERRO SKU', sku, e.message)
         res.push({ sku, status: 'erro', msg: e.message || 'Erro desconhecido' })
       }
 
