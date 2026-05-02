@@ -58,7 +58,22 @@ async function parseXLSX(file: File, sheetName?: string): Promise<Record<string,
     : wb.SheetNames[0]
   if (!target) return []
   const ws = wb.Sheets[target]
-  const rows: any[] = XLSX.utils.sheet_to_json(ws, { defval: '' })
+  // Encontrar a linha do header (onde está 'sku')
+  const rawRows: any[] = XLSX.utils.sheet_to_json(ws, { defval: '', header: 1 })
+  let headerIdx = 0
+  for (let i = 0; i < Math.min(rawRows.length, 15); i++) {
+    const row = rawRows[i] as any[]
+    if (row.some((cell: any) => String(cell).trim().toLowerCase() === 'sku')) {
+      headerIdx = i
+      break
+    }
+  }
+  const headers = (rawRows[headerIdx] as any[]).map((h: any) => String(h).trim().toLowerCase())
+  const rows: any[] = rawRows.slice(headerIdx + 1).map((row: any[]) => {
+    const obj: Record<string, string> = {}
+    headers.forEach((h, i) => { obj[h] = String(row[i] ?? '').trim() })
+    return obj
+  })
   return rows.map((row: any) => {
     const obj: Record<string, string> = {}
     Object.keys(row).forEach(k => { obj[k.trim().toLowerCase()] = String(row[k]).trim() })
