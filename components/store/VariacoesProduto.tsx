@@ -26,9 +26,18 @@ const typeLabel: Record<string, string> = {
   cor: 'Cor',
   cor_peca: 'Cor da Peça',
   temperatura: 'Temperatura de Cor',
+  temperatura_cor: 'Temperatura de Cor',
+  tensao: 'Tensão',
   voltagem: 'Voltagem',
   tamanho: 'Tamanho',
   potencia: 'Potência',
+  modelo: 'Modelo',
+  aplicacao: 'Aplicação',
+  angulo_abertura: 'Ângulo de Abertura',
+  comprimento: 'Comprimento',
+  formato: 'Formato',
+  face: 'Face',
+  outro: 'Variação',
 }
 
 const tempColor: Record<string, string> = {
@@ -102,7 +111,7 @@ export default function VariacoesProduto({ produtoId, onSelect }: Props) {
     <div className="space-y-4 mb-5">
       {tipos.map(tipo => {
         const opcoesBruto = variacoes.filter(v => v.type === tipo && v.stock_qty > 0)
-        const opcoes = tipo === 'temperatura'
+        const opcoes = (tipo === 'temperatura' || tipo === 'temperatura_cor')
           ? [...opcoesBruto].sort((a, b) => parseInt(a.value) - parseInt(b.value))
           : opcoesBruto
         const selecionado = selecionados[tipo]
@@ -117,7 +126,7 @@ export default function VariacoesProduto({ produtoId, onSelect }: Props) {
             <div className="flex flex-wrap gap-2">
               {opcoes.map(v => {
                 const ativo = selecionado === v.value
-                const isTemp = tipo === 'temperatura'
+                const isTemp = tipo === 'temperatura' || tipo === 'temperatura_cor'
 
                 if (isCor) {
                   const hex = getCorHex(v.value)
