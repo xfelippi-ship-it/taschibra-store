@@ -325,10 +325,15 @@ export default function ProdutoPage() {
   // Imagens antes de vídeos: still/fotos primeiro, vídeos no final
   // Se variação selecionada tem imagem própria, usa ela. Senão usa imagens do produto pai.
   const todasMidias = (() => {
+    // Se variacao tem imagem propria, usa SOMENTE as imagens da variacao
     if (variacaoSelecionada?.main_image) {
-      const varImgs = [variacaoSelecionada.main_image, ...((variacaoSelecionada as any).images || [])].filter(Boolean)
-      if (varImgs.length) return varImgs.slice(0, 10)
+      const varImgs = [
+        variacaoSelecionada.main_image,
+        ...((variacaoSelecionada as any).images?.filter((u: string) => u && u !== variacaoSelecionada.main_image) || [])
+      ].filter(Boolean)
+      return varImgs.slice(0, 10)
     }
+    // Sem imagem propria na variacao — usa imagens do produto pai
     return produto.images?.filter(Boolean).length
       ? produto.images!.filter(Boolean).slice(0, 10)
       : produto.main_image ? [produto.main_image] : []
