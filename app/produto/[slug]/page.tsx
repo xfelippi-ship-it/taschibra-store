@@ -323,9 +323,16 @@ export default function ProdutoPage() {
   const { n: nParcelas, valor: valorParcela } = calcParcelas(precoCartao)
   const garantia = produto.warranty || (produto.warranty_months ? `${produto.warranty_months} meses` : null)
   // Imagens antes de vídeos: still/fotos primeiro, vídeos no final
-  const todasMidias = produto.images?.filter(Boolean).length
-    ? produto.images!.filter(Boolean).slice(0, 10)
-    : produto.main_image ? [produto.main_image] : []
+  // Se variação selecionada tem imagem própria, usa ela. Senão usa imagens do produto pai.
+  const todasMidias = (() => {
+    if (variacaoSelecionada?.main_image) {
+      const varImgs = [variacaoSelecionada.main_image, ...((variacaoSelecionada as any).images || [])].filter(Boolean)
+      if (varImgs.length) return varImgs.slice(0, 10)
+    }
+    return produto.images?.filter(Boolean).length
+      ? produto.images!.filter(Boolean).slice(0, 10)
+      : produto.main_image ? [produto.main_image] : []
+  })()
   const imagens = [
     ...todasMidias.filter(url => !['youtube.com','youtu.be','vimeo.com'].some(d => url.includes(d)) && !url.match(/\.(mp4|webm|mov)/i)),
     ...todasMidias.filter(url => ['youtube.com','youtu.be','vimeo.com'].some(d => url.includes(d)) || url.match(/\.(mp4|webm|mov)/i)),
