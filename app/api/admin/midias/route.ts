@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
   if (idsPai.length > 0) {
     const { data } = await supabase
       .from('product_variants')
-      .select('sku, product_id, ean, main_image, images, name, active')
+      .select('sku, product_id, ean, main_image, images, name, active, type, value')
       .in('product_id', idsPai)
     variacoes = data || []
   }
