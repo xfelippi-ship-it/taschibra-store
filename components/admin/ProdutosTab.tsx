@@ -107,10 +107,13 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
   const [modal, setModal] = useState(false)
 
   useEffect(() => {
-    if (!abrirEdicaoSku || produtos.length === 0) return
-    const p = produtos.find(x => x.sku === abrirEdicaoSku)
-    if (p) { setProdutoEdit(p); setAbaModal('dados'); setModal(true) }
-  }, [abrirEdicaoSku, produtos])
+    if (!abrirEdicaoSku) return
+    const abrir = async () => {
+      const { data } = await supabase.from('products').select('*').eq('sku', abrirEdicaoSku).single()
+      if (data) { setProdutoEdit(data); setAbaModal('dados'); setModal(true) }
+    }
+    abrir()
+  }, [abrirEdicaoSku])
   const [produtoEdit, setProdutoEdit] = useState<Partial<Produto>>({})
   const [abaModal, setAbaModal] = useState<'dados' | 'fotos' | 'variacoes' | 'funcionalidades'>('dados')
 
