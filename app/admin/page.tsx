@@ -13,6 +13,7 @@ import CanaisVendaTab from '@/components/admin/CanaisVendaTab'
 import DashboardTab from '@/components/admin/DashboardTab'
 import TopBarTab from '@/components/admin/TopBarTab'
 import CategoriasTab from '@/components/admin/CategoriasTab'
+import MidiasTab from '@/components/admin/MidiasTab'
 import FreteGratisTab from '@/components/admin/FreteGratisTab'
 import CarrinhosAbandonadosTab from '@/components/admin/CarrinhosAbandonadosTab'
 import RelatoriosTab from '@/components/admin/RelatoriosTab'
@@ -58,6 +59,7 @@ const TODOS_MODULOS = [
   { id: 'dashboard',       label: 'Dashboard',             grupo: 'Geral' },
   { id: 'produtos',        label: 'Produtos',              grupo: 'Catálogo' },
   { id: 'categorias',      label: 'Categorias',            grupo: 'Catálogo' },
+  { id: 'midias-imagens',   label: 'Mídias',                grupo: 'Catálogo' },
   { id: 'caracteristicas', label: 'Características',       grupo: 'Catálogo' },
   { id: 'canais',          label: 'Canais de Venda',       grupo: 'Catálogo' },
   { id: 'importar',        label: 'Importar CSV',          grupo: 'Catálogo' },
@@ -826,7 +828,7 @@ export default function AdminPage() {
   const [erroLogin, setErroLogin] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
   const [showSenha, setShowSenha] = useState(false)
-  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'cores' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup' | 'blog' | 'caracteristicas' | 'canais' | 'badges' | 'beneficios' | 'motivos'  | 'upload-massa' | 'compre-junto'>('dashboard')
+  const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'cores' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup' | 'blog' | 'caracteristicas' | 'canais' | 'badges' | 'beneficios' | 'motivos'  | 'upload-massa' | 'compre-junto' | 'midias-imagens'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -1059,6 +1061,7 @@ export default function AdminPage() {
           <Grupo id="catalogo" label="Catálogo">
             {tem([], 'produtos') && <BtnItem id="produtos"   label="Produtos"     icon={<Package size={15} />} />}
             {tem([], 'categorias') && <BtnItem id="categorias" label="Categorias"   icon={<Tag size={15} />} />}
+            {tem([], 'midias-imagens') && <BtnItem id="midias-imagens" label="Mídias" icon={<ImageIcon size={15} />} />}
             {tem([], 'caracteristicas') && <BtnItem id="caracteristicas" label="Características" icon={<Sliders size={15} />} />}
             {tem([], 'canais') && <BtnItem id="canais" label="Canais de Venda" icon={<ShoppingBag size={15} />} />}
             {tem([], 'importar') && <BtnItem id="importar"   label="Importar CSV" icon={<Upload size={15} />} />}
@@ -1177,6 +1180,7 @@ export default function AdminPage() {
         {aba === 'blog' && <BlogTab />}
         {aba === 'topbar' && <TopBarTab />}
         {aba === 'categorias' && <CategoriasTab />}
+        {aba === 'midias-imagens' && <MidiasTab onEditarProduto={(sku) => { setAba('produtos') }} />}
         {aba === 'importar' && <ImportarTab meuEmail={meuEmail} />}
         {aba === 'upload-massa' && <UploadMassaTab />}
         {aba === 'compre-junto' && <CompreJuntoTab />}
