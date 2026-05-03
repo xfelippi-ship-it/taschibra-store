@@ -39,6 +39,8 @@ export async function GET(req: NextRequest) {
   if (ativo === 'false')       query = query.eq('active', false)
   if (status === 'com_imagem') query = query.not('main_image', 'is', null)
   if (status === 'sem_imagem') query = query.is('main_image', null)
+  if (tipo === 'pai')     query = query.gte('sku', 'A').lte('sku', 'z')
+  if (tipo === 'simples') query = query.gte('sku', '0').lte('sku', '9')
 
   const { data: produtos, count, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -94,8 +96,7 @@ export async function GET(req: NextRequest) {
   })
 
   let filtrado = resultado
-  if (tipo === 'pai')    filtrado = filtrado.filter((p: any) => p.tipo === 'pai')
-  if (tipo === 'simples') filtrado = filtrado.filter((p: any) => p.tipo === 'simples')
+
 
   return NextResponse.json({ data: filtrado, total: count || 0, summary })
 }
