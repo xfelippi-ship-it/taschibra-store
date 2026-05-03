@@ -43,23 +43,23 @@ export async function GET(req: NextRequest) {
   const { data: produtos, count, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  const skusPai = (produtos || [])
+  const idsPai = (produtos || [])
     .filter((p: any) => p.sku && /^[A-Z_]/.test(p.sku))
-    .map((p: any) => p.sku)
+    .map((p: any) => p.id)
 
   let variacoes: any[] = []
-  if (skusPai.length > 0) {
+  if (idsPai.length > 0) {
     const { data } = await supabase
       .from('product_variants')
-      .select('sku, sku_pai, ean, main_image, images')
-      .in('sku_pai', skusPai)
+      .select('sku, product_id, ean, main_image, images, name, active')
+      .in('product_id', idsPai)
     variacoes = data || []
   }
 
   const varMap: Record<string, any[]> = {}
   for (const v of variacoes) {
-    if (!varMap[v.sku_pai]) varMap[v.sku_pai] = []
-    varMap[v.sku_pai].push(v)
+    if (!varMap[v.product_id]) varMap[v.product_id] = []
+    varMap[v.product_id].push(v)
   }
 
   const resultado = (produtos || []).map((p: any) => {
@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
       main_image: p.main_image,
       img_status,
       slots,
-      filhos: isPai ? (varMap[p.sku] || []) : [],
+      filhos: isPai ? (varMap[p.id] || []) : [],
     }
   })
 
