@@ -19,6 +19,7 @@ type Produto = {
 
 type Variacao = {
   main_image?: string | null
+  images?: string[]
   id?: string; product_id: string; name: string; type: string; value: string
   sku: string; ean: string; price: number; promo_price: number
   stock_qty: number; active: boolean; technical_description?: string
@@ -45,6 +46,7 @@ const tipoLabel = (tipo: string) => TIPOS_VARIACAO.find(t => t.value === tipo)?.
 
 const variacaoVazia = (productId: string): Variacao => ({
   main_image: null,
+  images: [],
   product_id: productId, name: '', type: 'temperatura_cor', value: '',
   sku: '', ean: '', price: 0, promo_price: 0, stock_qty: 0, active: true
 })
@@ -316,6 +318,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
       active: varEdit.active,
       technical_description: varEdit.technical_description || null,
       main_image: varEdit.main_image || null,
+      images: varEdit.images || [],
     }
     if (varEdit.id) {
       await supabase.from('product_variants').update(dados).eq('id', varEdit.id)
@@ -1056,20 +1059,15 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
               </div>
               <div>
                 <label className="text-sm font-bold text-gray-700 mb-1 block">Descrição técnica (opcional)</label>
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Imagem da variação</label>
-                  <input type="text" placeholder="URL da imagem (ex: https://...)"
-                    value={varEdit.main_image || ''}
-                    onChange={e => setVarEdit({ ...varEdit, main_image: e.target.value || null })}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
-                  />
-                  {varEdit.main_image && (
-                    <img src={varEdit.main_image} alt="preview"
-                      className="mt-2 h-20 w-20 object-cover rounded-lg border border-gray-200"
-                      onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
-                    />
-                  )}
-                </div>
+                <ProdutoGaleriaUpload
+                  sku={varEdit.sku || varEdit.product_id}
+                  images={varEdit.images || (varEdit.main_image ? [varEdit.main_image] : [])}
+                  onChange={(imgs) => setVarEdit({
+                    ...varEdit,
+                    images: imgs,
+                    main_image: imgs[0] || null
+                  })}
+                />
                 <textarea value={varEdit.technical_description || ''} rows={2}
                   onChange={e => setVarEdit({ ...varEdit, technical_description: e.target.value })}
                   placeholder="Ex: Luz branca quente. Ideal para salas e quartos."

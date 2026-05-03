@@ -25,9 +25,14 @@ export type Database = {
           customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
+          d1_sent_at: string | null
+          d2_sent_at: string | null
+          d3_sent_at: string | null
           id: string
           items: Json | null
           last_step_reached: string | null
+          recovered_at: string | null
+          recovery_disparo: number | null
           reminder_count: number | null
           reminder_sent_at: string | null
           session_id: string | null
@@ -45,9 +50,14 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          d1_sent_at?: string | null
+          d2_sent_at?: string | null
+          d3_sent_at?: string | null
           id?: string
           items?: Json | null
           last_step_reached?: string | null
+          recovered_at?: string | null
+          recovery_disparo?: number | null
           reminder_count?: number | null
           reminder_sent_at?: string | null
           session_id?: string | null
@@ -65,9 +75,14 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          d1_sent_at?: string | null
+          d2_sent_at?: string | null
+          d3_sent_at?: string | null
           id?: string
           items?: Json | null
           last_step_reached?: string | null
+          recovered_at?: string | null
+          recovery_disparo?: number | null
           reminder_count?: number | null
           reminder_sent_at?: string | null
           session_id?: string | null
@@ -89,6 +104,7 @@ export type Database = {
           papel: string
           role: string | null
           status: string | null
+          trocar_senha: boolean | null
           user_id: string | null
         }
         Insert: {
@@ -102,6 +118,7 @@ export type Database = {
           papel?: string
           role?: string | null
           status?: string | null
+          trocar_senha?: boolean | null
           user_id?: string | null
         }
         Update: {
@@ -115,6 +132,7 @@ export type Database = {
           papel?: string
           role?: string | null
           status?: string | null
+          trocar_senha?: boolean | null
           user_id?: string | null
         }
         Relationships: []
@@ -152,6 +170,51 @@ export type Database = {
           user_email?: string
           valor_antes?: Json | null
           valor_depois?: Json | null
+        }
+        Relationships: []
+      }
+      badges: {
+        Row: {
+          active: boolean
+          ativo: boolean
+          bg_color: string
+          color_bg: string
+          color_border: string
+          color_text: string
+          created_at: string
+          id: string
+          label: string
+          slug: string
+          sort_order: number
+          text_color: string
+        }
+        Insert: {
+          active?: boolean
+          ativo?: boolean
+          bg_color?: string
+          color_bg?: string
+          color_border?: string
+          color_text?: string
+          created_at?: string
+          id?: string
+          label: string
+          slug: string
+          sort_order?: number
+          text_color?: string
+        }
+        Update: {
+          active?: boolean
+          ativo?: boolean
+          bg_color?: string
+          color_bg?: string
+          color_border?: string
+          color_text?: string
+          created_at?: string
+          id?: string
+          label?: string
+          slug?: string
+          sort_order?: number
+          text_color?: string
         }
         Relationships: []
       }
@@ -230,6 +293,81 @@ export type Database = {
         }
         Relationships: []
       }
+      benefit_bar: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          icone: string
+          id: string
+          sort_order: number
+          texto: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          icone?: string
+          id?: string
+          sort_order?: number
+          texto: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          icone?: string
+          id?: string
+          sort_order?: number
+          texto?: string
+        }
+        Relationships: []
+      }
+      blog_posts: {
+        Row: {
+          author: string | null
+          category: string | null
+          content: string | null
+          cover_image: string | null
+          created_at: string | null
+          excerpt: string | null
+          id: string
+          published: boolean | null
+          published_at: string | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author?: string | null
+          category?: string | null
+          content?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          id?: string
+          published?: boolean | null
+          published_at?: string | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author?: string | null
+          category?: string | null
+          content?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          id?: string
+          published?: boolean | null
+          published_at?: string | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       brands: {
         Row: {
           ativo: boolean | null
@@ -251,6 +389,27 @@ export type Database = {
           id?: string
           nome?: string
           slug?: string
+        }
+        Relationships: []
+      }
+      cancel_reasons: {
+        Row: {
+          ativo: boolean
+          id: string
+          motivo: string
+          sort_order: number
+        }
+        Insert: {
+          ativo?: boolean
+          id?: string
+          motivo: string
+          sort_order?: number
+        }
+        Update: {
+          ativo?: boolean
+          id?: string
+          motivo?: string
+          sort_order?: number
         }
         Relationships: []
       }
@@ -298,6 +457,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cart_recovery_settings: {
+        Row: {
+          created_at: string
+          d1_body: string
+          d1_coupon_code: string | null
+          d1_delay_hours: number
+          d1_enabled: boolean
+          d1_subject: string
+          d1_template: string
+          d2_body: string
+          d2_coupon_code: string | null
+          d2_delay_hours: number
+          d2_enabled: boolean
+          d2_subject: string
+          d2_template: string
+          d3_body: string
+          d3_coupon_code: string | null
+          d3_delay_hours: number
+          d3_enabled: boolean
+          d3_subject: string
+          d3_template: string
+          id: string
+          mode: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          d1_body?: string
+          d1_coupon_code?: string | null
+          d1_delay_hours?: number
+          d1_enabled?: boolean
+          d1_subject?: string
+          d1_template?: string
+          d2_body?: string
+          d2_coupon_code?: string | null
+          d2_delay_hours?: number
+          d2_enabled?: boolean
+          d2_subject?: string
+          d2_template?: string
+          d3_body?: string
+          d3_coupon_code?: string | null
+          d3_delay_hours?: number
+          d3_enabled?: boolean
+          d3_subject?: string
+          d3_template?: string
+          id?: string
+          mode?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          d1_body?: string
+          d1_coupon_code?: string | null
+          d1_delay_hours?: number
+          d1_enabled?: boolean
+          d1_subject?: string
+          d1_template?: string
+          d2_body?: string
+          d2_coupon_code?: string | null
+          d2_delay_hours?: number
+          d2_enabled?: boolean
+          d2_subject?: string
+          d2_template?: string
+          d3_body?: string
+          d3_coupon_code?: string | null
+          d3_delay_hours?: number
+          d3_enabled?: boolean
+          d3_subject?: string
+          d3_template?: string
+          id?: string
+          mode?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       carts: {
         Row: {
@@ -471,6 +705,78 @@ export type Database = {
         }
         Relationships: []
       }
+      color_library: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          hex: string
+          id: string
+          nome: string
+          sort_order: number | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          hex: string
+          id?: string
+          nome: string
+          sort_order?: number | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          hex?: string
+          id?: string
+          nome?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      company_info: {
+        Row: {
+          cep: string | null
+          cidade: string | null
+          cnpj: string | null
+          descricao: string | null
+          email: string | null
+          endereco: string | null
+          estado: string | null
+          id: string
+          nome: string
+          slogan: string | null
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string | null
+          descricao?: string | null
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          nome?: string
+          slogan?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string | null
+          descricao?: string | null
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          nome?: string
+          slogan?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       company_settings: {
         Row: {
           cnpj: string | null
@@ -561,6 +867,39 @@ export type Database = {
           phone?: string | null
           status?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      cookie_consents: {
+        Row: {
+          analiticos: boolean | null
+          created_at: string | null
+          essenciais: boolean | null
+          id: string
+          ip: string | null
+          marketing: boolean | null
+          session_id: string
+          versao_politica: string | null
+        }
+        Insert: {
+          analiticos?: boolean | null
+          created_at?: string | null
+          essenciais?: boolean | null
+          id?: string
+          ip?: string | null
+          marketing?: boolean | null
+          session_id: string
+          versao_politica?: string | null
+        }
+        Update: {
+          analiticos?: boolean | null
+          created_at?: string | null
+          essenciais?: boolean | null
+          id?: string
+          ip?: string | null
+          marketing?: boolean | null
+          session_id?: string
+          versao_politica?: string | null
         }
         Relationships: []
       }
@@ -841,6 +1180,42 @@ export type Database = {
         }
         Relationships: []
       }
+      favorites: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       free_shipping_rules: {
         Row: {
           active: boolean
@@ -880,35 +1255,259 @@ export type Database = {
       image_gallery: {
         Row: {
           ativo: boolean | null
+          badge: string | null
+          bg_color: string | null
+          btn_href: string | null
+          btn_label: string | null
           created_at: string | null
+          ends_at: string | null
           id: string
+          modo: string | null
           ordem: number | null
+          starts_at: string | null
+          subtitulo: string | null
           titulo: string
           updated_at: string | null
-          url_imagem: string
+          url_imagem: string | null
           url_link: string | null
         }
         Insert: {
           ativo?: boolean | null
+          badge?: string | null
+          bg_color?: string | null
+          btn_href?: string | null
+          btn_label?: string | null
           created_at?: string | null
+          ends_at?: string | null
           id?: string
+          modo?: string | null
           ordem?: number | null
+          starts_at?: string | null
+          subtitulo?: string | null
           titulo: string
           updated_at?: string | null
-          url_imagem: string
+          url_imagem?: string | null
           url_link?: string | null
         }
         Update: {
           ativo?: boolean | null
+          badge?: string | null
+          bg_color?: string | null
+          btn_href?: string | null
+          btn_label?: string | null
           created_at?: string | null
+          ends_at?: string | null
           id?: string
+          modo?: string | null
           ordem?: number | null
+          starts_at?: string | null
+          subtitulo?: string | null
           titulo?: string
           updated_at?: string | null
-          url_imagem?: string
+          url_imagem?: string | null
           url_link?: string | null
         }
         Relationships: []
+      }
+      market_ai_analyses: {
+        Row: {
+          ai_model: string | null
+          analysis: string
+          created_at: string | null
+          custo_estimado: number | null
+          id: string
+          product_name: string | null
+          prompt: string | null
+          recommendation: string | null
+          sku: string
+        }
+        Insert: {
+          ai_model?: string | null
+          analysis: string
+          created_at?: string | null
+          custo_estimado?: number | null
+          id?: string
+          product_name?: string | null
+          prompt?: string | null
+          recommendation?: string | null
+          sku: string
+        }
+        Update: {
+          ai_model?: string | null
+          analysis?: string
+          created_at?: string | null
+          custo_estimado?: number | null
+          id?: string
+          product_name?: string | null
+          prompt?: string | null
+          recommendation?: string | null
+          sku?: string
+        }
+        Relationships: []
+      }
+      market_alerts: {
+        Row: {
+          active: boolean
+          created_at: string
+          email_notificar: string | null
+          id: string
+          sku: string
+          source: string | null
+          threshold: number | null
+          tipo: string
+          ultimo_disparo: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email_notificar?: string | null
+          id?: string
+          sku: string
+          source?: string | null
+          threshold?: number | null
+          tipo: string
+          ultimo_disparo?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email_notificar?: string | null
+          id?: string
+          sku?: string
+          source?: string | null
+          threshold?: number | null
+          tipo?: string
+          ultimo_disparo?: string | null
+        }
+        Relationships: []
+      }
+      market_api_credentials: {
+        Row: {
+          app_id: string | null
+          app_secret: string | null
+          ativo: boolean | null
+          canal: string
+          created_at: string | null
+          extra_config: Json | null
+          id: string
+          label: string
+          tipo: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          app_id?: string | null
+          app_secret?: string | null
+          ativo?: boolean | null
+          canal: string
+          created_at?: string | null
+          extra_config?: Json | null
+          id?: string
+          label: string
+          tipo?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          app_id?: string | null
+          app_secret?: string | null
+          ativo?: boolean | null
+          canal?: string
+          created_at?: string | null
+          extra_config?: Json | null
+          id?: string
+          label?: string
+          tipo?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      market_competitors: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          map_price: number | null
+          notas: string | null
+          product_name: string | null
+          search_term: string
+          sku: string
+          source: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          map_price?: number | null
+          notas?: string | null
+          product_name?: string | null
+          search_term: string
+          sku: string
+          source: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          map_price?: number | null
+          notas?: string | null
+          product_name?: string | null
+          search_term?: string
+          sku?: string
+          source?: string
+        }
+        Relationships: []
+      }
+      market_price_snapshots: {
+        Row: {
+          captured_at: string
+          condition: string | null
+          id: string
+          listing_id: string | null
+          original_price: number | null
+          price: number
+          product_id: string | null
+          seller: string | null
+          sku: string
+          source: string
+          title: string | null
+          url: string | null
+        }
+        Insert: {
+          captured_at?: string
+          condition?: string | null
+          id?: string
+          listing_id?: string | null
+          original_price?: number | null
+          price: number
+          product_id?: string | null
+          seller?: string | null
+          sku: string
+          source: string
+          title?: string | null
+          url?: string | null
+        }
+        Update: {
+          captured_at?: string
+          condition?: string | null
+          id?: string
+          listing_id?: string | null
+          original_price?: number | null
+          price?: number
+          product_id?: string | null
+          seller?: string | null
+          sku?: string
+          source?: string
+          title?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_price_snapshots_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       newsletter_subscribers: {
         Row: {
@@ -982,17 +1581,96 @@ export type Database = {
           },
         ]
       }
+      order_notes: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          note: string
+          order_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          note: string
+          order_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          note?: string
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_notes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_status: string
+          order_id: string
+          previous_status: string | null
+          reason: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status: string
+          order_id: string
+          previous_status?: string | null
+          reason?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string
+          order_id?: string
+          previous_status?: string | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
+          clearsales_score: number | null
+          clearsales_status: string | null
           coupon_code: string | null
           created_at: string | null
+          cte_key: string | null
+          cte_url: string | null
+          customer_email: string | null
           customer_id: string | null
+          customer_name: string | null
           discount_total: number | null
+          erp_integrated: boolean | null
           fulfillment_status: string | null
           id: string
           notes: string | null
           order_number: string
+          pagarme_transaction_id: string | null
           payment_status: string | null
+          refund_reason: string | null
           sapiens_order_id: string | null
           shipping_address: Json | null
           shipping_method: string | null
@@ -1004,15 +1682,24 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          clearsales_score?: number | null
+          clearsales_status?: string | null
           coupon_code?: string | null
           created_at?: string | null
+          cte_key?: string | null
+          cte_url?: string | null
+          customer_email?: string | null
           customer_id?: string | null
+          customer_name?: string | null
           discount_total?: number | null
+          erp_integrated?: boolean | null
           fulfillment_status?: string | null
           id?: string
           notes?: string | null
           order_number: string
+          pagarme_transaction_id?: string | null
           payment_status?: string | null
+          refund_reason?: string | null
           sapiens_order_id?: string | null
           shipping_address?: Json | null
           shipping_method?: string | null
@@ -1024,15 +1711,24 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          clearsales_score?: number | null
+          clearsales_status?: string | null
           coupon_code?: string | null
           created_at?: string | null
+          cte_key?: string | null
+          cte_url?: string | null
+          customer_email?: string | null
           customer_id?: string | null
+          customer_name?: string | null
           discount_total?: number | null
+          erp_integrated?: boolean | null
           fulfillment_status?: string | null
           id?: string
           notes?: string | null
           order_number?: string
+          pagarme_transaction_id?: string | null
           payment_status?: string | null
+          refund_reason?: string | null
           sapiens_order_id?: string | null
           shipping_address?: Json | null
           shipping_method?: string | null
@@ -1083,21 +1779,51 @@ export type Database = {
       payment_card_settings: {
         Row: {
           id: string
+          juros_por_parcela: number | null
           max_parcelas: number | null
+          parcelas_sem_juros: number | null
           updated_at: string | null
           valor_minimo_parcela: number | null
         }
         Insert: {
           id?: string
+          juros_por_parcela?: number | null
           max_parcelas?: number | null
+          parcelas_sem_juros?: number | null
           updated_at?: string | null
           valor_minimo_parcela?: number | null
         }
         Update: {
           id?: string
+          juros_por_parcela?: number | null
           max_parcelas?: number | null
+          parcelas_sem_juros?: number | null
           updated_at?: string | null
           valor_minimo_parcela?: number | null
+        }
+        Relationships: []
+      }
+      payment_pix_settings: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          desconto_percentual: number | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          desconto_percentual?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          desconto_percentual?: number | null
+          id?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -1193,6 +1919,48 @@ export type Database = {
           prazo_dias?: number | null
           telefone?: string | null
           valor?: number | null
+        }
+        Relationships: []
+      }
+      popup_promos: {
+        Row: {
+          active: boolean | null
+          bg_color: string | null
+          button_link: string | null
+          button_text: string | null
+          created_at: string | null
+          end_date: string | null
+          id: string
+          image_url: string | null
+          start_date: string | null
+          subtitle: string | null
+          title: string
+        }
+        Insert: {
+          active?: boolean | null
+          bg_color?: string | null
+          button_link?: string | null
+          button_text?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          start_date?: string | null
+          subtitle?: string | null
+          title: string
+        }
+        Update: {
+          active?: boolean | null
+          bg_color?: string | null
+          button_link?: string | null
+          button_text?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          start_date?: string | null
+          subtitle?: string | null
+          title?: string
         }
         Relationships: []
       }
@@ -1328,6 +2096,41 @@ export type Database = {
           },
         ]
       }
+      product_specs: {
+        Row: {
+          chave: string
+          created_at: string | null
+          id: string
+          product_id: string
+          sort_order: number | null
+          valor: string
+        }
+        Insert: {
+          chave: string
+          created_at?: string | null
+          id?: string
+          product_id: string
+          sort_order?: number | null
+          valor: string
+        }
+        Update: {
+          chave?: string
+          created_at?: string | null
+          id?: string
+          product_id?: string
+          sort_order?: number | null
+          valor?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_specs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_variants: {
         Row: {
           active: boolean | null
@@ -1335,15 +2138,19 @@ export type Database = {
           created_at: string | null
           ean: string | null
           id: string
+          images: string[] | null
           is_lancamento: boolean
+          main_image: string | null
           name: string
           price: number | null
           product_id: string | null
           promo_price: number | null
           sku: string | null
+          sort_order: number | null
           stock_qty: number | null
           technical_description: string | null
           type: string
+          updated_at: string | null
           value: string
         }
         Insert: {
@@ -1352,15 +2159,19 @@ export type Database = {
           created_at?: string | null
           ean?: string | null
           id?: string
+          images?: string[] | null
           is_lancamento?: boolean
+          main_image?: string | null
           name: string
           price?: number | null
           product_id?: string | null
           promo_price?: number | null
           sku?: string | null
+          sort_order?: number | null
           stock_qty?: number | null
           technical_description?: string | null
           type: string
+          updated_at?: string | null
           value: string
         }
         Update: {
@@ -1369,20 +2180,80 @@ export type Database = {
           created_at?: string | null
           ean?: string | null
           id?: string
+          images?: string[] | null
           is_lancamento?: boolean
+          main_image?: string | null
           name?: string
           price?: number | null
           product_id?: string | null
           promo_price?: number | null
           sku?: string | null
+          sort_order?: number | null
           stock_qty?: number | null
           technical_description?: string | null
           type?: string
+          updated_at?: string | null
           value?: string
         }
         Relationships: [
           {
             foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variations: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          ean: string | null
+          id: string
+          price: number | null
+          product_id: string
+          promo_price: number | null
+          sku: string
+          sort_order: number | null
+          stock_qty: number | null
+          updated_at: string | null
+          variation_type: string | null
+          variation_value: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          ean?: string | null
+          id?: string
+          price?: number | null
+          product_id: string
+          promo_price?: number | null
+          sku: string
+          sort_order?: number | null
+          stock_qty?: number | null
+          updated_at?: string | null
+          variation_type?: string | null
+          variation_value?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          ean?: string | null
+          id?: string
+          price?: number | null
+          product_id?: string
+          promo_price?: number | null
+          sku?: string
+          sort_order?: number | null
+          stock_qty?: number | null
+          updated_at?: string | null
+          variation_type?: string | null
+          variation_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variations_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -1397,15 +2268,20 @@ export type Database = {
           badges: string[] | null
           brand: string | null
           brand_id: string | null
+          categories: string[] | null
           category_id: string | null
           category_slug: string | null
           color_temp_k: number | null
+          cor_id: string | null
+          cores_relacionadas: string[] | null
           cost: number | null
           created_at: string | null
+          datasheet_url: string | null
           depth_cm: number | null
           depth_cm_packed: number | null
           description: string | null
           ean: string | null
+          familia_cor: string | null
           family: string | null
           height_cm: number | null
           height_cm_packed: number | null
@@ -1428,10 +2304,12 @@ export type Database = {
           slug: string
           sort_order: number
           stock_qty: number | null
+          subcategory_slug: string | null
           tags: string[] | null
           technical_description: string | null
           unit: string | null
           updated_at: string | null
+          video_url: string | null
           voltage: string | null
           warranty: string | null
           warranty_months: number | null
@@ -1446,15 +2324,20 @@ export type Database = {
           badges?: string[] | null
           brand?: string | null
           brand_id?: string | null
+          categories?: string[] | null
           category_id?: string | null
           category_slug?: string | null
           color_temp_k?: number | null
+          cor_id?: string | null
+          cores_relacionadas?: string[] | null
           cost?: number | null
           created_at?: string | null
+          datasheet_url?: string | null
           depth_cm?: number | null
           depth_cm_packed?: number | null
           description?: string | null
           ean?: string | null
+          familia_cor?: string | null
           family?: string | null
           height_cm?: number | null
           height_cm_packed?: number | null
@@ -1477,10 +2360,12 @@ export type Database = {
           slug: string
           sort_order?: number
           stock_qty?: number | null
+          subcategory_slug?: string | null
           tags?: string[] | null
           technical_description?: string | null
           unit?: string | null
           updated_at?: string | null
+          video_url?: string | null
           voltage?: string | null
           warranty?: string | null
           warranty_months?: number | null
@@ -1495,15 +2380,20 @@ export type Database = {
           badges?: string[] | null
           brand?: string | null
           brand_id?: string | null
+          categories?: string[] | null
           category_id?: string | null
           category_slug?: string | null
           color_temp_k?: number | null
+          cor_id?: string | null
+          cores_relacionadas?: string[] | null
           cost?: number | null
           created_at?: string | null
+          datasheet_url?: string | null
           depth_cm?: number | null
           depth_cm_packed?: number | null
           description?: string | null
           ean?: string | null
+          familia_cor?: string | null
           family?: string | null
           height_cm?: number | null
           height_cm_packed?: number | null
@@ -1526,10 +2416,12 @@ export type Database = {
           slug?: string
           sort_order?: number
           stock_qty?: number | null
+          subcategory_slug?: string | null
           tags?: string[] | null
           technical_description?: string | null
           unit?: string | null
           updated_at?: string | null
+          video_url?: string | null
           voltage?: string | null
           warranty?: string | null
           warranty_months?: number | null
@@ -1553,7 +2445,56 @@ export type Database = {
             referencedRelation: "categories"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "products_cor_id_fkey"
+            columns: ["cor_id"]
+            isOneToOne: false
+            referencedRelation: "color_library"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      promo_banners: {
+        Row: {
+          ativo: boolean | null
+          cor_fundo: string | null
+          created_at: string | null
+          cupons: Json | null
+          emoji: string | null
+          id: string
+          imagem_url: string | null
+          subtitulo: string | null
+          tipo: string | null
+          titulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          cor_fundo?: string | null
+          created_at?: string | null
+          cupons?: Json | null
+          emoji?: string | null
+          id?: string
+          imagem_url?: string | null
+          subtitulo?: string | null
+          tipo?: string | null
+          titulo?: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          cor_fundo?: string | null
+          created_at?: string | null
+          cupons?: Json | null
+          emoji?: string | null
+          id?: string
+          imagem_url?: string | null
+          subtitulo?: string | null
+          tipo?: string | null
+          titulo?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       reviews: {
         Row: {
@@ -1691,6 +2632,27 @@ export type Database = {
           dias_adicionais?: number
           id?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      site_config: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string | null
+          value: string | null
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string | null
+          value?: string | null
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string | null
+          value?: string | null
         }
         Relationships: []
       }
