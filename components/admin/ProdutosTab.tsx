@@ -49,7 +49,7 @@ const variacaoVazia = (productId: string): Variacao => ({
 
 type Feature = { id?: string; title: string; description: string; image_url: string; sort_order: number }
 
-export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }: { meuPapel?: string, meuEmail?: string }) {
+export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', abrirEdicaoSku = null }: { meuPapel?: string, meuEmail?: string, abrirEdicaoSku?: string | null }) {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [totalProdutos, setTotalProdutos] = useState(0)
   const [pagina, setPagina] = useState(1)
@@ -103,6 +103,12 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin' }:
 
   // Modal produto
   const [modal, setModal] = useState(false)
+
+  useEffect(() => {
+    if (!abrirEdicaoSku || produtos.length === 0) return
+    const p = produtos.find(x => x.sku === abrirEdicaoSku)
+    if (p) { setProdutoEdit(p); setAbaModal('dados'); setModal(true) }
+  }, [abrirEdicaoSku, produtos])
   const [produtoEdit, setProdutoEdit] = useState<Partial<Produto>>({})
   const [abaModal, setAbaModal] = useState<'dados' | 'fotos' | 'variacoes' | 'funcionalidades'>('dados')
 
