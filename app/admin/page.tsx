@@ -1181,7 +1181,7 @@ export default function AdminPage() {
         {aba === 'blog' && <BlogTab />}
         {aba === 'topbar' && <TopBarTab />}
         {aba === 'categorias' && <CategoriasTab />}
-        {aba === 'midias-imagens' && <MidiasTab onEditarProduto={(sku) => { setSkuParaEditar(null); setTimeout(() => setSkuParaEditar(sku), 50); setAba('produtos') }} />}
+        {aba === 'midias-imagens' && <MidiasTab onEditarProduto={(sku) => { setSkuParaEditar(sku); setAba('produtos') }} />}
         {aba === 'importar' && <ImportarTab meuEmail={meuEmail} />}
         {aba === 'upload-massa' && <UploadMassaTab />}
         {aba === 'compre-junto' && <CompreJuntoTab />}
