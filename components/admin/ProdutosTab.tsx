@@ -107,13 +107,35 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
   const [modal, setModal] = useState(false)
 
   useEffect(() => {
-    if (!abrirEdicaoSku || !abrirEdicaoTs) return
+    if (!abrirEdicaoSku) return
     const abrir = async () => {
-      const { data } = await supabase.from('products').select('*').eq('sku', abrirEdicaoSku).single()
-      if (data) { setProdutoEdit(data); setAbaModal('dados'); setModal(true) }
+      // Tenta produto simples primeiro
+      const { data: prod } = await supabase
+        .from('products')
+        .select('*')
+        .eq('sku', abrirEdicaoSku)
+        .maybeSingle()
+      if (prod) {
+        setProdutoEdit(prod); setAbaModal('dados'); setModal(true)
+        return
+      }
+      // Se não achou, tenta variacao — busca o produto pai
+      const { data: vari } = await supabase
+        .from('product_variants')
+        .select('product_id')
+        .eq('sku', abrirEdicaoSku)
+        .maybeSingle()
+      if (vari?.product_id) {
+        const { data: pai } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', vari.product_id)
+          .maybeSingle()
+        if (pai) { setProdutoEdit(pai); setAbaModal('variacoes'); setModal(true) }
+      }
     }
     abrir()
-  }, [abrirEdicaoTs])
+  }, [abrirEdicaoSku, abrirEdicaoTs])
   const [produtoEdit, setProdutoEdit] = useState<Partial<Produto>>({})
   const [abaModal, setAbaModal] = useState<'dados' | 'fotos' | 'variacoes' | 'funcionalidades'>('dados')
 
