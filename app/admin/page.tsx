@@ -830,7 +830,7 @@ export default function AdminPage() {
   const [showSenha, setShowSenha] = useState(false)
   const [aba, setAba] = useState<'dashboard' | 'produtos' | 'pedidos' | 'cupons' | 'usuarios' | 'banners' | 'topbar' | 'categorias' | 'importar' | 'frete' | 'carrinhos' | 'relatorios' | 'clientes' | 'midias' | 'vendedores' | 'faq' | 'newsletter' | 'faleconosco' | 'auditoria' | 'configuracoes' | 'cms' | 'seo' | 'avaliacoes' | 'marcas' | 'cores' | 'galeria' | 'retirada' | 'faturamento' | 'promo-banner' | 'popup' | 'blog' | 'caracteristicas' | 'canais' | 'badges' | 'beneficios' | 'motivos'  | 'upload-massa' | 'compre-junto' | 'midias-imagens'>('dashboard')
   const [produtos, setProdutos] = useState<Produto[]>([])
-  const [skuParaEditar, setSkuParaEditar] = useState<string | null>(null)
+  const [skuParaEditar, setSkuParaEditar] = useState<{sku: string, ts: number} | null>(null)
   const [pedidos, setPedidos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [busca, setBusca] = useState("")
@@ -1155,7 +1155,7 @@ export default function AdminPage() {
       <main className="flex-1 p-8 overflow-auto">
         {aba === 'dashboard' && <DashboardTab />}
 
-        {aba === 'produtos' && <ProdutosTab meuPapel={meuPapel} meuEmail={meuEmail} abrirEdicaoSku={skuParaEditar} />}
+        {aba === 'produtos' && <ProdutosTab meuPapel={meuPapel} meuEmail={meuEmail} abrirEdicaoSku={skuParaEditar?.sku ?? null} abrirEdicaoTs={skuParaEditar?.ts ?? null} />}
 
         {aba === 'pedidos' && <PedidosTab meuEmail={meuEmail} />}
 
@@ -1181,7 +1181,7 @@ export default function AdminPage() {
         {aba === 'blog' && <BlogTab />}
         {aba === 'topbar' && <TopBarTab />}
         {aba === 'categorias' && <CategoriasTab />}
-        {aba === 'midias-imagens' && <MidiasTab onEditarProduto={(sku) => { setSkuParaEditar(sku); setAba('produtos') }} />}
+        {aba === 'midias-imagens' && <MidiasTab onEditarProduto={(sku) => { setSkuParaEditar({sku, ts: Date.now()}); setAba('produtos') }} />}
         {aba === 'importar' && <ImportarTab meuEmail={meuEmail} />}
         {aba === 'upload-massa' && <UploadMassaTab />}
         {aba === 'compre-junto' && <CompreJuntoTab />}
