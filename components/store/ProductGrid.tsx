@@ -136,6 +136,7 @@ export default function ProductGrid({
         let q = supabase
           .from('products')
           .select('id, name, slug, price, promo_price, category_slug, main_image, badge, badges, stock_qty')
+          .eq('active', true)
         if (categorySlug) {
           q =
             categorySlug === 'lancamentos'

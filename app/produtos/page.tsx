@@ -47,7 +47,7 @@ function ProdutosContent() {
       const [ordemCampo, ordemDir] = ordem.split("_")
       const ascending = ordemDir === "asc"
       const campoOrdem = ordemCampo === "name" ? "name" : ordemCampo === "preco" ? "price" : ordemCampo === "sales" ? "sales_count" : ordemCampo === "sort" ? "sort_order" : "created_at"
-      let query = supabase.from("products").select("*", { count: "exact" })
+      let query = supabase.from("products").select("*", { count: "exact" }).eq("active", true)
       if (ordem === "stock_desc") {
         query = query.order("stock_qty", { ascending: false, nullsFirst: false }).order("name", { ascending: true })
       } else {
