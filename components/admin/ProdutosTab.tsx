@@ -2,6 +2,7 @@
 import ProdutoGaleriaUpload from '@/components/store/ProdutoGaleriaUpload'
 import { ProdutoDatasheetUpload } from '@/components/store/ProdutoDatasheet'
 import { useState, useEffect, useRef } from 'react'
+import ReactDOM from 'react-dom'
 import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Upload, ImageIcon } from 'lucide-react'
 import FotosTab from '@/components/admin/FotosTab'
 import { supabase } from '@/lib/supabase'
@@ -82,6 +83,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
   const [marcas, setMarcas] = useState<{id:string;nome:string}[]>([])
   const [coresBib, setCoresBib] = useState<{id:string,nome:string,hex:string}[]>([])
   const [corPopup, setCorPopup] = useState<string|null>(null)
+  const [corPopupPos, setCorPopupPos] = useState<{top:number,left:number}>({top:0,left:0})
   useEffect(() => {
     supabase.from('brands').select('id,nome').eq('ativo',true).order('nome').then(({data}) => setMarcas(data||[]))
     ;(supabase.from as any)('color_library').select('id,nome,hex').eq('ativo',true).order('sort_order').then(({data}:any) => setCoresBib(data||[]))
@@ -478,7 +480,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                             <div
                               className="w-6 h-6 rounded-full border-2 border-green-500 mx-auto cursor-pointer"
                               style={{background: coresBib.find(c => c.id === (p as any).cor_id)?.hex || '#ccc'}}
-                              onClick={e => { e.stopPropagation(); setCorPopup(corPopup === p.id ? null : p.id) }}
+                              onClick={e => { e.stopPropagation(); const r=(e.currentTarget as HTMLElement).getBoundingClientRect(); setCorPopupPos({top:r.top+window.scrollY-220,left:r.left+window.scrollX-80}); setCorPopup(corPopup === p.id ? null : p.id) }}
                               data-cor-popup={p.id}
                             />
                           </div>
@@ -486,15 +488,12 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                           <span
                             className="text-gray-400 text-xs hover:text-green-600 cursor-pointer"
                             data-cor-popup={p.id}
-                            onClick={e => { e.stopPropagation(); setCorPopup(corPopup === p.id ? null : p.id) }}
+                            onClick={e => { e.stopPropagation(); const r=(e.currentTarget as HTMLElement).getBoundingClientRect(); setCorPopupPos({top:r.top+window.scrollY-220,left:r.left+window.scrollX-80}); setCorPopup(corPopup === p.id ? null : p.id) }}
                           >+ cor</span>
                         )}
-                        {corPopup === p.id && (
+                        {corPopup === p.id && typeof document !== 'undefined' && ReactDOM.createPortal(
                           <div className="fixed z-[9999] bg-white border border-gray-200 rounded-xl shadow-xl p-3 w-56"
-                            style={{
-                              top: (() => { const el = document.querySelector(`[data-cor-popup="${p.id}"]`); if(!el) return 0; const r = el.getBoundingClientRect(); return r.top - 260; })(),
-                              left: (() => { const el = document.querySelector(`[data-cor-popup="${p.id}"]`); if(!el) return 0; const r = el.getBoundingClientRect(); return Math.max(8, r.left - 80); })(),
-                            }}
+                            style={{top: corPopupPos.top, left: Math.max(8, corPopupPos.left)}}
                             onClick={e => e.stopPropagation()}>
                             <div className="flex items-center justify-between mb-2">
                               <p className="text-xs text-gray-500 font-medium">Selecionar cor</p>
@@ -519,7 +518,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                             <button onClick={async e => { e.stopPropagation(); await supabase.from('products').update({ cor_id: null } as any).eq('id', p.id); setCorPopup(null); carregar() }}
                               className="mt-2 text-xs text-gray-400 hover:text-red-500 w-full text-center">✕ Remover cor</button>
                           </div>
-                        )}
+                        , document.body)}
                       </div>
                     </td>
                     {/* Coluna Família inline */}
