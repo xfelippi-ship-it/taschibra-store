@@ -479,16 +479,23 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                               className="w-6 h-6 rounded-full border-2 border-green-500 mx-auto cursor-pointer"
                               style={{background: coresBib.find(c => c.id === (p as any).cor_id)?.hex || '#ccc'}}
                               onClick={e => { e.stopPropagation(); setCorPopup(corPopup === p.id ? null : p.id) }}
+                              data-cor-popup={p.id}
                             />
                           </div>
                         ) : (
                           <span
                             className="text-gray-400 text-xs hover:text-green-600 cursor-pointer"
+                            data-cor-popup={p.id}
                             onClick={e => { e.stopPropagation(); setCorPopup(corPopup === p.id ? null : p.id) }}
                           >+ cor</span>
                         )}
                         {corPopup === p.id && (
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-[9999] bg-white border border-gray-200 rounded-xl shadow-xl p-3 w-56" onClick={e => e.stopPropagation()}>
+                          <div className="fixed z-[9999] bg-white border border-gray-200 rounded-xl shadow-xl p-3 w-56"
+                            style={{
+                              top: (() => { const el = document.querySelector(`[data-cor-popup="${p.id}"]`); if(!el) return 0; const r = el.getBoundingClientRect(); return r.top - 260; })(),
+                              left: (() => { const el = document.querySelector(`[data-cor-popup="${p.id}"]`); if(!el) return 0; const r = el.getBoundingClientRect(); return Math.max(8, r.left - 80); })(),
+                            }}
+                            onClick={e => e.stopPropagation()}>
                             <div className="flex items-center justify-between mb-2">
                               <p className="text-xs text-gray-500 font-medium">Selecionar cor</p>
                               <button onClick={e => { e.stopPropagation(); setCorPopup(null) }} className="text-gray-400 hover:text-gray-600 text-sm font-bold leading-none">✕</button>
