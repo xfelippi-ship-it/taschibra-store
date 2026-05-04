@@ -488,8 +488,11 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                           >+ cor</span>
                         )}
                         {corPopup === p.id && (
-                          <div className="fixed z-[9999] bg-white border border-gray-200 rounded-xl shadow-lg p-3 w-52" style={{bottom: '80px', right: '120px'}} onClick={e => e.stopPropagation()}>
-                            <p className="text-xs text-gray-500 mb-2 font-medium">Selecionar cor</p>
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-[9999] bg-white border border-gray-200 rounded-xl shadow-xl p-3 w-56" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="text-xs text-gray-500 font-medium">Selecionar cor</p>
+                              <button onClick={e => { e.stopPropagation(); setCorPopup(null) }} className="text-gray-400 hover:text-gray-600 text-sm font-bold leading-none">✕</button>
+                            </div>
                             <div className="flex flex-wrap gap-2">
                               {coresBib.map(cor => (
                                 <button key={cor.id} title={cor.nome}
