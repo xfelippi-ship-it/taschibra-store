@@ -39,6 +39,7 @@ const TIPOS_VARIACAO = [
   { value: 'indice_protecao',     label: 'Índice de Proteção'           },
   { value: 'modelo',              label: 'Modelo'                       },
   { value: 'temperatura_cor',     label: 'Temperatura de Cor'           },
+  { value: 'temperatura_verde',    label: 'Temperatura de Cor (Verde)'   },
   { value: 'temperatura_frontal', label: 'Temperatura de Cor (Frontal)' },
   { value: 'tensao',              label: 'Tensão'                       },
 ]
@@ -1025,7 +1026,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                 <div>
                   <label className="text-sm font-bold text-gray-700 mb-1 block">Valor *</label>
                   <input value={varEdit.value} onChange={e => setVarEdit({ ...varEdit, value: e.target.value })}
-                    placeholder="Ex: 3000K, Preto, 127V"
+                    placeholder="Ex: 3000K, 4000K, 6500K, VERDE, Preto, 127V"
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
               </div>
