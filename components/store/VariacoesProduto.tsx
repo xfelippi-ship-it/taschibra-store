@@ -110,7 +110,7 @@ export default function VariacoesProduto({ produtoId, onSelect }: Props) {
   return (
     <div className="space-y-4 mb-5">
       {tipos.map(tipo => {
-        const opcoesBruto = variacoes.filter(v => v.type === tipo && v.stock_qty > 0)
+        const opcoesBruto = variacoes.filter(v => v.type === tipo)
         const opcoes = (tipo === 'temperatura' || tipo === 'temperatura_cor')
           ? [...opcoesBruto].sort((a, b) => parseInt(a.value) - parseInt(b.value))
           : opcoesBruto
@@ -145,23 +145,26 @@ export default function VariacoesProduto({ produtoId, onSelect }: Props) {
                   )
                 }
 
+                const semEstoque = v.stock_qty === 0
                 return (
                   <button
                     key={v.id}
                     onClick={() => setSelecionados(prev => ({ ...prev, [tipo]: v.value }))}
+                    title={semEstoque ? 'Indisponível' : v.value}
                     className={`
                       relative px-4 py-2 rounded-lg border-2 text-sm font-bold transition-all cursor-pointer
-                      ${ativo ? 'border-green-600 bg-green-50 text-green-700' : 'border-gray-200 text-gray-700 hover:border-gray-400'}
-                      ${isTemp && tempColor[v.value] ? tempColor[v.value] : ''}
+                      ${ativo ? 'border-green-600 bg-green-50 text-green-700' : semEstoque ? 'border-gray-100 text-gray-300 bg-gray-50' : 'border-gray-200 text-gray-700 hover:border-gray-400'}
+                      ${isTemp && tempColor[v.value] && !semEstoque ? tempColor[v.value] : ''}
                     `}
                   >
                     {isTemp && (
                       <span
                         className="inline-block w-3 h-3 rounded-full mr-1.5 border border-gray-300"
-                        style={{ backgroundColor: tempDot[v.value] || '#94a3b8' }}
+                        style={{ backgroundColor: semEstoque ? '#e5e7eb' : tempDot[v.value] || '#94a3b8' }}
                       />
                     )}
                     {v.value}
+                    {semEstoque && <span className="block text-xs font-normal text-gray-300">Indisp.</span>}
                   </button>
                 )
               })}
