@@ -69,7 +69,17 @@ export default function VariacoesProduto({ produtoId, onSelect }: Props) {
         .eq('product_id', produtoId)
         .eq('active', true)
         .order('type')
-      setVariacoes((data || []) as Variacao[])
+      const vs = (data || []) as Variacao[]
+      setVariacoes(vs)
+      // Auto-selecionar primeira variação com estoque por tipo
+      const tipos = [...new Set(vs.map(v => v.type))]
+      const autoSel: Record<string, string> = {}
+      tipos.forEach(tipo => {
+        const comEstoque = vs.filter(v => v.type === tipo && v.stock_qty > 0)
+        const opcao = comEstoque[0] || vs.filter(v => v.type === tipo)[0]
+        if (opcao) autoSel[tipo] = opcao.value
+      })
+      setSelecionados(autoSel)
       setLoading(false)
     }
     load()
