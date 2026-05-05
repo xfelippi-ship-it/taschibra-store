@@ -153,7 +153,7 @@ export default function VariacoesProduto({ produtoId, onSelect }: Props) {
                     title={semEstoque ? 'Indisponível' : v.value}
                     className={`
                       relative px-4 py-2 rounded-lg border-2 text-sm font-bold transition-all cursor-pointer
-                      ${ativo ? 'border-green-600 bg-green-50 text-green-700' : semEstoque ? 'border-gray-100 text-gray-300 bg-gray-50' : 'border-gray-200 text-gray-700 hover:border-gray-400'}
+                      ${semEstoque ? 'border-gray-100 text-gray-300 bg-gray-50' : ativo ? 'border-green-600 text-green-700' : 'border-gray-200 text-gray-700 hover:border-gray-400'}
                       ${isTemp && tempColor[v.value] && !semEstoque ? tempColor[v.value] : ''}
                     `}
                   >
@@ -164,7 +164,7 @@ export default function VariacoesProduto({ produtoId, onSelect }: Props) {
                       />
                     )}
                     {v.value}
-                    {semEstoque && <span className="block text-xs font-normal text-gray-300">Indisp.</span>}
+                    {semEstoque && <span className="block text-xs font-normal text-gray-300">Indisponível</span>}
                   </button>
                 )
               })}
