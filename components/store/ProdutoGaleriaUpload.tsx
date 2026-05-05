@@ -9,9 +9,10 @@ interface Props {
   images: string[]
   onChange: (images: string[]) => void
   sku?: string
+  ean?: string
 }
 
-export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
+export default function ProdutoGaleriaUpload({ images, onChange, sku, ean }: Props) {
   const [uploading, setUploading] = useState<number | null>(null)
   const [uploadingZip, setUploadingZip] = useState(false)
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null)
@@ -28,8 +29,10 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
     setUploading(idx)
     try {
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-      const prefix = sku ? `produtos/${sku}` : 'produtos'
-      const nome = `${prefix}/${idx + 1}-${Date.now()}.${ext}`
+      const chave = ean || sku || Date.now().toString()
+      const prefix = `produtos/${chave}`
+      const numStr = String(idx + 1).padStart(2, '0')
+      const nome = `${prefix}/${chave}_${numStr}.${ext}`
       const { error } = await supabase.storage.from('midias').upload(nome, file, { upsert: true, contentType: file.type })
       if (error) throw error
       const { data } = supabase.storage.from('midias').getPublicUrl(nome)
@@ -44,7 +47,8 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
     const imgs = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'))
     if (!imgs.length) return
     setUploadingZip(true)
-    const prefix = sku ? `produtos/${sku}` : 'produtos'
+    const chave = ean || sku || Date.now().toString()
+    const prefix = `produtos/${chave}`
     const novoGrid = [...grid]
     let slotIdx = novoGrid.findIndex(v => !v)
     if (slotIdx === -1) slotIdx = 0
@@ -54,7 +58,8 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku }: Props) {
       setProgress(`Subindo ${++count}/${imgs.length}...`)
       try {
         const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-        const nome = `${prefix}/${slotIdx + 1}-${Date.now()}.${ext}`
+        const numStr = String(slotIdx + 1).padStart(2, '0')
+        const nome = `${prefix}/${chave}_${numStr}.${ext}`
         const { error } = await supabase.storage.from('midias').upload(nome, file, { upsert: true, contentType: file.type })
         if (error) throw error
         const { data } = supabase.storage.from('midias').getPublicUrl(nome)

@@ -1075,6 +1075,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                 <label className="text-sm font-bold text-gray-700 mb-1 block">Descrição técnica (opcional)</label>
                 <ProdutoGaleriaUpload
                   sku={varEdit.sku || varEdit.product_id}
+                  ean={varEdit.ean}
                   images={varEdit.images || (varEdit.main_image ? [varEdit.main_image] : [])}
                   onChange={(imgs) => setVarEdit({
                     ...varEdit,
