@@ -71,8 +71,12 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
     setUploadingImg(true)
     try {
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-      const nome = `produtos/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      const { error } = await supabase.storage.from('midias').upload(nome, file, { upsert: false, contentType: file.type })
+      const chave = produtoEdit.ean || produtoEdit.sku || Date.now().toString()
+      // Contar imagens existentes para numerar corretamente
+      const { data: existentes } = await supabase.storage.from('midias').list(`produtos/${chave}`)
+      const num = ((existentes?.length || 0) + 1).toString().padStart(2, '0')
+      const nome = `produtos/${chave}/${chave}_${num}.${ext}`
+      const { error } = await supabase.storage.from('midias').upload(nome, file, { upsert: true, contentType: file.type })
       if (error) throw error
       const { data: urlData } = supabase.storage.from('midias').getPublicUrl(nome)
       setProdutoEdit(prev => ({ ...prev, main_image: urlData.publicUrl }))

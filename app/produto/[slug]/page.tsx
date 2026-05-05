@@ -23,6 +23,7 @@ type Variacao = {
   id: string; name: string; type: string; value: string
   sku?: string; ean?: string; price?: number; promo_price?: number
   stock_qty: number; active: boolean; technical_description?: string
+  main_image?: string | null; images?: string[]
 }
 type Produto = {
   id: string; name: string; slug: string; price: number; promo_price: number
