@@ -16,6 +16,7 @@ import ProductJsonLd from '@/components/store/ProductJsonLd'
 import ProdutoZoom from '@/components/store/ProdutoZoom'
 import { detectMediaType, getYouTubeEmbedUrl, getVimeoEmbedUrl, getYouTubeThumbnail } from '@/lib/media-helpers'
 import { ProdutoDatasheetDownload } from '@/components/store/ProdutoDatasheet'
+import AviseMeModal from '@/components/store/AviseMeModal'
 
 
 type Variacao = {
@@ -234,6 +235,7 @@ export default function ProdutoPage() {
   const [reviewText, setReviewText] = useState('')
   const [reviewSent, setReviewSent] = useState(false)
   const { addItem, items } = useCart()
+  const [aviseMeOpen, setAviseMeOpen] = useState(false)
   const [isFavorito, setIsFavorito] = useState(false)
   const [favLoading, setFavLoading] = useState(false)
   const [clienteId, setClienteId] = useState<string|null>(null)
@@ -525,8 +527,14 @@ export default function ProdutoPage() {
               <button onClick={() => setQty(q => q + 1)} className="w-10 h-12 bg-gray-50 text-lg font-bold text-gray-700 hover:bg-gray-100">+</button>
             </div>
             {semEstoque ? (
-              <div className="flex-1 border-2 border-gray-200 rounded-lg py-3 flex items-center justify-center text-sm font-black text-gray-400 bg-gray-50">
-                Produto Indisponível
+              <div className="flex-1 flex flex-col gap-2">
+                <div className="border-2 border-gray-200 rounded-lg py-3 flex items-center justify-center text-sm font-black text-gray-400 bg-gray-50">
+                  Produto Indisponível
+                </div>
+                <button onClick={() => setAviseMeOpen(true)}
+                  className="w-full border border-gray-300 rounded-lg py-2.5 text-sm font-bold text-gray-600 hover:border-green-500 hover:text-green-600 flex items-center justify-center gap-2 transition-colors">
+                  🔔 Avise-me quando disponível
+                </button>
               </div>
             ) : semPreco ? (
               <div className="flex-1 border-2 border-gray-200 rounded-lg py-3 flex items-center justify-center text-sm font-black text-gray-400 bg-gray-50 cursor-not-allowed">
@@ -740,8 +748,14 @@ export default function ProdutoPage() {
           <button onClick={() => setQty(q => q + 1)} className="w-9 h-11 bg-gray-50 text-lg font-bold text-gray-700">+</button>
         </div>
         {semEstoque ? (
-          <div className="flex-1 border-2 border-gray-200 rounded-lg py-3 flex items-center justify-center text-sm font-black text-gray-400 bg-gray-50">
-            Produto Indisponível
+          <div className="flex-1 flex flex-col gap-2">
+            <div className="border-2 border-gray-200 rounded-lg py-3 flex items-center justify-center text-sm font-black text-gray-400 bg-gray-50">
+              Produto Indisponível
+            </div>
+            <button onClick={() => setAviseMeOpen(true)}
+              className="w-full border border-gray-300 rounded-lg py-2.5 text-sm font-bold text-gray-600 hover:border-green-500 hover:text-green-600 flex items-center justify-center gap-2 transition-colors">
+              🔔 Avise-me quando disponível
+            </button>
           </div>
         ) : semPreco ? (
           <div className="flex-1 border-2 border-gray-200 rounded-lg py-3 flex items-center justify-center text-sm font-black text-gray-400 bg-gray-50 cursor-not-allowed">
@@ -770,6 +784,14 @@ export default function ProdutoPage() {
       </div>
 
       <Footer />
+      <AviseMeModal
+        open={aviseMeOpen}
+        onClose={() => setAviseMeOpen(false)}
+        productId={produto.id}
+        productName={produto.name}
+        variantSku={variacaoSelecionada?.sku}
+        variantLabel={variacaoSelecionada?.value || variacaoSelecionada?.name}
+      />
     </>
   )
 }
