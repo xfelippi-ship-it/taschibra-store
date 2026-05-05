@@ -1076,7 +1076,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                 <ProdutoGaleriaUpload
                   sku={varEdit.sku || varEdit.product_id}
                   ean={varEdit.ean}
-                  images={varEdit.images || (varEdit.main_image ? [varEdit.main_image] : [])}
+                  images={varEdit.images || []}
                   onChange={(imgs) => setVarEdit({
                     ...varEdit,
                     images: imgs,
