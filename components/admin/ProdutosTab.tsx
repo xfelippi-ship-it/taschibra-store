@@ -935,7 +935,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                       {(produtoEdit.categories || []).length} selecionada(s)
                     </span>
                   </label>
-                  <div className="border border-gray-200 rounded-lg max-h-52 overflow-y-auto p-2 space-y-0.5 bg-white">
+                  <div className="border border-gray-200 rounded-lg max-h-80 overflow-y-auto p-2 space-y-0.5 bg-white">
                     {catsLS.map(cat => {
                       const checked = (produtoEdit.categories || []).includes(cat.slug)
                       return (
