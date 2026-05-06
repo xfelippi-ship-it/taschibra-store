@@ -1062,9 +1062,11 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                       ...prev,
                       images: imgs,
                       // Se há imagem nova: usa ela como principal.
-                      // Se NÃO há imagem nova mas array está vazio (operador limpou tudo): null para trigger refilar.
+                      // Se NÃO há imagem nova mas array está vazio (operador limpou tudo): NULL (trigger SQL refila da variação).
                       // Se NÃO há imagem nova e ainda há outras imagens: mantém a anterior.
-                      main_image: primeiraImagem || (imgs.length === 0 ? null : prev.main_image) || ''
+                      main_image: primeiraImagem
+                        ? primeiraImagem
+                        : (imgs.length === 0 ? null : (prev.main_image || ''))
                     }))
                   }}
                   sku={produtoEdit.sku}
