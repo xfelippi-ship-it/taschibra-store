@@ -1072,7 +1072,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                 </div>
               </div>
               <div>
-                <label className="text-sm font-bold text-gray-700 mb-1 block">Descrição técnica (opcional)</label>
+                <label className="text-sm font-bold text-gray-700 mb-1 block">Galeria de imagens da variação</label>
                 <ProdutoGaleriaUpload
                   sku={varEdit.sku || varEdit.product_id}
                   ean={varEdit.ean}
@@ -1083,6 +1083,9 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                     main_image: imgs[0] || null
                   })}
                 />
+              </div>
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-1 block">Descrição técnica (opcional)</label>
                 <textarea value={varEdit.technical_description || ''} rows={2}
                   onChange={e => setVarEdit({ ...varEdit, technical_description: e.target.value })}
                   placeholder="Ex: Luz branca quente. Ideal para salas e quartos."
