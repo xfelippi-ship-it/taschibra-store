@@ -816,7 +816,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
 
                 {/* Galeria de imagens — slot 1 = imagem principal automaticamente */}
                 <ProdutoGaleriaUpload
-                  images={produtoEdit.images || []}
+                  images={(produtoEdit.images?.length ? produtoEdit.images : (produtoEdit.main_image ? [produtoEdit.main_image] : []))}
                   onChange={imgs => {
                     const primeiraImagem = imgs.find(u => u && !['youtube.com','youtu.be','vimeo.com'].some(d => u.includes(d)) && !u.match(/\.(mp4|webm|mov)/i))
                     setProdutoEdit(prev => ({ ...prev, images: imgs, main_image: primeiraImagem || prev.main_image || '' }))
