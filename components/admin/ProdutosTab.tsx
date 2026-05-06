@@ -1051,12 +1051,21 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                   </div>
                 </div>
 
-                {/* Galeria de imagens — slot 1 = imagem principal automaticamente */}
+                {/* Galeria de imagens — slot 1 = imagem principal automaticamente.
+                    Quando o operador esvazia tudo (clica X em todas), main_image vira null
+                    para o trigger fill_pai_main_image() preencher da variação com mais estoque. */}
                 <ProdutoGaleriaUpload
                   images={(produtoEdit.images?.length ? produtoEdit.images : (produtoEdit.main_image ? [produtoEdit.main_image] : []))}
                   onChange={imgs => {
                     const primeiraImagem = imgs.find(u => u && !['youtube.com','youtu.be','vimeo.com'].some(d => u.includes(d)) && !u.match(/\.(mp4|webm|mov)/i))
-                    setProdutoEdit(prev => ({ ...prev, images: imgs, main_image: primeiraImagem || prev.main_image || '' }))
+                    setProdutoEdit(prev => ({
+                      ...prev,
+                      images: imgs,
+                      // Se há imagem nova: usa ela como principal.
+                      // Se NÃO há imagem nova mas array está vazio (operador limpou tudo): null para trigger refilar.
+                      // Se NÃO há imagem nova e ainda há outras imagens: mantém a anterior.
+                      main_image: primeiraImagem || (imgs.length === 0 ? null : prev.main_image) || ''
+                    }))
                   }}
                   sku={produtoEdit.sku}
                 />
