@@ -1013,7 +1013,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
       {/* Modal Variação */}
       {modalVar && varEdit && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl w-full max-w-3xl p-6 shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-black text-gray-800">{varEdit.id ? 'Editar Variação' : 'Nova Variação'}</h2>
               <button onClick={() => { setModalVar(false); setVarEdit(null) }} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
