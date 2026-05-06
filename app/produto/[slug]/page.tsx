@@ -29,8 +29,10 @@ type Produto = {
   id: string; name: string; slug: string; price: number; promo_price: number
   category_slug: string; sku?: string; ean?: string; description?: string
   technical_description?: string; main_image?: string; images?: string[]
-  warranty?: string; warranty_months?: number; weight_kg?: number
-  height_cm?: number; width_cm?: number; length_cm?: number
+  warranty?: string; warranty_months?: number
+  weight_kg?: number; height_cm?: number; width_cm?: number; depth_cm?: number
+  weight_kg_packed?: number; height_cm_packed?: number; width_cm_packed?: number; depth_cm_packed?: number
+  show_dimensions_unpacked?: boolean; show_dimensions_packed?: boolean
   voltage?: string; power_w?: number; color_temp_k?: number
   ip_rating?: string; brand?: string; datasheet_url?: string
   stock_qty?: number | null
@@ -346,18 +348,36 @@ export default function ProdutoPage() {
     ...todasMidias.filter(url => ['youtube.com','youtu.be','vimeo.com'].some(d => url.includes(d)) || url.match(/\.(mp4|webm|mov)/i)),
   ]
 
-  const specs: { label: string; valor: string; icon?: React.ReactNode }[] = []
-  if (produto.voltage) specs.push({ label: 'Tensão', valor: produto.voltage, icon: <Zap size={13} /> })
-  if (produto.power_w) specs.push({ label: 'Potência', valor: `${produto.power_w}W`, icon: <Zap size={13} /> })
-  if (produto.color_temp_k) specs.push({ label: 'Temperatura de Cor', valor: `${produto.color_temp_k}K`, icon: <Thermometer size={13} /> })
-  if (produto.ip_rating) specs.push({ label: 'Índice de Proteção', valor: produto.ip_rating })
-  if (produto.weight_kg) specs.push({ label: 'Peso', valor: `${produto.weight_kg} kg`, icon: <Package size={13} /> })
-  if (produto.height_cm || produto.width_cm || produto.length_cm) {
-    const dims = [produto.height_cm, produto.width_cm, produto.length_cm].filter(Boolean).join(' × ')
-    specs.push({ label: 'Dimensões (A×L×C)', valor: `${dims} cm`, icon: <Ruler size={13} /> })
+  // Características técnicas elétricas
+  const specsTec: { label: string; valor: string; icon?: React.ReactNode }[] = []
+  if (produto.voltage) specsTec.push({ label: 'Tensão', valor: produto.voltage, icon: <Zap size={13} /> })
+  if (produto.power_w) specsTec.push({ label: 'Potência', valor: `${produto.power_w}W`, icon: <Zap size={13} /> })
+  if (produto.color_temp_k) specsTec.push({ label: 'Temperatura de Cor', valor: `${produto.color_temp_k}K`, icon: <Thermometer size={13} /> })
+  if (produto.ip_rating) specsTec.push({ label: 'Índice de Proteção', valor: produto.ip_rating })
+
+  // Medidas do produto (sem embalagem) — só aparece se toggle ON no backoffice
+  const specsProduto: { label: string; valor: string }[] = []
+  if (produto.show_dimensions_unpacked) {
+    if (produto.weight_kg) specsProduto.push({ label: 'Peso', valor: `${produto.weight_kg} kg` })
+    if (produto.width_cm) specsProduto.push({ label: 'Largura', valor: `${produto.width_cm} cm` })
+    if (produto.height_cm) specsProduto.push({ label: 'Altura', valor: `${produto.height_cm} cm` })
+    if (produto.depth_cm) specsProduto.push({ label: 'Comprimento', valor: `${produto.depth_cm} cm` })
   }
-  if (variacaoSelecionada?.ean || produto.ean) specs.push({ label: 'EAN', valor: variacaoSelecionada?.ean || produto.ean! })
-  if (variacaoSelecionada?.sku || produto.sku) specs.push({ label: 'SKU', valor: variacaoSelecionada?.sku || produto.sku! })
+
+  // Medidas com embalagem — só aparece se toggle ON no backoffice
+  const specsEmbalagem: { label: string; valor: string }[] = []
+  if (produto.show_dimensions_packed) {
+    if (produto.weight_kg_packed) specsEmbalagem.push({ label: 'Peso', valor: `${produto.weight_kg_packed} kg` })
+    if (produto.width_cm_packed) specsEmbalagem.push({ label: 'Largura', valor: `${produto.width_cm_packed} cm` })
+    if (produto.height_cm_packed) specsEmbalagem.push({ label: 'Altura', valor: `${produto.height_cm_packed} cm` })
+    if (produto.depth_cm_packed) specsEmbalagem.push({ label: 'Comprimento', valor: `${produto.depth_cm_packed} cm` })
+  }
+
+  // Identificação — só SKU (EAN é interno do operador, não vai para a PDP)
+  const skuValor = variacaoSelecionada?.sku || produto.sku || ''
+
+  // Flag para mostrar bloco inteiro
+  const temAlgumaSpec = specsTec.length > 0 || specsProduto.length > 0 || specsEmbalagem.length > 0 || skuValor
 
   const categoriaLabel = produto.category_slug
     ? produto.category_slug.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
@@ -618,23 +638,79 @@ export default function ProdutoPage() {
       )}
 
       {/* ── Especificações técnicas ── */}
-      {(productSpecs.length > 0 || specs.length > 0) && (
+      {(productSpecs.length > 0 || temAlgumaSpec) && (
         <div className="max-w-7xl mx-auto px-4 border-t border-gray-100 py-8">
-          <h2 className="text-lg font-black text-gray-800 mb-4 flex items-center gap-3">
+          <h2 className="text-lg font-black text-gray-800 mb-5 flex items-center gap-3">
             <span className="w-1 h-5 bg-indigo-500 rounded-full block" />Especificações técnicas
           </h2>
-          <table className="w-full text-sm border border-gray-200 rounded-xl overflow-hidden">
-            <tbody>
-              {specs.map((s, i) => (
-                <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                  <td className="py-2.5 px-4 text-gray-500 font-medium w-1/2">
-                    <span className="flex items-center gap-1.5">{s.icon}{s.label}</span>
-                  </td>
-                  <td className="py-2.5 px-4 text-gray-800 font-semibold">{s.valor}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+          {/* Características elétricas */}
+          {specsTec.length > 0 && (
+            <div className="mb-5">
+              <p className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                <Zap size={14} className="text-indigo-500" />Características
+              </p>
+              <table className="w-full text-sm border border-gray-200 rounded-xl overflow-hidden">
+                <tbody>
+                  {specsTec.map((s, i) => (
+                    <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                      <td className="py-2.5 px-4 text-gray-500 font-medium w-1/2">
+                        <span className="flex items-center gap-1.5">{s.icon}{s.label}</span>
+                      </td>
+                      <td className="py-2.5 px-4 text-gray-800 font-semibold">{s.valor}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Medidas do produto */}
+          {specsProduto.length > 0 && (
+            <div className="mb-5">
+              <p className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                <Ruler size={14} className="text-emerald-500" />Medidas do produto
+                <span className="text-[10px] font-bold uppercase tracking-wide bg-gray-100 text-gray-500 px-2 py-0.5 rounded">sem embalagem</span>
+              </p>
+              <table className="w-full text-sm border border-gray-200 rounded-xl overflow-hidden">
+                <tbody>
+                  {specsProduto.map((s, i) => (
+                    <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                      <td className="py-2.5 px-4 text-gray-500 font-medium w-1/2">{s.label}</td>
+                      <td className="py-2.5 px-4 text-gray-800 font-semibold">{s.valor}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Medidas com embalagem */}
+          {specsEmbalagem.length > 0 && (
+            <div className="mb-5">
+              <p className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                <Package size={14} className="text-amber-600" />Medidas com embalagem
+                <span className="text-[10px] font-bold uppercase tracking-wide bg-amber-50 text-amber-700 px-2 py-0.5 rounded">para frete</span>
+              </p>
+              <table className="w-full text-sm border border-gray-200 rounded-xl overflow-hidden">
+                <tbody>
+                  {specsEmbalagem.map((s, i) => (
+                    <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                      <td className="py-2.5 px-4 text-gray-500 font-medium w-1/2">{s.label}</td>
+                      <td className="py-2.5 px-4 text-gray-800 font-semibold">{s.valor}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Código (SKU apenas) */}
+          {skuValor && (
+            <p className="text-xs text-gray-400 mt-3">
+              Código <span className="ml-1 font-mono font-semibold text-gray-600">{skuValor}</span>
+            </p>
+          )}
         </div>
       )}
 
