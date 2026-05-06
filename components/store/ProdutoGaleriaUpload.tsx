@@ -24,6 +24,25 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku, ean }: Pro
   const slots = 8
   const grid = Array.from({ length: slots }, (_, i) => images[i] || '')
 
+  async function handleDownload(url: string, idx: number) {
+    try {
+      const res = await fetch(url)
+      const blob = await res.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      const ext = url.split('.').pop()?.split('?')[0] || 'jpg'
+      a.href = blobUrl
+      a.download = `imagem-${idx + 1}.${ext}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(blobUrl)
+    } catch (err) {
+      console.error('Erro ao baixar:', err)
+      window.open(url, '_blank')
+    }
+  }
+
   async function uploadSlot(file: File, idx: number) {
     if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) return
     setUploading(idx)
@@ -220,7 +239,7 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku, ean }: Pro
                 </button>
                 <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-1">
                   {idx > 0 && <button type="button" onClick={() => moveSlot(idx, idx-1)} className="bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded hover:bg-black/60">←</button>}
-                  <a href={url} download target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded hover:bg-black/60" title="Baixar">⬇</a>
+                  <button type="button" onClick={e => { e.stopPropagation(); handleDownload(url, idx) }} className="bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded hover:bg-black/60" title="Baixar">⬇</button>
                   {idx < grid.filter(Boolean).length - 1 && <button type="button" onClick={() => moveSlot(idx, idx+1)} className="bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded hover:bg-black/60">→</button>}
                 </div>
               </>
