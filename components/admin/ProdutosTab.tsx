@@ -906,13 +906,6 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                   <label htmlFor="ativo_prod" className="text-sm font-bold text-gray-700">Produto ativo</label>
                 </div>
 
-                {/* Ficha técnica PDF */}
-                <ProdutoDatasheetUpload
-                  value={produtoEdit.datasheet_url || ""}
-                  onChange={url => setProdutoEdit(prev => ({ ...prev, datasheet_url: url }))}
-                  sku={produtoEdit.sku}
-                />
-
               </div>
 
               {/* ── COLUNA DIREITA ── */}
@@ -958,6 +951,13 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                     const primeiraImagem = imgs.find(u => u && !['youtube.com','youtu.be','vimeo.com'].some(d => u.includes(d)) && !u.match(/\.(mp4|webm|mov)/i))
                     setProdutoEdit(prev => ({ ...prev, images: imgs, main_image: primeiraImagem || prev.main_image || '' }))
                   }}
+                  sku={produtoEdit.sku}
+                />
+
+                {/* Ficha técnica PDF */}
+                <ProdutoDatasheetUpload
+                  value={produtoEdit.datasheet_url || ""}
+                  onChange={url => setProdutoEdit(prev => ({ ...prev, datasheet_url: url }))}
                   sku={produtoEdit.sku}
                 />
 
