@@ -599,7 +599,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                                   {v.active ? 'Ativo' : 'Off'}
                                 </span>
                                 <div className="flex gap-2">
-                                  <button onClick={() => { setVarEdit(v); setModalVar(true) }}
+                                  <button onClick={() => { setVarEdit({...v, images: v.images?.length ? v.images : v.main_image ? [v.main_image] : []}); setModalVar(true) }}
                                     className="text-blue-400 hover:text-blue-600"><Pencil size={13} /></button>
                                   <button onClick={() => excluirVariacao(v)}
                                     className="text-red-300 hover:text-red-500"><Trash2 size={13} /></button>
@@ -939,7 +939,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                             <p className={`text-xs ${v.stock_qty === 0 ? 'text-red-500 font-bold' : 'text-gray-400'}`}>{v.stock_qty} un</p>
                           </div>
                           <div className="flex gap-2">
-                            <button onClick={() => { setVarEdit(v); setModalVar(true) }}
+                            <button onClick={() => { setVarEdit({...v, images: v.images?.length ? v.images : v.main_image ? [v.main_image] : []}); setModalVar(true) }}
                               className="text-blue-400 hover:text-blue-600"><Pencil size={14} /></button>
                             <button onClick={() => excluirVariacao(v)}
                               className="text-red-300 hover:text-red-500"><Trash2 size={14} /></button>
