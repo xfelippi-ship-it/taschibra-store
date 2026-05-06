@@ -1,6 +1,7 @@
 'use client'
 import ProdutoGaleriaUpload from '@/components/store/ProdutoGaleriaUpload'
 import { ProdutoDatasheetUpload } from '@/components/store/ProdutoDatasheet'
+import { generateSEO } from '@/lib/seo'
 import { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { Plus, Pencil, Trash2, X, ChevronDown, ChevronRight, Upload, ImageIcon } from 'lucide-react'
@@ -20,6 +21,8 @@ type Produto = {
   show_dimensions_unpacked?: boolean; show_dimensions_packed?: boolean
   warranty?: string; ean?: string
   cor_id?: string; cores_relacionadas?: string[]; familia_cor?: string
+  slug?: string; seo_auto?: boolean; seo_title?: string; seo_description?: string
+  voltage?: string; power_w?: number; color_temp_k?: number; ip_rating?: string
 }
 
 type Variacao = {
@@ -920,6 +923,64 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                   onChange={url => setProdutoEdit(prev => ({ ...prev, datasheet_url: url }))}
                   sku={produtoEdit.sku}
                 />
+
+                {/* Bloco SEO */}
+                <div className="bg-gray-50 rounded-xl p-3 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">🔍 SEO</p>
+                      <p className="text-xs text-gray-400 mt-0.5">Título e descrição que aparecem no Google</p>
+                    </div>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <span className="text-xs font-bold text-gray-700">Automático</span>
+                      <input type="checkbox" checked={produtoEdit.seo_auto ?? true}
+                        onChange={e => setProdutoEdit({ ...produtoEdit, seo_auto: e.target.checked })}
+                        className="w-4 h-4 accent-green-600" />
+                    </label>
+                  </div>
+
+                  {(() => {
+                    const isAuto = produtoEdit.seo_auto ?? true
+                    const auto = generateSEO(produtoEdit)
+                    const titulo = isAuto ? auto.title : (produtoEdit.seo_title || '')
+                    const descricao = isAuto ? auto.description : (produtoEdit.seo_description || '')
+                    const slug = produtoEdit.slug || produtoEdit.sku?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'produto'
+
+                    return (
+                      <>
+                        <div>
+                          <label className="text-[11px] font-bold text-gray-600 mb-1 flex items-center justify-between">
+                            <span>Título SEO {isAuto && <span className="text-gray-400 font-normal">· auto</span>}</span>
+                            <span className={`text-[10px] ${titulo.length > 60 ? 'text-red-500' : 'text-gray-400'}`}>{titulo.length}/60</span>
+                          </label>
+                          <input value={titulo} disabled={isAuto}
+                            onChange={e => setProdutoEdit({ ...produtoEdit, seo_title: e.target.value })}
+                            placeholder="Auto: Plafon Waffle 4xE27 60W 6500K | Taschibra"
+                            className={`w-full border border-gray-200 rounded px-3 py-1.5 text-xs outline-none ${isAuto ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white focus:border-green-500'}`} />
+                        </div>
+
+                        <div>
+                          <label className="text-[11px] font-bold text-gray-600 mb-1 flex items-center justify-between">
+                            <span>Descrição SEO {isAuto && <span className="text-gray-400 font-normal">· auto</span>}</span>
+                            <span className={`text-[10px] ${descricao.length > 160 ? 'text-red-500' : 'text-gray-400'}`}>{descricao.length}/160</span>
+                          </label>
+                          <textarea value={descricao} disabled={isAuto} rows={3}
+                            onChange={e => setProdutoEdit({ ...produtoEdit, seo_description: e.target.value })}
+                            placeholder="Descrição completa do produto para aparecer no Google"
+                            className={`w-full border border-gray-200 rounded px-3 py-1.5 text-xs outline-none resize-none ${isAuto ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white focus:border-green-500'}`} />
+                        </div>
+
+                        {/* Preview SERP do Google */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-3">
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Prévia no Google</p>
+                          <p className="text-[11px] text-gray-500">taschibra.com.br › {slug}</p>
+                          <p className="text-[14px] text-blue-700 leading-tight mt-0.5 hover:underline cursor-pointer">{titulo || 'Sem título'}</p>
+                          <p className="text-[12px] text-gray-600 leading-snug mt-1">{descricao || 'Sem descrição'}</p>
+                        </div>
+                      </>
+                    )
+                  })()}
+                </div>
 
               </div>
 
