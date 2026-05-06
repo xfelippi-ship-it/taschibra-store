@@ -1072,7 +1072,6 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                 </div>
               </div>
               <div>
-                <label className="text-sm font-bold text-gray-700 mb-1 block">Galeria de imagens da variação</label>
                 <ProdutoGaleriaUpload
                   sku={varEdit.sku || varEdit.product_id}
                   ean={varEdit.ean}
