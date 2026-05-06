@@ -55,8 +55,10 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku, ean }: Pro
       const { error } = await supabase.storage.from('midias').upload(nome, file, { upsert: true, contentType: file.type })
       if (error) throw error
       const { data } = supabase.storage.from('midias').getPublicUrl(nome)
+      // Cache buster: força navegador a baixar arquivo novo (evita mostrar versão antiga em cache)
+      const urlComVersao = `${data.publicUrl}?v=${Date.now()}`
       const novo = [...grid]
-      novo[idx] = data.publicUrl
+      novo[idx] = urlComVersao
       onChange(novo)
     } catch { alert('Erro no upload') }
     finally { setUploading(null) }
