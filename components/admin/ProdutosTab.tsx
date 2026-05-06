@@ -979,7 +979,7 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                     <textarea
                       value={produtoEdit.description || ''}
                       onChange={e => setProdutoEdit({ ...produtoEdit, description: e.target.value })}
-                      rows={6}
+                      rows={10}
                       placeholder="Descrição completa. Suporta HTML: <b>negrito</b>, <i>itálico</i>, <br>, <ul><li>item</li></ul>"
                       className="w-full px-4 py-2.5 text-sm outline-none resize-none font-mono text-gray-700"
                     />
