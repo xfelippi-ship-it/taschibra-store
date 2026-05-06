@@ -670,7 +670,6 @@ export default function ProdutoPage() {
             <div className="mb-5">
               <p className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                 <Ruler size={14} className="text-emerald-500" />Medidas do produto
-                <span className="text-[10px] font-bold uppercase tracking-wide bg-gray-100 text-gray-500 px-2 py-0.5 rounded">sem embalagem</span>
               </p>
               <table className="w-full text-sm border border-gray-200 rounded-xl overflow-hidden">
                 <tbody>
@@ -689,8 +688,7 @@ export default function ProdutoPage() {
           {specsEmbalagem.length > 0 && (
             <div className="mb-5">
               <p className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <Package size={14} className="text-amber-600" />Medidas com embalagem
-                <span className="text-[10px] font-bold uppercase tracking-wide bg-amber-50 text-amber-700 px-2 py-0.5 rounded">para frete</span>
+                <Package size={14} className="text-amber-600" />Medidas do produto com embalagem
               </p>
               <table className="w-full text-sm border border-gray-200 rounded-xl overflow-hidden">
                 <tbody>
