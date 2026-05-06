@@ -220,6 +220,7 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku, ean }: Pro
                 </button>
                 <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-1">
                   {idx > 0 && <button type="button" onClick={() => moveSlot(idx, idx-1)} className="bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded hover:bg-black/60">←</button>}
+                  <a href={url} download target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded hover:bg-black/60" title="Baixar">⬇</a>
                   {idx < grid.filter(Boolean).length - 1 && <button type="button" onClick={() => moveSlot(idx, idx+1)} className="bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded hover:bg-black/60">→</button>}
                 </div>
               </>
