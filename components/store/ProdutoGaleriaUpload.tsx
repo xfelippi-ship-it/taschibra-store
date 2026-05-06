@@ -38,7 +38,7 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku, ean }: Pro
       const { data } = supabase.storage.from('midias').getPublicUrl(nome)
       const novo = [...grid]
       novo[idx] = data.publicUrl
-      onChange(novo.filter(Boolean))
+      onChange(novo)
     } catch { alert('Erro no upload') }
     finally { setUploading(null) }
   }
@@ -67,7 +67,7 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku, ean }: Pro
         slotIdx++
       } catch { /* pula arquivo com erro */ }
     }
-    onChange(novoGrid.filter(Boolean))
+    onChange(novoGrid)
     setProgress('')
     setUploadingZip(false)
   }
