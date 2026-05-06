@@ -652,7 +652,22 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
           <div className="bg-white rounded-2xl w-full max-w-5xl p-6 shadow-xl max-h-[92vh] flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-black text-gray-800">{produtoEdit.id ? 'Editar Produto' : 'Novo Produto'}</h2>
-              <button onClick={() => { setModal(false); setProdutoEdit({}) }} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setProdutoEdit({ ...produtoEdit, active: !(produtoEdit.active ?? true) })}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                    (produtoEdit.active ?? true)
+                      ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                  }`}
+                  title="Clique para alternar"
+                >
+                  <span className={`w-2 h-2 rounded-full ${(produtoEdit.active ?? true) ? 'bg-green-500' : 'bg-gray-400'}`} />
+                  {(produtoEdit.active ?? true) ? 'Ativo' : 'Inativo'}
+                </button>
+                <button onClick={() => { setModal(false); setProdutoEdit({}) }} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+              </div>
             </div>
 
             {/* Abas do modal */}
@@ -897,13 +912,6 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                   {produtoEdit.familia_cor && (
                     <p className="text-xs text-green-600 mt-1">Todos os produtos com família <strong>{produtoEdit.familia_cor}</strong> aparecerão linkados na PDP</p>
                   )}
-                </div>
-
-                <div className="flex items-center gap-3 pt-1">
-                  <input type="checkbox" id="ativo_prod" checked={produtoEdit.active ?? true}
-                    onChange={e => setProdutoEdit({ ...produtoEdit, active: e.target.checked })}
-                    className="w-4 h-4 accent-green-600" />
-                  <label htmlFor="ativo_prod" className="text-sm font-bold text-gray-700">Produto ativo</label>
                 </div>
 
                 {/* Ficha técnica PDF */}
