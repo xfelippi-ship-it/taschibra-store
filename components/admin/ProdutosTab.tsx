@@ -651,23 +651,23 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl w-full max-w-5xl p-6 shadow-xl max-h-[92vh] flex flex-col">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-black text-gray-800">{produtoEdit.id ? 'Editar Produto' : 'Novo Produto'}</h2>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
+                <h2 className="text-lg font-black text-gray-800">{produtoEdit.id ? 'Editar Produto' : 'Novo Produto'}</h2>
                 <button
                   type="button"
                   onClick={() => setProdutoEdit({ ...produtoEdit, active: !(produtoEdit.active ?? true) })}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
                     (produtoEdit.active ?? true)
-                      ? 'bg-green-50 text-green-700 hover:bg-green-100'
-                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      ? 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200 border border-gray-200'
                   }`}
                   title="Clique para alternar"
                 >
-                  <span className={`w-2 h-2 rounded-full ${(produtoEdit.active ?? true) ? 'bg-green-500' : 'bg-gray-400'}`} />
+                  <span className={`w-2.5 h-2.5 rounded-full ${(produtoEdit.active ?? true) ? 'bg-green-500' : 'bg-gray-400'}`} />
                   {(produtoEdit.active ?? true) ? 'Ativo' : 'Inativo'}
                 </button>
-                <button onClick={() => { setModal(false); setProdutoEdit({}) }} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
               </div>
+              <button onClick={() => { setModal(false); setProdutoEdit({}) }} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
             </div>
 
             {/* Abas do modal */}
