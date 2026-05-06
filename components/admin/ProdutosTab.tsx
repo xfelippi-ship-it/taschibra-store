@@ -14,7 +14,11 @@ type Produto = {
   id: string; name: string; sku: string; price: number; promo_price: number
   stock_qty: number; active: boolean; badge: string; badges?: string[]; is_lancamento?: boolean; family?: string; brand_id?: string
   category_slug?: string; subcategory_slug?: string; categories?: string[]; description?: string; main_image?: string; images?: string[]; datasheet_url?: string
-  weight_kg?: number; warranty?: string; ean?: string
+  weight_kg?: number; weight_kg_packed?: number
+  height_cm?: number; width_cm?: number; depth_cm?: number
+  height_cm_packed?: number; width_cm_packed?: number; depth_cm_packed?: number
+  show_dimensions_unpacked?: boolean; show_dimensions_packed?: boolean
+  warranty?: string; ean?: string
   cor_id?: string; cores_relacionadas?: string[]; familia_cor?: string
 }
 
@@ -744,20 +748,108 @@ export default function ProdutosTab({ meuPapel = 'master', meuEmail = 'admin', a
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-3">
+                {/* Bloco Peso e Dimensões */}
+                <div className="bg-gray-50 rounded-xl p-3 space-y-2">
                   <div>
-                    <label className="text-sm font-bold text-gray-700 mb-1 block">Peso (kg)</label>
-                    <input type="number" step="0.001" value={produtoEdit.weight_kg || ''}
-                      onChange={e => setProdutoEdit({ ...produtoEdit, weight_kg: parseFloat(e.target.value) })}
-                      placeholder="0.045"
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">📦 Peso e Dimensões</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Sem embalagem é opcional · Com embalagem é obrigatório p/ frete</p>
                   </div>
-                  <div>
-                    <label className="text-sm font-bold text-gray-700 mb-1 block">Garantia</label>
-                    <input value={produtoEdit.warranty || ''} onChange={e => setProdutoEdit({ ...produtoEdit, warranty: e.target.value })}
-                      placeholder="Ex: 12 meses"
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
+
+                  {/* Card Sem embalagem */}
+                  <div className="bg-white rounded-lg p-2.5 border border-gray-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-gray-700">💡 Sem embalagem</span>
+                      <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">opcional</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-600 block mb-0.5">Peso (kg)</label>
+                        <input type="number" step="0.001" value={produtoEdit.weight_kg || ''}
+                          onChange={e => setProdutoEdit({ ...produtoEdit, weight_kg: parseFloat(e.target.value) })}
+                          placeholder="0.000"
+                          className="w-full border border-gray-200 rounded px-2 py-1 text-xs outline-none focus:border-green-500" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-600 block mb-0.5">Larg (cm)</label>
+                        <input type="number" step="0.1" value={produtoEdit.width_cm || ''}
+                          onChange={e => setProdutoEdit({ ...produtoEdit, width_cm: parseFloat(e.target.value) })}
+                          placeholder="0"
+                          className="w-full border border-gray-200 rounded px-2 py-1 text-xs outline-none focus:border-green-500" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-600 block mb-0.5">Alt (cm)</label>
+                        <input type="number" step="0.1" value={produtoEdit.height_cm || ''}
+                          onChange={e => setProdutoEdit({ ...produtoEdit, height_cm: parseFloat(e.target.value) })}
+                          placeholder="0"
+                          className="w-full border border-gray-200 rounded px-2 py-1 text-xs outline-none focus:border-green-500" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-600 block mb-0.5">Comp (cm)</label>
+                        <input type="number" step="0.1" value={produtoEdit.depth_cm || ''}
+                          onChange={e => setProdutoEdit({ ...produtoEdit, depth_cm: parseFloat(e.target.value) })}
+                          placeholder="0"
+                          className="w-full border border-gray-200 rounded px-2 py-1 text-xs outline-none focus:border-green-500" />
+                      </div>
+                    </div>
+                    <label className="flex items-center justify-between mt-2 px-2 py-1 bg-gray-50 rounded cursor-pointer">
+                      <span className="text-xs text-gray-700">Exibir na PDP</span>
+                      <input type="checkbox" checked={produtoEdit.show_dimensions_unpacked ?? false}
+                        onChange={e => setProdutoEdit({ ...produtoEdit, show_dimensions_unpacked: e.target.checked })}
+                        className="w-4 h-4 accent-green-600" />
+                    </label>
                   </div>
+
+                  {/* Card Com embalagem */}
+                  <div className="bg-white rounded-lg p-2.5 border border-gray-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-gray-700">📦 Com embalagem</span>
+                      <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">obrig. p/ frete</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-600 block mb-0.5">Peso (kg)</label>
+                        <input type="number" step="0.001" value={produtoEdit.weight_kg_packed || ''}
+                          onChange={e => setProdutoEdit({ ...produtoEdit, weight_kg_packed: parseFloat(e.target.value) })}
+                          placeholder="0.000"
+                          className="w-full border border-gray-200 rounded px-2 py-1 text-xs outline-none focus:border-green-500" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-600 block mb-0.5">Larg (cm)</label>
+                        <input type="number" step="0.1" value={produtoEdit.width_cm_packed || ''}
+                          onChange={e => setProdutoEdit({ ...produtoEdit, width_cm_packed: parseFloat(e.target.value) })}
+                          placeholder="0"
+                          className="w-full border border-gray-200 rounded px-2 py-1 text-xs outline-none focus:border-green-500" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-600 block mb-0.5">Alt (cm)</label>
+                        <input type="number" step="0.1" value={produtoEdit.height_cm_packed || ''}
+                          onChange={e => setProdutoEdit({ ...produtoEdit, height_cm_packed: parseFloat(e.target.value) })}
+                          placeholder="0"
+                          className="w-full border border-gray-200 rounded px-2 py-1 text-xs outline-none focus:border-green-500" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-gray-600 block mb-0.5">Comp (cm)</label>
+                        <input type="number" step="0.1" value={produtoEdit.depth_cm_packed || ''}
+                          onChange={e => setProdutoEdit({ ...produtoEdit, depth_cm_packed: parseFloat(e.target.value) })}
+                          placeholder="0"
+                          className="w-full border border-gray-200 rounded px-2 py-1 text-xs outline-none focus:border-green-500" />
+                      </div>
+                    </div>
+                    <label className="flex items-center justify-between mt-2 px-2 py-1 bg-gray-50 rounded cursor-pointer">
+                      <span className="text-xs text-gray-700">Exibir na PDP</span>
+                      <input type="checkbox" checked={produtoEdit.show_dimensions_packed ?? false}
+                        onChange={e => setProdutoEdit({ ...produtoEdit, show_dimensions_packed: e.target.checked })}
+                        className="w-4 h-4 accent-green-600" />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Garantia (mantida fora do bloco de dimensões) */}
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 block">Garantia</label>
+                  <input value={produtoEdit.warranty || ''} onChange={e => setProdutoEdit({ ...produtoEdit, warranty: e.target.value })}
+                    placeholder="Ex: 12 meses"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-green-500" />
                 </div>
 
                 {/* Campo de cor da biblioteca */}

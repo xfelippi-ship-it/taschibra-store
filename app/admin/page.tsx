@@ -51,7 +51,9 @@ type Produto = {
   main_image?: string; weight_kg?: number; unit?: string; warranty?: string
   images?: string[]; weight_kg_packed?: number; height_cm?: number
   width_cm?: number; depth_cm?: number; height_cm_packed?: number
-  width_cm_packed?: number; depth_cm_packed?: number; tags?: string[]
+  width_cm_packed?: number; depth_cm_packed?: number
+  show_dimensions_unpacked?: boolean; show_dimensions_packed?: boolean
+  tags?: string[]
 }
 
 
