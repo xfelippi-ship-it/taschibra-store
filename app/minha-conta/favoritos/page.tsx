@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
-import { Heart, ArrowLeft, ShoppingCart } from 'lucide-react'
+import { Heart, ArrowLeft, ShoppingCart, Check } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { getImageUrl } from '@/lib/imageUrl'
@@ -15,6 +15,15 @@ export default function FavoritosPage() {
   const [favoritos, setFavoritos] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [clienteId, setClienteId] = useState<string|null>(null)
+  const [adicionadoId, setAdicionadoId] = useState<string|null>(null)
+
+  function handleAdicionar(fav: any) {
+    const p = fav.products
+    if (!p) return
+    addItem({ id: p.id, slug: p.slug, name: p.name, price: p.price, promo_price: p.promo_price ?? 0, emoji: '💡', image: p.main_image || '' })
+    setAdicionadoId(fav.id)
+    setTimeout(() => setAdicionadoId(null), 2000)
+  }
 
   useEffect(() => {
     const salvo = localStorage.getItem('cliente_logado')
@@ -100,9 +109,18 @@ export default function FavoritosPage() {
                     </div>
                   ) : (
                     <button
-                      onClick={() => addItem({ id: p.id, slug: p.slug, name: p.name, price: p.price, promo_price: p.promo_price ?? 0, emoji: '💡', image: p.main_image || '' })}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors">
-                      <ShoppingCart size={12} /> Comprar
+                      onClick={() => handleAdicionar(fav)}
+                      disabled={adicionadoId === fav.id}
+                      className={`w-full font-black text-xs py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors text-white ${
+                        adicionadoId === fav.id
+                          ? 'bg-green-800 cursor-default'
+                          : 'bg-green-600 hover:bg-green-700'
+                      }`}>
+                      {adicionadoId === fav.id ? (
+                        <><Check size={12} /> Adicionado!</>
+                      ) : (
+                        <><ShoppingCart size={12} /> Adicionar</>
+                      )}
                     </button>
                   )}
                 </div>
