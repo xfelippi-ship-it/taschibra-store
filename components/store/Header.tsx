@@ -8,6 +8,7 @@ const TopBar = dynamic(() => import('@/components/store/TopBar'), { ssr: false }
 import Image from 'next/image'
 import { useCart } from '@/contexts/CartContext'
 import { supabase } from '@/lib/supabase'
+import UserMenu from '@/components/store/UserMenu'
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -353,13 +354,7 @@ export default function Header() {
           </div>
           <div className="flex items-center gap-2 md:gap-4 ml-auto">
             <button aria-label="Buscar produtos" className="md:hidden text-gray-700 hover:text-green-600 transition-colors"><Search size={22} /></button>
-            <Link href="/login" className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-green-600 transition-colors">
-              <User size={20} className="text-green-600" />
-              <div className="text-left hidden md:block">
-                <div className="text-xs text-gray-500 font-normal">Olá, faça seu</div>
-                <div className="text-sm font-bold leading-tight">Login</div>
-              </div>
-            </Link>
+            <UserMenu />
             <Link href="/carrinho" className="relative bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-3 md:px-4 py-2 md:py-2.5 rounded-full flex items-center gap-2 transition-colors">
               <ShoppingCart size={18} />
               <span className="hidden md:inline">Carrinho</span>
