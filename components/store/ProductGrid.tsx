@@ -60,7 +60,7 @@ function ProdCard({ p }: { p: Produto }) {
   function handleAdd(e: React.MouseEvent) {
     e.preventDefault()
     if (semEstoque) return
-    addItem({ id: p.id, slug, name: nome, price: preco, promo_price: p.promo_price ?? 0, emoji: '💡' })
+    addItem({ id: p.id, slug, name: nome, price: preco, promo_price: p.promo_price ?? 0, emoji: '💡', image: p.main_image || '' })
   }
 
   return (

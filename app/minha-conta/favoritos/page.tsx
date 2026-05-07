@@ -100,7 +100,7 @@ export default function FavoritosPage() {
                     </div>
                   ) : (
                     <button
-                      onClick={() => addItem({ id: p.id, slug: p.slug, name: p.name, price: p.price, promo_price: p.promo_price ?? 0, emoji: '💡' })}
+                      onClick={() => addItem({ id: p.id, slug: p.slug, name: p.name, price: p.price, promo_price: p.promo_price ?? 0, emoji: '💡', image: p.main_image || '' })}
                       className="w-full bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors">
                       <ShoppingCart size={12} /> Comprar
                     </button>

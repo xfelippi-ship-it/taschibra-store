@@ -219,7 +219,7 @@ function ProdutosContent() {
                             </div>
                           )}
                           {precoCartao > 0 ? (
-                            <button onClick={() => addItem({ id: p.id, name: p.name, slug: p.slug, price: precoCartao, promo_price: preco, emoji: "💡" })} className="w-full bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                            <button onClick={() => addItem({ id: p.id, name: p.name, slug: p.slug, price: precoCartao, promo_price: preco, emoji: "💡", image: p.main_image || "" })} className="w-full bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5">
                               <ShoppingCart size={13} /> ADICIONAR AO CARRINHO
                             </button>
                           ) : (
