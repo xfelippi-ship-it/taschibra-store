@@ -73,6 +73,7 @@ export default function UserMenu() {
 
   function handleLogout() {
     localStorage.removeItem('cliente_logado')
+    window.dispatchEvent(new Event('cliente-changed'))
     setCliente(null)
     setOpen(false)
     router.push('/')

@@ -39,6 +39,7 @@ export default function MinhaContaPage() {
 
       const u = { email: data.email, nome: `${data.first_name || ''} ${data.last_name || ''}`.trim(), id: data.id }
       localStorage.setItem('cliente_logado', JSON.stringify(u))
+      window.dispatchEvent(new Event('cliente-changed'))
       setUsuario(u)
     } catch {
       setErro('Erro ao fazer login. Tente novamente.')
@@ -80,6 +81,7 @@ export default function MinhaContaPage() {
 
       const u = { email: data.email, nome: `${data.first_name || ''} ${data.last_name || ''}`.trim(), id: data.id }
       localStorage.setItem('cliente_logado', JSON.stringify(u))
+      window.dispatchEvent(new Event('cliente-changed'))
       setUsuario(u)
     } catch {
       setErro('Erro ao cadastrar. Tente novamente.')
@@ -90,6 +92,7 @@ export default function MinhaContaPage() {
 
   function handleLogout() {
     localStorage.removeItem('cliente_logado')
+    window.dispatchEvent(new Event('cliente-changed'))
     setUsuario(null)
   }
 
