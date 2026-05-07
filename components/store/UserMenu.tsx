@@ -19,18 +19,34 @@ export default function UserMenu() {
   const pathname = usePathname()
   const router = useRouter()
 
-  // Re-le localStorage em cada navegacao (caso login/logout ocorra em outra pagina)
+  // Re-le localStorage em cada navegacao OU quando recebe evento cliente-changed
+  // (login/cadastro/logout em outra pagina dispara o evento sem mudar pathname)
   useEffect(() => {
     setMounted(true)
-    const salvo = localStorage.getItem('cliente_logado')
-    if (salvo) {
-      try {
-        setCliente(JSON.parse(salvo))
-      } catch {
+    function recarregar() {
+      const salvo = localStorage.getItem('cliente_logado')
+      if (salvo) {
+        try {
+          setCliente(JSON.parse(salvo))
+        } catch {
+          setCliente(null)
+        }
+      } else {
         setCliente(null)
       }
-    } else {
-      setCliente(null)
+    }
+    recarregar()
+
+    // Custom event: disparado pela mesma aba apos login/cadastro/logout
+    window.addEventListener('cliente-changed', recarregar)
+    // Storage event: disparado pelo browser quando outra aba muda localStorage
+    window.addEventListener('storage', (e: StorageEvent) => {
+      if (e.key === 'cliente_logado') recarregar()
+    })
+
+    return () => {
+      window.removeEventListener('cliente-changed', recarregar)
+      window.removeEventListener('storage', recarregar as EventListener)
     }
   }, [pathname])
 
