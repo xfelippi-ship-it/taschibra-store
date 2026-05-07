@@ -51,14 +51,14 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku, ean }: Pro
       const chave = ean || sku || Date.now().toString()
       const prefix = `produtos/${chave}`
       const numStr = String(idx + 1).padStart(2, '0')
-      const nome = `${prefix}/${chave}_${numStr}.${ext}`
-      const { error } = await supabase.storage.from('midias').upload(nome, file, { upsert: true, contentType: file.type })
+      // Timestamp no nome do arquivo: cada upload gera URL única, evita cache stale para sempre
+      const stamp = Date.now()
+      const nome = `${prefix}/${chave}_${numStr}_${stamp}.${ext}`
+      const { error } = await supabase.storage.from('midias').upload(nome, file, { contentType: file.type })
       if (error) throw error
       const { data } = supabase.storage.from('midias').getPublicUrl(nome)
-      // Cache buster: força navegador a baixar arquivo novo (evita mostrar versão antiga em cache)
-      const urlComVersao = `${data.publicUrl}?v=${Date.now()}`
       const novo = [...grid]
-      novo[idx] = urlComVersao
+      novo[idx] = data.publicUrl
       onChange(novo)
     } catch { alert('Erro no upload') }
     finally { setUploading(null) }
@@ -80,8 +80,10 @@ export default function ProdutoGaleriaUpload({ images, onChange, sku, ean }: Pro
       try {
         const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
         const numStr = String(slotIdx + 1).padStart(2, '0')
-        const nome = `${prefix}/${chave}_${numStr}.${ext}`
-        const { error } = await supabase.storage.from('midias').upload(nome, file, { upsert: true, contentType: file.type })
+        // Timestamp no nome do arquivo: cada upload gera URL única, evita cache stale para sempre
+        const stamp = Date.now()
+        const nome = `${prefix}/${chave}_${numStr}_${stamp}.${ext}`
+        const { error } = await supabase.storage.from('midias').upload(nome, file, { contentType: file.type })
         if (error) throw error
         const { data } = supabase.storage.from('midias').getPublicUrl(nome)
         novoGrid[slotIdx] = data.publicUrl
