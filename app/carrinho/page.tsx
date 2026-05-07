@@ -115,8 +115,13 @@ export default function CarrinhoPage() {
           </div>
           {items.map(item => (
             <div key={item.id} className="bg-white border border-gray-200 rounded-xl p-4 flex gap-4 items-center">
-              <div className="w-20 h-20 bg-gray-50 rounded-lg flex items-center justify-center text-4xl flex-shrink-0">
-                {item.emoji}
+              <div className="w-20 h-20 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                {item.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={item.image} alt={item.name} loading="lazy" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-4xl">{item.emoji || '💡'}</span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-gray-800 text-sm leading-snug mb-1 line-clamp-2">{item.name}</p>
