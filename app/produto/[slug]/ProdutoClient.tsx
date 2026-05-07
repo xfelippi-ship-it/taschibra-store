@@ -11,7 +11,6 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import SwatchesCor from '@/components/store/SwatchesCor'
 import { getImageUrl } from '@/lib/imageUrl'
-import ProductJsonLd from '@/components/store/ProductJsonLd'
 import ProdutoZoom from '@/components/store/ProdutoZoom'
 import { detectMediaType, getYouTubeEmbedUrl, getVimeoEmbedUrl, getYouTubeThumbnail } from '@/lib/media-helpers'
 import { ProdutoDatasheetDownload } from '@/components/store/ProdutoDatasheet'
@@ -426,13 +425,6 @@ export default function ProdutoClient({ slug }: { slug: string }) {
   return (
     <>
       <Header />
-      <ProductJsonLd
-        name={produto.name} description={produto.description}
-        price={precoCartao} promoPrice={precoVista}
-        image={produto.main_image} sku={produto.sku}
-        ean={produto.ean} brand={produto.brand}
-        slug={produto.slug} />
-
       {/* Breadcrumb */}
       <div className="bg-gray-50 border-b border-gray-200 py-2 px-4">
         <div className="max-w-7xl mx-auto text-xs text-gray-500 flex items-center gap-1 overflow-x-auto whitespace-nowrap">

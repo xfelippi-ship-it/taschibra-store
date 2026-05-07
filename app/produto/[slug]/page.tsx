@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { generateSEO } from '@/lib/seo'
+import ProductJsonLd from '@/components/store/ProductJsonLd'
 import ProdutoClient from './ProdutoClient'
 
 interface PageProps {
@@ -18,7 +19,7 @@ async function fetchProdutoMeta(slug: string) {
   const supabase = await createSupabaseServerClient()
   const { data } = await supabase
     .from('products')
-    .select('id, name, slug, description, main_image, seo_auto, seo_title, seo_description, voltage, power_w, color_temp_k, ip_rating, category_slug, family')
+    .select('id, name, slug, description, main_image, seo_auto, seo_title, seo_description, voltage, power_w, color_temp_k, ip_rating, category_slug, family, price, promo_price, sku, ean, brand, stock_qty')
     .eq('slug', slug)
     .maybeSingle()
   return data
@@ -75,5 +76,21 @@ export default async function ProdutoPage({ params }: PageProps) {
     notFound()
   }
 
-  return <ProdutoClient slug={slug} />
+  return (
+    <>
+      <ProductJsonLd
+        name={produto.name}
+        description={produto.description}
+        price={produto.price || 0}
+        promoPrice={produto.promo_price || undefined}
+        image={produto.main_image}
+        sku={produto.sku}
+        ean={produto.ean}
+        brand={produto.brand}
+        slug={produto.slug}
+        inStock={(produto.stock_qty || 0) > 0}
+      />
+      <ProdutoClient slug={slug} />
+    </>
+  )
 }
