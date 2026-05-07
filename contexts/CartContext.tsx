@@ -18,6 +18,7 @@ export type CartItem = {
   price: number
   promo_price: number
   emoji: string
+  image?: string
   quantity: number
 }
 
