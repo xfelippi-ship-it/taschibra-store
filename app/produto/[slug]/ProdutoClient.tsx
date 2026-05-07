@@ -394,7 +394,8 @@ export default function ProdutoClient({ slug }: { slug: string }) {
       slug: produto.slug,
       price: preco,
       promo_price: variacaoSelecionada?.promo_price || produto.promo_price,
-      emoji: produto.main_image ? '' : '💡',
+      emoji: '💡',
+      image: variacaoSelecionada?.main_image || produto.main_image || '',
     })
     for (let i = 1; i < qty; i++) {
       addItem({
@@ -403,7 +404,8 @@ export default function ProdutoClient({ slug }: { slug: string }) {
         slug: produto.slug,
         price: preco,
         promo_price: variacaoSelecionada?.promo_price || produto.promo_price,
-        emoji: produto.main_image ? '' : '💡',
+        emoji: '💡',
+        image: variacaoSelecionada?.main_image || produto.main_image || '',
       })
     }
     window.location.href = '/carrinho'
@@ -416,6 +418,7 @@ export default function ProdutoClient({ slug }: { slug: string }) {
       slug: produto!.slug,
       name: variacaoSelecionada ? `${produto!.name} — ${variacaoSelecionada.value}` : produto!.name,
       price: precoCartao, promo_price: precoVista, emoji: '💡',
+      image: variacaoSelecionada?.main_image || produto!.main_image || '',
     })
     setAdicionado(true)
     setTimeout(() => setAdicionado(false), 2000)
