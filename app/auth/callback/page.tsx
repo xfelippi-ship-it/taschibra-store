@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Header from '@/components/store/Header'
 import Footer from '@/components/store/Footer'
@@ -7,7 +7,8 @@ import { Check, X, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
-export default function AuthCallbackPage() {
+// ─── Componente interno que usa useSearchParams ────────────────
+function CallbackHandler() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [estado, setEstado] = useState<'processando' | 'sucesso' | 'erro'>('processando')
@@ -15,7 +16,6 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     async function processar() {
-      const tipo = searchParams.get('type') || 'signup'
       const erro = searchParams.get('error')
       const erroDescricao = searchParams.get('error_description')
 
@@ -63,62 +63,76 @@ export default function AuthCallbackPage() {
   // ─── Processando ────────────────────────────────────────────────
   if (estado === 'processando') {
     return (
-      <><Header />
-      <div className="max-w-md mx-auto px-6 py-12">
-        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Loader2 size={28} className="text-green-600 animate-spin" />
-          </div>
-          <h1 className="text-xl font-black text-gray-800 mb-2">Confirmando seu cadastro...</h1>
-          <p className="text-sm text-gray-600">So um momento.</p>
+      <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
+        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Loader2 size={28} className="text-green-600 animate-spin" />
         </div>
+        <h1 className="text-xl font-black text-gray-800 mb-2">Confirmando seu cadastro...</h1>
+        <p className="text-sm text-gray-600">So um momento.</p>
       </div>
-      <Footer /></>
     )
   }
 
   // ─── Sucesso ────────────────────────────────────────────────────
   if (estado === 'sucesso') {
     return (
-      <><Header />
-      <div className="max-w-md mx-auto px-6 py-12">
-        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Check size={28} className="text-green-600" />
-          </div>
-          <h1 className="text-xl font-black text-gray-800 mb-2">E-mail confirmado!</h1>
-          <p className="text-sm text-gray-600 mb-6">Tudo pronto. Redirecionando para sua conta...</p>
-          <Link href="/minha-conta"
-            className="inline-block bg-green-600 hover:bg-green-700 text-white font-black text-sm px-6 py-3 rounded-lg transition-colors">
-            Ir para Minha Conta
-          </Link>
+      <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
+        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Check size={28} className="text-green-600" />
         </div>
+        <h1 className="text-xl font-black text-gray-800 mb-2">E-mail confirmado!</h1>
+        <p className="text-sm text-gray-600 mb-6">Tudo pronto. Redirecionando para sua conta...</p>
+        <Link href="/minha-conta"
+          className="inline-block bg-green-600 hover:bg-green-700 text-white font-black text-sm px-6 py-3 rounded-lg transition-colors">
+          Ir para Minha Conta
+        </Link>
       </div>
-      <Footer /></>
     )
   }
 
   // ─── Erro ───────────────────────────────────────────────────────
   return (
+    <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
+      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <X size={28} className="text-red-600" />
+      </div>
+      <h1 className="text-xl font-black text-gray-800 mb-2">Erro na confirmacao</h1>
+      <p className="text-sm text-gray-600 mb-6">{mensagem}</p>
+      <div className="flex flex-col gap-2">
+        <Link href="/minha-conta"
+          className="inline-block bg-green-600 hover:bg-green-700 text-white font-black text-sm px-6 py-3 rounded-lg transition-colors">
+          Ir para o login
+        </Link>
+        <Link href="/esqueci-senha"
+          className="text-sm text-green-600 hover:text-green-700 font-bold hover:underline">
+          Solicitar novo link
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+// ─── Fallback enquanto Suspense carrega ─────────────────────────
+function CallbackFallback() {
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
+      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <Loader2 size={28} className="text-green-600 animate-spin" />
+      </div>
+      <h1 className="text-xl font-black text-gray-800 mb-2">Carregando...</h1>
+    </div>
+  )
+}
+
+// ─── Página (default export) ────────────────────────────────────
+// Envolve com Suspense porque useSearchParams exige boundary em Next 14
+export default function AuthCallbackPage() {
+  return (
     <><Header />
     <div className="max-w-md mx-auto px-6 py-12">
-      <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
-        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <X size={28} className="text-red-600" />
-        </div>
-        <h1 className="text-xl font-black text-gray-800 mb-2">Erro na confirmacao</h1>
-        <p className="text-sm text-gray-600 mb-6">{mensagem}</p>
-        <div className="flex flex-col gap-2">
-          <Link href="/minha-conta"
-            className="inline-block bg-green-600 hover:bg-green-700 text-white font-black text-sm px-6 py-3 rounded-lg transition-colors">
-            Ir para o login
-          </Link>
-          <Link href="/esqueci-senha"
-            className="text-sm text-green-600 hover:text-green-700 font-bold hover:underline">
-            Solicitar novo link
-          </Link>
-        </div>
-      </div>
+      <Suspense fallback={<CallbackFallback />}>
+        <CallbackHandler />
+      </Suspense>
     </div>
     <Footer /></>
   )
